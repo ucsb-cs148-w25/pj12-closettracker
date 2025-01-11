@@ -1,0 +1,5 @@
+# Sophia
+
+Hi, I'm Sophia. I'm a 4th year Computer Science major. I love making projects that people can interact with and which can put a smile on their faces. As such, I prefer to work on user-facing projects, especially in frontend. Outisde of coding, I like to watch anime, hang out with friends, and try new local coffee shops.
+
+For this project, I'm envisioning a wardrobe archive where you can add pictures, sort and filter by tags or descriptions, and mark the days each item has been worn and washed. There can be a different page representing the laundry bin where users can look at how many of their clothes need to be washed. The user can create an outfit by choosing items in their wardrobe to put together. If we have time, it would be fun to implement a "Wardrobe Wrapped" feature that shows the user data at the end of every month or year. 
