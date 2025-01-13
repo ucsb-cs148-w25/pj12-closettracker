@@ -1,0 +1,1 @@
+Hello, my name is Daisy Zhong. For fun I like to bake and hike. Some of my ideas for the project would be some sort of AI to sort the clothes into category. Not sure yet how to do that but excited to learn and figure it out.
