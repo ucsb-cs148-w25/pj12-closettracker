@@ -1,4 +1,4 @@
-# Lect02 scrum meeting
+# Lect03 scrum meeting
 Mentor: none
 
 Meeting Time: lect03
