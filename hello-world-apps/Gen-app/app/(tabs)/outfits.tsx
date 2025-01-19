@@ -1,12 +1,12 @@
 import { Text, StyleSheet } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Index() {
+export default function OutfitsScreen() {
   return (
     <SafeAreaView
       style={styles.container}
     >
-      <Text>Hello</Text>
+      <Text>outfits</Text>
     </SafeAreaView>
   );
 }

@@ -9,7 +9,7 @@ Team: Sophia Tran [x], Gretchen Lam [x], Anvitha Kosuri [x], Andrew Chen [x], Vi
 
 # Scribed Discussion:
 
-Sophia: haven’t completed anything since last class. I’m planning to add more things to the kanban board by Wednesday. No current roadblocks.
+Sophia: haven't completed anything since last class. I'm planning to add more things to the kanban board by Wednesday. No current roadblocks.
 
 Gen: Got hello world approved, planning on adding more to Kanban for brainstorm. No blockers
 
