@@ -14,7 +14,7 @@ export default function UploadScreen() {
       {/* Subtitle Section */}
       <ThemedView style={styles.subtitleContainer}>
         <ThemedText type="subtitle">
-          Use your camera to upload an item, or select a photo from your camera roll.
+          Use your camera to upload an item, or select a photo from your camera roll. Please ensure the photo is taken on a solid background.
         </ThemedText>
       </ThemedView>
 
@@ -53,12 +53,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     paddingHorizontal: 16,
-    paddingTop: 100,
+    paddingTop: 85,
     backgroundColor: '#151718',
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 15,
   },
   subtitleContainer: {
     alignItems: 'center',
