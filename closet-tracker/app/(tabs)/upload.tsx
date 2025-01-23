@@ -14,13 +14,13 @@ export default function UploadScreen() {
       {/* Subtitle Section */}
       <ThemedView style={styles.subtitleContainer}>
         <ThemedText type="subtitle">
-          Use your camera to upload one piece at a time, or select multiple items from your camera roll.
+          Use your camera to upload an item, or select a photo from your camera roll.
         </ThemedText>
       </ThemedView>
 
       {/* Upload Box */}
       <TouchableOpacity style={styles.uploadBox}>
-        <Text style={styles.uploadBoxText}>Upload Pictures from Camera Roll</Text>
+        <Text style={styles.uploadBoxText}>Select from Camera Roll</Text>
       </TouchableOpacity>
 
       {/* OR Divider */}
@@ -32,7 +32,7 @@ export default function UploadScreen() {
 
       {/* Camera Button */}
       <TouchableOpacity style={styles.cameraButton}>
-        <Text style={styles.cameraButtonText}>Open Camera and Take Photo</Text>
+        <Text style={styles.cameraButtonText}>Open Camera & Take Photo</Text>
       </TouchableOpacity>
 
       {/* Dividing Line */}
