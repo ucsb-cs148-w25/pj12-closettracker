@@ -29,7 +29,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="launch" options={{ headerShown: false }} /> {/* Launch Screen */}
+        <Stack.Screen name="index" options={{ headerShown: false }} /> {/* Launch Screen */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* Tabs Layout */}
         <Stack.Screen name="+not-found" /> {/* Not Found Screen */}
       </Stack>

@@ -8,7 +8,7 @@ export default function LaunchScreen() {
         <View style={styles.container}>
             <Text style={styles.title}>Welcome to My App</Text>
             <Text style={styles.subtitle}>Your app's tagline or description goes here.</Text>
-            <Button title="Get Started" onPress={() => router.push('/(tabs)/index')} />
+            <Button title="Get Started" onPress={() => router.push('./(tabs)')} />
         </View>
     );
 }
