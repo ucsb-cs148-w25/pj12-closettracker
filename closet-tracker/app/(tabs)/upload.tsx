@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 16,
     paddingTop: 85,
-    backgroundColor: '#151718',
   },
   titleContainer: {
     alignItems: 'center',
