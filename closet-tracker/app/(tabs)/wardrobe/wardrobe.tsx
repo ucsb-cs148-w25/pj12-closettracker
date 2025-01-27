@@ -3,24 +3,34 @@ import { Image, StyleSheet, Platform } from 'react-native';
 import React, {useState} from 'react';
 import {FlatList, StatusBar, Text, TouchableOpacity} from 'react-native';
 import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+// import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import { useRouter } from 'expo-router'; // Correct hook for navigation
 
-type ItemData = {
+export type ItemData = {
     id: string;
     title: string;
+    wearCount: number;
+    lastWorn: string;
   };
   
-  const DATA: ItemData[] = [
+export  const DATA: ItemData[] = [
     {
       id: '1',
       title: 'Shirt',
+      wearCount: 3,
+      lastWorn: '2025-01-20T12:00:00Z',  
     },
     {
       id: '2',
       title: 'Cardigan',
+      wearCount: 3,
+      lastWorn: '2025-01-19T12:00:00Z',
     },
     {
       id: '3',
       title: 'Pants',
+      wearCount: 3,
+      lastWorn: '2025-01-22T12:00:00Z', 
     },
   ];
   
@@ -38,8 +48,9 @@ type ItemData = {
   );
 
 export default function WardrobeScreen() {
-    const [selectedId, setSelectedId] = useState<string | null>(null);
-
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const router = useRouter(); // Use the router from expo-router
+  
   const renderItem = ({item}: {item: ItemData}) => {
     const isSelected = item.id === selectedId;
     const backgroundColor = item.id === selectedId ? '#4160fb' : '#a5b4fd';
@@ -48,7 +59,10 @@ export default function WardrobeScreen() {
     return (
       <Item
         item={item}
-        onPress={() => setSelectedId(isSelected ? null : item.id)}
+        onPress={() => {
+          // When an item is pressed, navigate to ItemDetailsScreen and pass the selected item
+          router.push(`/wardrobe/ClothingTracker?item=${item.id}`);
+        }}
         backgroundColor={backgroundColor}
         textColor={color}
       />
