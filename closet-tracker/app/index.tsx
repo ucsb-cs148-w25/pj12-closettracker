@@ -1,41 +1,49 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import Login from './screens/login';
-import {User, onAuthStateChanged} from 'firebase/auth'
-import { auth } from '@/FirebaseConfig';
-import { useNavigation } from '@react-navigation/native';
-
-import TabsLayout from './(tabs)/_layout';
-
-
-const Stack = createNativeStackNavigator();
+import React from 'react';
+import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
-    const [user, setUser] = useState<User | null> (null);
-    const navigation = useNavigation();
+  const router = useRouter();
 
-    useEffect(() =>{
-        onAuthStateChanged(auth, (user)=>{
-            console.log('user', user);
-            setUser(user)
-            if (user) {
-                navigation.navigate('(tabs)');
-            }
-        });
-    },[])
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Closet Tracker</Text>
+      <Text style={styles.subtitle}>The app's tagline or description goes here.</Text>
 
-    return (
-    <Stack.Navigator initialRouteName='Login'>
-        {user ? (
-            <Stack.Screen
-            name="(tabs)"
-            component={TabsLayout} // Use the TabsLayout component here
-            options={{ headerShown: false }}
-            />
-        ) : (
-            <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}></Stack.Screen>
-        )}
-    </Stack.Navigator>
-    );
+      {/* Navigation Buttons */}
+      <Button title="Login" onPress={() => router.push('./(login)/login')} />
+      <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
+
+      <TouchableOpacity onPress={() => router.replace('./(tabs)/home')}>
+        <Text style={styles.guestText}>Continue as Guest</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#666',
+  },
+  guestText: {
+    marginTop: 20,
+    fontSize: 14,
+    color: '#007BFF',
+    textDecorationLine: 'underline',
+  },
+});

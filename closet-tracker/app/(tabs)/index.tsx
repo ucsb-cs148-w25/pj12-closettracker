@@ -1,42 +1,76 @@
-import { Text, StyleSheet, Platform, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '@/FirebaseConfig';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      setUser(authUser); // Set user state
+      setLoading(false);  // Stop loading after checking authentication
+    });
+
+    return () => unsubscribe(); // Unsubscribe on unmount
+  }, []);
+
   const handleSignOut = async () => {
     try {
-      await auth.signOut(); // Sign out the user
+      await auth.signOut();
       console.log("User signed out successfully");
     } catch (error) {
       console.log("Error signing out: ", error);
     }
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Welcome to My App</Text>
-      <Text style={styles.subtitle}>Your app's tagline or description goes here.</Text>
-      <Button title='Log Out' onPress={handleSignOut} /> {/* Call handleSignOut on button press */}
+      {user ? (
+        <>
+          <Text style={styles.title}>Welcome, {user.email}</Text>
+          <Button title="Log Out" onPress={handleSignOut} />
+        </>
+      ) : (
+        <>
+          <Text style={styles.subtitle}>You are not logged in.</Text>
+          <Button title="Login" onPress={() => router.push('./(login)/login')} />
+          <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
+        </>
+      )}
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 16,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   subtitle: {
-      fontSize: 16,
-      textAlign: 'center',
-      marginBottom: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });

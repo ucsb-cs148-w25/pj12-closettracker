@@ -20,19 +20,11 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-  
             position: 'absolute',
           },
           default: {},
         }),
       }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Index',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.and.flag.circle" color={color} />,
-        }}
-      />
       <Tabs.Screen
         name="home"
         options={{
@@ -41,17 +33,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="wardrobe"
         options={{
           title: 'Wardrobe',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="shippingbox.fill" color={color} />,
         }}
        />
       <Tabs.Screen
@@ -59,6 +44,13 @@ export default function TabLayout() {
         options={{
           title: 'Upload',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'User',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />
     </Tabs>
