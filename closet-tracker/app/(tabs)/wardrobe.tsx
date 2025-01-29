@@ -61,7 +61,7 @@ export default function WardrobeScreen() {
         item={item}
         onPress={() => {
           // When an item is pressed, navigate to ItemDetailsScreen and pass the selected item
-          router.push(`/wardrobe/ClothingTracker?item=${item.id}`);
+          router.push(`../(screens)/ClothingTracker?item=${item.id}`);
         }}
         backgroundColor={backgroundColor}
         textColor={color}
