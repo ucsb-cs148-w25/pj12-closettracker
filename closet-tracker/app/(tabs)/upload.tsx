@@ -26,8 +26,8 @@ export default function UploadScreen() {
       </ThemedView>
 
       {/* Upload Box */}
-      <TouchableOpacity style={styles.uploadBox}>
-      <Button title="Select from Camera Roll" onPress={async () => setImage(await selectImage())} />
+      <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
+        <Text style={styles.uploadBoxText}>Select from Camera Roll</Text>
       </TouchableOpacity>
       {image && (
         <SafeAreaView>
@@ -57,8 +57,8 @@ export default function UploadScreen() {
       </View>
 
       {/* Camera Button */}
-      <TouchableOpacity style={styles.cameraButton}>
-      <Button title="Open Camera & Take Photo" onPress={async () => setImage(await captureImage())} />
+      <TouchableOpacity style={styles.cameraButton} onPress={async () => setImage(await captureImage())}>
+        <Text style={styles.cameraButtonText}>Open Camera & Take Photo</Text>
       </TouchableOpacity>
       {image && (
         <SafeAreaView>
