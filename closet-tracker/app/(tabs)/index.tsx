@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
+import { Text, StyleSheet, Button, ActivityIndicator, View, Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
 import { auth } from '@/FirebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRouter } from 'expo-router';
@@ -8,6 +9,10 @@ import { useRouter } from 'expo-router';
 export default function Index() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const selectImage = useSelectImage();
+  const captureImage = useCameraImage();
+  const [image, setImage] = useState<string | null | undefined>(null);
+  const [modifiedImage, setModifiedImage] = useState<string | null | undefined>(null);
 
   const router = useRouter();
 
@@ -39,6 +44,16 @@ export default function Index() {
   }
 
   return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Button title="Select Image" onPress={async () => setImage(await selectImage())} />
+      <Button title="Capture Image" onPress={async () => setImage(await captureImage())} />
+      {image && (
     <SafeAreaView style={styles.container}>
       {user ? (
         <>
@@ -53,7 +68,19 @@ export default function Index() {
         </>
       )}
     </SafeAreaView>
+  )}
+  {modifiedImage && (
+        <SafeAreaView>
+          <Image
+            source={{ uri: `data:image/png;base64,${modifiedImage}` }}
+            style={{ width: 200, height: 200 }}
+          />
+          <Button title="Clear" onPress={() => setModifiedImage(null)} />
+        </SafeAreaView>
+      )}
+    </View>
   );
+
 }
 
 const styles = StyleSheet.create({
