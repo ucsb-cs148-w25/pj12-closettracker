@@ -29,25 +29,6 @@ export default function UploadScreen() {
       <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
         <Text style={styles.uploadBoxText}>Select from Camera Roll</Text>
       </TouchableOpacity>
-      {image && (
-        <SafeAreaView>
-          <Image
-            source={{ uri: `data:image/png;base64,${image}` }}
-            style={{ width: 200, height: 200 }}
-          />
-          <Button title="Clear" onPress={() => setImage(null)} />
-          {/* <Button title="Remove Background" onPress={() => setImage(null)} /> */}
-        </SafeAreaView>
-      )}
-      {modifiedImage && (
-        <SafeAreaView>
-          <Image
-            source={{ uri: `data:image/png;base64,${modifiedImage}` }}
-            style={{ width: 200, height: 200 }}
-          />
-          <Button title="Clear" onPress={() => setModifiedImage(null)} />
-        </SafeAreaView>
-      )}
 
       {/* OR Divider */}
       <View style={styles.orContainer}>
@@ -68,15 +49,6 @@ export default function UploadScreen() {
           />
           <Button title="Clear" onPress={() => setImage(null)} />
           {/* <Button title="Remove Background" onPress={() => setImage(null)} /> */}
-        </SafeAreaView>
-      )}
-      {modifiedImage && (
-        <SafeAreaView>
-          <Image
-            source={{ uri: `data:image/png;base64,${modifiedImage}` }}
-            style={{ width: 200, height: 200 }}
-          />
-          <Button title="Clear" onPress={() => setModifiedImage(null)} />
         </SafeAreaView>
       )}
 
