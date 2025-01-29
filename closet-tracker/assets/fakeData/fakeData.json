@@ -1,0 +1,75 @@
+[
+    {
+      "id": 1,
+      "name": "Slim Fit Jeans",
+      "type": "Jeans",
+      "size": "32",
+      "color": "Indigo Blue",
+      "price": 49.99,
+      "imageUrl": "@/assets/fakeData/images/slimFitJeans.png"
+    },
+    {
+      "id": 2,
+      "name": "Black Leather Jacket",
+      "type": "Jacket",
+      "size": "M",
+      "color": "Black",
+      "price": 120.00,
+      "imageUrl": "@/assets/fakeData/images/blackLeatherJacket.png"
+    }, 
+    {
+      "id": 3,
+      "name": "Graphic Tee",
+      "type": "T-Shirt",
+      "size": "L",
+      "color": "Black",
+      "price": 19.99,
+      "imageUrl": "@/assets/fakeData/images/graphicTee.png"
+    },
+    {
+      "id": 4,
+      "name": "Running Shoes",
+      "type": "Shoes",
+      "size": "10",
+      "color": "Blue",
+      "price": 89.99,
+      "imageUrl": "@/assets/fakeData/images/runningShoes.png"
+    },
+    {
+      "id": 5,
+      "name": "Maxi Dress",
+      "type": "Dress",
+      "size": "S",
+      "color": "Red",
+      "price": 39.99,
+      "imageUrl": "@/assets/fakeData/images/maxiDress.png"
+    },
+    {
+      "id": 6,
+      "name": "Wool Sweater",
+      "type": "Sweater",
+      "size": "XL",
+      "color": "Dark Grey",
+      "price": 69.99,
+      "imageUrl": "@/assets/fakeData/images/woolSweater.png"
+    },
+    {
+      "id": 7,
+      "name": "Cargo Shorts",
+      "type": "Shorts",
+      "size": "34",
+      "color": "Khaki",
+      "price": 29.99,
+      "imageUrl": "@/assets/fakeData/images/cargoShorts.png"
+    },
+    {
+      "id": 8,
+      "name": "Business Blazer",
+      "type": "Blazer",
+      "size": "L",
+      "color": "Blue",
+      "price": 180.00,
+      "imageUrl": "@/assets/fakeData/images/buisnessBlazer.png"
+    }
+  ]
+  
