@@ -27,38 +27,8 @@ export default function UploadScreen() {
 
       {/* Upload Box */}
       <TouchableOpacity style={styles.uploadBox}>
-        <Text style={styles.uploadBoxText}>Select from Camera Roll</Text>
+      <Button title="Select from Camera Roll" onPress={async () => setImage(await selectImage())} />
       </TouchableOpacity>
-
-      {/* OR Divider */}
-      <View style={styles.orContainer}>
-        <View style={styles.line} />
-        <Text style={styles.orText}>or</Text>
-        <View style={styles.line} />
-      </View>
-
-      {/* Camera Button */}
-      <TouchableOpacity style={styles.cameraButton}>
-        <Text style={styles.cameraButtonText}>Open Camera & Take Photo</Text>
-      </TouchableOpacity>
-
-      {/* Dividing Line */}
-      <View style={styles.lineDivider}>
-      </View>
-
-      {/* Submit Button */}
-      <TouchableOpacity style={styles.submitButton}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
-      <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-      >
-      <Button title="Select Image" onPress={async () => setImage(await selectImage())} />
-      <Button title="Capture Image" onPress={async () => setImage(await captureImage())} />
       {image && (
         <SafeAreaView>
           <Image
@@ -78,7 +48,46 @@ export default function UploadScreen() {
           <Button title="Clear" onPress={() => setModifiedImage(null)} />
         </SafeAreaView>
       )}
-    </View>
+
+      {/* OR Divider */}
+      <View style={styles.orContainer}>
+        <View style={styles.line} />
+        <Text style={styles.orText}>or</Text>
+        <View style={styles.line} />
+      </View>
+
+      {/* Camera Button */}
+      <TouchableOpacity style={styles.cameraButton}>
+      <Button title="Open Camera & Take Photo" onPress={async () => setImage(await captureImage())} />
+      </TouchableOpacity>
+      {image && (
+        <SafeAreaView>
+          <Image
+            source={{ uri: `data:image/png;base64,${image}` }}
+            style={{ width: 200, height: 200 }}
+          />
+          <Button title="Clear" onPress={() => setImage(null)} />
+          {/* <Button title="Remove Background" onPress={() => setImage(null)} /> */}
+        </SafeAreaView>
+      )}
+      {modifiedImage && (
+        <SafeAreaView>
+          <Image
+            source={{ uri: `data:image/png;base64,${modifiedImage}` }}
+            style={{ width: 200, height: 200 }}
+          />
+          <Button title="Clear" onPress={() => setModifiedImage(null)} />
+        </SafeAreaView>
+      )}
+
+      {/* Dividing Line */}
+      <View style={styles.lineDivider}>
+      </View>
+
+      {/* Submit Button */}
+      <TouchableOpacity style={styles.submitButton}>
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </TouchableOpacity>
     </ScrollView> 
   );
 }
