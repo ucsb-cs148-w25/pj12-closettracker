@@ -6,7 +6,7 @@ import { auth } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 
-export default function Login () {
+export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function Login () {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             setUser(userCredential.user);
-            router.replace('../(tabs)/home');
+            router.replace('../(tabs)/wardrobe');
         } catch (error: any) {
             alert('Sign in failed: ' + error.message);
         } finally {
@@ -31,7 +31,7 @@ export default function Login () {
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.title}>Sign In</Text>
-                
+
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -40,7 +40,7 @@ export default function Login () {
                     autoCapitalize="none"
                     keyboardType="email-address"
                 />
-                
+
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
@@ -58,7 +58,7 @@ export default function Login () {
         </SafeAreaView>
     );
 };
-    
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
