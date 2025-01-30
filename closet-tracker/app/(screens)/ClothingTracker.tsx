@@ -12,8 +12,17 @@ type ItemData = {
 // Fake data simulating your wardrobe
 const fakeData: ItemData[] = [
   { id: '1', title: 'Shirt', wearCount: 3, lastWorn: '2025-01-20T12:00:00Z' },
-  { id: '2', title: 'Cardigan', wearCount: 5, lastWorn: '2025-01-19T12:00:00Z' },
-  { id: '3', title: 'Pants', wearCount: 2, lastWorn: '2025-01-22T12:00:00Z' },
+  { id: '2', title: 'Cardigan', wearCount: 3, lastWorn: '2025-01-19T12:00:00Z' },
+  { id: '3', title: 'Pants', wearCount: 3, lastWorn: '2025-01-22T12:00:00Z' },
+  { id: '4', title: 'Jacket', wearCount: 2, lastWorn: '2025-01-18T12:00:00Z' },
+  { id: '5', title: 'Sweater', wearCount: 5, lastWorn: '2025-01-21T12:00:00Z' },
+  { id: '6', title: 'Jeans', wearCount: 4, lastWorn: '2025-01-15T12:00:00Z' },
+  { id: '11', title: 'Shirt', wearCount: 3, lastWorn: '2025-01-20T12:00:00Z' },
+  { id: '12', title: 'Cardigan', wearCount: 3, lastWorn: '2025-01-19T12:00:00Z' },
+  { id: '13', title: 'Pants', wearCount: 3, lastWorn: '2025-01-22T12:00:00Z' },
+  { id: '14', title: 'Jacket', wearCount: 2, lastWorn: '2025-01-18T12:00:00Z' },
+  { id: '15', title: 'Sweater', wearCount: 5, lastWorn: '2025-01-21T12:00:00Z' },
+  { id: '16', title: 'Jeans', wearCount: 4, lastWorn: '2025-01-15T12:00:00Z' },
 ];
 
 export default function ClothingTracker() {
