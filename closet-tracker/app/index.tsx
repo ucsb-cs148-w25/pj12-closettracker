@@ -14,7 +14,7 @@ export default function Index() {
       <Button title="Login" onPress={() => router.push('./(login)/login')} />
       <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
 
-      <TouchableOpacity onPress={() => router.replace('./(tabs)/home')}>
+      <TouchableOpacity onPress={() => router.replace('./(tabs)/wardrobe')}>
         <Text style={styles.guestText}>Continue as Guest</Text>
       </TouchableOpacity>
     </View>
