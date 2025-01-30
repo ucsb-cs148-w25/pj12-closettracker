@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function UploadScreen() {
   const selectImage = useSelectImage();
@@ -10,72 +11,74 @@ export default function UploadScreen() {
   const [image, setImage] = useState<string | null | undefined>(null);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Title Section */}
-      <ThemedView style={[styles.titleContainer, { backgroundColor: 'transparent' }]}>
-        <ThemedText type="title" style={{ backgroundColor: 'transparent', color: '#000' }}>
-          Upload your clothes!
-        </ThemedText>
-      </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {/* Title Section */}
+        <ThemedView style={[styles.titleContainer, { backgroundColor: 'transparent' }]}>
+          <ThemedText type="title" style={{ backgroundColor: 'transparent', color: '#000' }}>
+            Upload your clothes!
+          </ThemedText>
+        </ThemedView>
 
-      {/* Subtitle Section */}
-      <ThemedView style={[styles.subtitleContainer, { backgroundColor: 'transparent' }]}>
-        <ThemedText type="subtitle" style={{ backgroundColor: 'transparent', color: '#000' }}>
-          Use your camera to upload an item, or select a photo from your camera roll. Please ensure the photo is taken on a solid background.
-        </ThemedText>
-      </ThemedView>
+        {/* Subtitle Section */}
+        <ThemedView style={[styles.subtitleContainer, { backgroundColor: 'transparent' }]}>
+          <ThemedText type="subtitle" style={{ backgroundColor: 'transparent', color: '#000' }}>
+            Use your camera to upload an item, or select a photo from your camera roll. Please ensure the photo is taken on a solid background.
+          </ThemedText>
+        </ThemedView>
 
-      {image ? (
-        // Display selected image and options
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: `data:image/png;base64,${image}` }} style={styles.image} />
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.optionButton} onPress={() => setImage(null)}>
-              <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={async () => setImage(await selectImage())}
-            >
-              <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera Roll</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={async () => setImage(await captureImage())}
-            >
-              <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera</Text>
-            </TouchableOpacity>
+        {image ? (
+          // Display selected image and options
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: `data:image/png;base64,${image}` }} style={styles.image} />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.optionButton} onPress={() => setImage(null)}>
+                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionButton}
+                onPress={async () => setImage(await selectImage())}
+              >
+                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera Roll</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.optionButton}
+                onPress={async () => setImage(await captureImage())}
+              >
+                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      ) : (
-        // Show upload options if no image is selected
-        <>
-          <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
-            <Text style={[styles.uploadBoxText, { color: '#fff' }]}>Select from Camera Roll</Text>
-          </TouchableOpacity>
+        ) : (
+          // Show upload options if no image is selected
+          <>
+            <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
+              <Text style={[styles.uploadBoxText, { color: '#fff' }]}>Select from Camera Roll</Text>
+            </TouchableOpacity>
 
-          {/* OR Divider */}
-          <View style={styles.orContainer}>
-            <View style={styles.line} />
-            <Text style={[styles.orText, { color: '#000' }]}>or</Text>
-            <View style={styles.line} />
-          </View>
+            {/* OR Divider */}
+            <View style={styles.orContainer}>
+              <View style={styles.line} />
+              <Text style={[styles.orText, { color: '#000' }]}>or</Text>
+              <View style={styles.line} />
+            </View>
 
-          {/* Camera Button */}
-          <TouchableOpacity style={styles.cameraButton} onPress={async () => setImage(await captureImage())}>
-            <Text style={[styles.cameraButtonText, { color: '#fff' }]}>Open Camera & Take Photo</Text>
-          </TouchableOpacity>
-        </>
-      )}
+            {/* Camera Button */}
+            <TouchableOpacity style={styles.cameraButton} onPress={async () => setImage(await captureImage())}>
+              <Text style={[styles.cameraButtonText, { color: '#fff' }]}>Open Camera & Take Photo</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
-      {/* Dividing Line */}
-      <View style={styles.lineDivider} />
+        {/* Dividing Line */}
+        <View style={styles.lineDivider} />
 
-      {/* Submit Button */}
-      <TouchableOpacity style={styles.submitButton}>
-        <Text style={[styles.submitButtonText, { color: '#fff' }]}>Submit</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Submit Button */}
+        <TouchableOpacity style={styles.submitButton}>
+          <Text style={[styles.submitButtonText, { color: '#fff' }]}>Submit</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -85,8 +88,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 16,
-    paddingTop: 85,
-    paddingBottom: 30, // Add padding at the bottom to ensure the Submit button is reachable
+    paddingBottom: Platform.OS === 'ios' ? 30 : 0,
   },
   titleContainer: {
     alignItems: 'center',
@@ -171,7 +173,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#333',
-    marginBottom: 70,
   },
   submitButtonText: {
     fontSize: 16,
