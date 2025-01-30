@@ -1,16 +1,9 @@
-import { useState } from "react";
-import { Button, Image, StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native';
-import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function UploadScreen() {
-  const selectImage = useSelectImage();
-  const captureImage = useCameraImage();
-  const [image, setImage] = useState<string | null | undefined>(null);
-  const [modifiedImage, setModifiedImage] = useState<string | null | undefined>(null);
-  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Title Section */}
@@ -26,7 +19,7 @@ export default function UploadScreen() {
       </ThemedView>
 
       {/* Upload Box */}
-      <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
+      <TouchableOpacity style={styles.uploadBox}>
         <Text style={styles.uploadBoxText}>Select from Camera Roll</Text>
       </TouchableOpacity>
 
@@ -38,19 +31,9 @@ export default function UploadScreen() {
       </View>
 
       {/* Camera Button */}
-      <TouchableOpacity style={styles.cameraButton} onPress={async () => setImage(await captureImage())}>
+      <TouchableOpacity style={styles.cameraButton}>
         <Text style={styles.cameraButtonText}>Open Camera & Take Photo</Text>
       </TouchableOpacity>
-      {image && (
-        <SafeAreaView>
-          <Image
-            source={{ uri: `data:image/png;base64,${image}` }}
-            style={{ width: 200, height: 200 }}
-          />
-          <Button title="Clear" onPress={() => setImage(null)} />
-          {/* <Button title="Remove Background" onPress={() => setImage(null)} /> */}
-        </SafeAreaView>
-      )}
 
       {/* Dividing Line */}
       <View style={styles.lineDivider}>
@@ -60,7 +43,8 @@ export default function UploadScreen() {
       <TouchableOpacity style={styles.submitButton}>
         <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
-    </ScrollView> 
+
+    </ScrollView>
   );
 }
 
