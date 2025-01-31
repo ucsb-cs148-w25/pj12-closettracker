@@ -1,5 +1,6 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 FirebaseConfig.ts
+supabase.ts
 
 # dependencies
 node_modules/

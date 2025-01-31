@@ -2,13 +2,15 @@ import { View, Text, TextInput, ActivityIndicator, Button, StyleSheet } from 're
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { auth } from '@/FirebaseConfig';
+import { auth, db } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 
 export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState<any>(null);
     
@@ -27,7 +29,23 @@ export default function Signup() {
         setLoading(true);
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            setUser(userCredential.user);
+            // setUser(userCredential.user);
+            const newUser = userCredential.user; // Corrected: use `userCredential.user`
+
+            // Store user in Firestore
+            await setDoc(doc(db, 'users', newUser.uid), {
+                name: name,
+                uid: newUser.uid,
+                email: newUser.email,
+            });
+
+            // Initialize an empty "clothing" subcollection
+            const clothingCollectionRef = collection(doc(db, 'users', newUser.uid), 'clothing');
+            await addDoc(clothingCollectionRef, {
+                initialized: true,
+                message: 'This is a placeholder item. Remove it when adding actual clothing items.',
+            });
+
             router.replace('../(tabs)/wardrobe');
         } catch (error: any) {
             alert('Sign up failed: ' + error.message);
@@ -40,7 +58,12 @@ export default function Signup() {
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.title}>Sign Up</Text>
-
+                <TextInput
+                    style={styles.input}
+                    placeholder="Name"
+                    value={name}
+                    onChangeText={setName}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
