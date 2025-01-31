@@ -54,7 +54,7 @@ export default function WardrobeScreen() {
         prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
       );
     } else {
-      router.push(`../(screens)/ClothingTracker?item=${itemId}`);
+      router.push(`../(screens)/singleItem?item=${itemId}`);
     }
   };
 
