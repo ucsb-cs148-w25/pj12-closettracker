@@ -1,5 +1,5 @@
 import { View, Text, TextInput, ActivityIndicator, Button, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '@/FirebaseConfig';
@@ -13,6 +13,15 @@ export default function Signup() {
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState<any>(null);
+    
+    useEffect (() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                router.replace('../(tabs)/wardrobe');
+            }
+        });
+        return unsubscribe;
+    }, []);
 
     const router = useRouter();
 
