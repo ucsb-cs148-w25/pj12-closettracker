@@ -23,5 +23,10 @@ Extra: Upload photo and add to mannequin for video demo, friday is soft deadline
 ## Experiment/Change
 
 * A brief description of what constitutes your change/experiment
+  Wasn't as organized, so made changes to update other teammates more frequently
+  
 * A brief assessment of how its results (did it improve things? move the needle at all?)
-* A decision going forward: keep the change, revert to previous procedure, make a new change? 
+  More conversing in the groupchats and everyone is more up to date with less confusion going on
+  
+* A decision going forward: keep the change, revert to previous procedure, make a new change?
+  Keep the change
