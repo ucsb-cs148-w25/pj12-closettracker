@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { auth } from '@/FirebaseConfig';
 
 export default function Index() {
   const router = useRouter();
+
+  useEffect (() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        router.replace('./(tabs)/wardrobe');
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   return (
     <View style={styles.container}>
