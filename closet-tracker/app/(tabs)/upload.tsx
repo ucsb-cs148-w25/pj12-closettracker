@@ -1,14 +1,82 @@
 import { useState } from "react";
-import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity, Platform } from 'react-native';
+import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
 import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getAuth } from "firebase/auth";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import supabase from '@/supabase';
+import { decode } from 'base64-arraybuffer';
 
 export default function UploadScreen() {
   const selectImage = useSelectImage();
   const captureImage = useCameraImage();
   const [image, setImage] = useState<string | null | undefined>(null);
+  const [itemName, setItemName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  
+  const handleSubmit = async () => {
+    if (!image || !itemName) {
+      alert("Please select an image and enter an item name.");
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {  
+      // extract base64 data from image URI
+      const base64 = image;
+      const arrayBuffer = decode(base64); // converting base64 to ArrayBuffer
+      // console.log("Base64 data:", base64);
+
+      const fileName = `image_${Date.now()}.jpg`;
+      const filePath = `user_${getAuth().currentUser?.uid}/${fileName}`;
+  
+      // uploading to supabase
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('closetImages')
+        .upload(filePath, arrayBuffer, {
+        contentType: 'image/jpeg',
+      });  
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw uploadError;
+      }
+  
+      // retrieve pub url of uploaded image
+      const { data: urlData } = supabase.storage
+        .from('closetImages')
+        .getPublicUrl(filePath);
+  
+      const imageUrl = urlData.publicUrl;
+      console.log("Public URL:", imageUrl);
+  
+      // store in firestore
+      const auth = getAuth();
+      const db = getFirestore();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        alert("Please sign in before uploading your clothes.");
+        return;
+      }
+  
+      const docRef = await addDoc(collection(db, "users", user.uid, "clothing"), {
+        itemName: itemName,
+        image: imageUrl,
+      });
+  
+      alert("Item uploaded successfully!");
+      setImage(null);
+      setItemName("");
+    } catch (error) {
+      console.error("Error uploading item: ", error);
+      alert("Failed to upload item.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -35,22 +103,17 @@ export default function UploadScreen() {
               <TouchableOpacity style={styles.optionButton} onPress={() => setImage(null)}>
                 <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionButton}
-                onPress={async () => setImage(await selectImage())}
-              >
-                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera Roll</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.optionButton}
-                onPress={async () => setImage(await captureImage())}
-              >
-                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Replace from Camera</Text>
-              </TouchableOpacity>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Enter item name"
+                value={itemName}
+                onChangeText={setItemName}
+              />
+
             </View>
           </View>
         ) : (
-          // Show upload options if no image is selected
           <>
             <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
               <Text style={[styles.uploadBoxText, { color: '#fff' }]}>Select from Camera Roll</Text>
@@ -74,8 +137,10 @@ export default function UploadScreen() {
         <View style={styles.lineDivider} />
 
         {/* Submit Button */}
-        <TouchableOpacity style={styles.submitButton}>
-          <Text style={[styles.submitButtonText, { color: '#fff' }]}>Submit</Text>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
+          <Text style={[styles.submitButtonText, { color: '#fff' }]}>
+            {loading ? "Uploading..." : "Submit"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -184,4 +249,14 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: '100%',
   },
+  input: {
+    height: 40,
+    width: '90%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+
 });
