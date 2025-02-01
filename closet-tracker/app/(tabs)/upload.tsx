@@ -58,7 +58,7 @@ export default function UploadScreen() {
       const user = auth.currentUser;
   
       if (!user) {
-        alert("No user logged in.");
+        alert("Please sign in before uploading your clothes.");
         return;
       }
   
@@ -103,7 +103,7 @@ export default function UploadScreen() {
               <TouchableOpacity style={styles.optionButton} onPress={() => setImage(null)}>
                 <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
               </TouchableOpacity>
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Enter item name"
@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
+    width: '90%',
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 5,
