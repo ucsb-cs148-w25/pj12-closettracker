@@ -3,60 +3,74 @@ import { View, Text, Image, Button, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router'; // Correct hook for local search params
 // import { IncreaseWearButton, DecreaseWearButton } from '@/components/SingleItemComponents'
 import TimesWornComponent from '@/components/SingleItemComponents' 
-
-type ItemData = {
-  id: string;
-  title: string;
-  wearCount: number;
-};
-
-// Fake data simulating your wardrobe
-const fakeData: ItemData[] = [
-  { id: '1', title: 'Shirt', wearCount: 3 },
-  { id: '2', title: 'Cardigan', wearCount: 5 },
-  { id: '3', title: 'Pants', wearCount: 2 },
-];
+import { doc, getDoc, DocumentData } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { db } from "@/FirebaseConfig";
+import {SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function singleItem() {
   const { item } = useLocalSearchParams(); // Get query params
+  const itemId = Array.isArray(item) ? item[0] : item;
   const router = useRouter();
-  // console.log('Item from query param:', item);  // Debugging: Check if item is passed correctly
-
+  //console.log('Item from query param:', item);  // Debugging: Check if item is passed correctly
   
-  const [itemData, setItemData] = useState<ItemData | null>(null);
+  const [itemData, setItemData] = useState<DocumentData | null>(null);
 
   useEffect(() => {
-    if (item) {
-      // Find the item from fake data based on item.id
-      console.log('Item from query param:',  item);  // Debugging: Check if item is passed correctly
-      const foundItem = fakeData.find((data) => data.id === item); // `item` is a string
-      setItemData(foundItem || null); // Set the found item, or null if not found
-    }
-  }, [item]); // Dependency array
+    const fetchItem = async () => {
+      if (!itemId) return;
 
-  if (!itemData) return <Text style={{fontSize:18, color:'white', textAlign:'center'}}>Loading...</Text>; //FIXME doesn't work rn
+      const auth = getAuth(); // Get Firebase Auth instance
+      const user = auth.currentUser; // Get the logged-in user
 
-  const handleIncrement = () => {
-    const newWearCount = itemData.wearCount + 1;
-    setItemData({ ...itemData, wearCount: newWearCount});
-  };
+      if (!user) {
+        console.error("No user is logged in!");
+        return;
+      }
 
-  const handleDecrement = () => {
-    const newWearCount = itemData.wearCount > 0 ? itemData.wearCount - 1 : 0;
-    setItemData({ ...itemData, wearCount: newWearCount});
-  };
+      const userId = user.uid; // Get the logged-in user's ID
+      const itemRef = doc(db, "users", userId, "clothing", itemId);
+
+      try {
+        const docSnap = await getDoc(itemRef);
+        if (docSnap.exists()) {
+          setItemData(docSnap.data());
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching item:", error);
+      }
+    };
+
+    fetchItem();
+  }, [itemId]);
+
+  if (!itemData) {
+    return <Text>Loading...</Text>;
+  }
+
+  // const handleIncrement = () => {
+  //   const newWearCount = itemData.wearCount + 1;
+  //   setItemData({ ...itemData, wearCount: newWearCount});
+  // };
+
+  // const handleDecrement = () => {
+  //   const newWearCount = itemData.wearCount > 0 ? itemData.wearCount - 1 : 0;
+  //   setItemData({ ...itemData, wearCount: newWearCount});
+  // };
 
   return (
-
-    <View style={styles.container}>
-      <Image
-        source={require('@/assets/fakeData/images/buisnessBlazer.png')}
-        style={styles.image}
-      />
-      <Text style={styles.title}>{itemData.title}</Text>
-      <TimesWornComponent />
-      <Button title="Back to Wardrobe" onPress={() => router.back()} />
-    </View>
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        {itemData.image && (
+          <Image source={{ uri: itemData.image }} style={styles.image} />
+        )}
+        <Text style={styles.title}>{itemData.itemName}</Text>
+        {/* <TimesWornComponent /> */}
+        <Button title="Back to Wardrobe" onPress={() => router.back()} />
+      </View>
+    </SafeAreaProvider>
   );
 }
 
