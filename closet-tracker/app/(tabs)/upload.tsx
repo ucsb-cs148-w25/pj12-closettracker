@@ -8,6 +8,8 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
+import { useRouter } from 'expo-router';
+
 
 export default function UploadScreen() {
   const selectImage = useSelectImage();
@@ -15,6 +17,7 @@ export default function UploadScreen() {
   const [image, setImage] = useState<string | null | undefined>(null);
   const [itemName, setItemName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
   
   const handleSubmit = async () => {
     if (!image || !itemName) {
@@ -70,6 +73,10 @@ export default function UploadScreen() {
       alert("Item uploaded successfully!");
       setImage(null);
       setItemName("");
+      
+      console.log(docRef.id)
+      router.push(`../(screens)/uploadClothingData?item_id=${docRef.id}`);
+
     } catch (error) {
       console.error("Error uploading item: ", error);
       alert("Failed to upload item.");
