@@ -36,6 +36,7 @@ export default function Index() {
     try {
       await auth.signOut();
       console.log("User signed out successfully");
+      router.replace('/');
     } catch (error) {
       console.log("Error signing out: ", error);
     }

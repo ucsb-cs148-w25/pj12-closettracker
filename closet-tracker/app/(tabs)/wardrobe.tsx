@@ -1,39 +1,14 @@
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, Button, View, ActivityIndicator, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, Button, View, Image, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getAuth } from "firebase/auth";
-import { getFirestore, collection, query, onSnapshot } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 
-// export type ItemData = {
-//   id: string;
-//   title: string;
-//   wearCount: number;
-//   lastWorn: string;
-// };
-  // export type ItemData = {
-  //   id: string;
-  //   title: string;
-  // };
-
-// export const DATA: ItemData[] = [
-//   { id: '1', title: 'Shirt', wearCount: 3, lastWorn: '2025-01-20T12:00:00Z' },
-//   { id: '2', title: 'Cardigan', wearCount: 3, lastWorn: '2025-01-19T12:00:00Z' },
-//   { id: '3', title: 'Pants', wearCount: 3, lastWorn: '2025-01-22T12:00:00Z' },
-//   { id: '4', title: 'Jacket', wearCount: 2, lastWorn: '2025-01-18T12:00:00Z' },
-//   { id: '5', title: 'Sweater', wearCount: 5, lastWorn: '2025-01-21T12:00:00Z' },
-//   { id: '6', title: 'Jeans', wearCount: 4, lastWorn: '2025-01-15T12:00:00Z' },
-//   { id: '11', title: 'Shirt', wearCount: 3, lastWorn: '2025-01-20T12:00:00Z' },
-//   { id: '12', title: 'Cardigan', wearCount: 3, lastWorn: '2025-01-19T12:00:00Z' },
-//   { id: '13', title: 'Pants', wearCount: 3, lastWorn: '2025-01-22T12:00:00Z' },
-//   { id: '14', title: 'Jacket', wearCount: 2, lastWorn: '2025-01-18T12:00:00Z' },
-//   { id: '15', title: 'Sweater', wearCount: 5, lastWorn: '2025-01-21T12:00:00Z' },
-//   { id: '16', title: 'Jeans', wearCount: 4, lastWorn: '2025-01-15T12:00:00Z' },
-// ];
 type ItemType = {
   id: string;
   itemName: string;
-  image: string
+  image: string;
 };
 
 type ItemProps = {
@@ -51,43 +26,52 @@ const Item = ({ item, onPress, onLongPress, backgroundColor, textColor }: ItemPr
   </TouchableOpacity>
 );
 
-
 export default function WardrobeScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(true); // Used for both initial load and pull-to-refresh
+  const [user, setUser] = useState<any>(null);
 
-  // useEffect(() => {
-  //   console.log('Selected IDs:', selectedIds);
-  // }, [selectedIds]);
-  useEffect(() => {
-    const auth = getAuth();
-    const db = getFirestore();
-    const user = auth.currentUser;
+  const auth = getAuth();
+  const db = getFirestore();
 
-    if (!user) {
-      console.log("No user logged in");
-      return;
+  // Fetch wardrobe items
+  const fetchItems = useCallback(() => {
+    if (user) {
+      const itemsRef = collection(db, "users", user.uid, "clothing");
+      const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
+        const fetchedItems = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setItems(fetchedItems);
+        setRefreshing(false);
+      });
+      return unsubscribe;
+    } else {
+      setItems([]); // Clear items if logged out
+      setRefreshing(false);
     }
+  }, [user]);
 
-    const itemsRef = collection(db, "users", user.uid, "clothing");
-    const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
-      const fetchedItems = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setItems(fetchedItems);
-      setLoading(false);
+  // Handle authentication changes
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setRefreshing(true);
     });
-
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribeAuth();
   }, []);
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
+  // Fetch items when user changes
+  useEffect(() => {
+    const unsubscribe = fetchItems();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [fetchItems]);
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -130,22 +114,41 @@ export default function WardrobeScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Wardrobe</Text>
-          {selectMode && (
-            <Button title="Cancel Selection" onPress={handleCancelSelection} color="red" />
-          )}
-        </View>
+        {!user ? (
+          <View style={styles.centeredMessage}>
+            <Text style={styles.loginMessage}>Please log in first</Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.header}>
+              <Text style={styles.title}>Wardrobe</Text>
+              {selectMode && (
+                <Button title="Cancel Selection" onPress={handleCancelSelection} color="red" />
+              )}
+            </View>
 
-        <FlatList
-          contentContainerStyle={styles.clothesContainer}
-          style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-          data={items}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          extraData={selectedIds}
-          numColumns={2}
-        />
+            <FlatList
+              contentContainerStyle={styles.clothesContainer}
+              style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
+              data={items}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              extraData={selectedIds}
+              numColumns={2}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => {
+                    setRefreshing(true);
+                    fetchItems();
+                  }}
+                  colors={['#4160fb']} // For Android pull-to-refresh color
+                  tintColor="#4160fb" // For iOS pull-to-refresh color
+                />
+              }
+            />
+          </>
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -168,24 +171,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
   },
-  // clothesContainer: {
-  //   alignItems: 'center',
-  // },
   clothesContainer: {
     alignItems: 'stretch',
     justifyContent: "center",
   },
-  // item: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   margin: 8,
-  //   width: '45%',
-  //   height: 200,
-  //   borderRadius: 10,
-  //   backgroundColor: '#a5b4fd',
-  // },
   item: {
-    // flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     margin: 8,
@@ -198,22 +188,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  itemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-    backgroundColor: "#f8f8f8",
-    padding: 10,
-    borderRadius: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "100",
-  },
   itemImage: {
     width: "100%",
     height: "80%",
     borderRadius: 10,
     marginBottom: 8,
+  },
+  centeredMessage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginMessage: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'red',
   },
 });
