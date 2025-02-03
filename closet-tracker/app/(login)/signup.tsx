@@ -40,11 +40,11 @@ export default function Signup() {
             });
 
             // Initialize an empty "clothing" subcollection
-            const clothingCollectionRef = collection(doc(db, 'users', newUser.uid), 'clothing');
-            await addDoc(clothingCollectionRef, {
-                initialized: true,
-                message: 'This is a placeholder item. Remove it when adding actual clothing items.',
-            });
+            // const clothingCollectionRef = collection(doc(db, 'users', newUser.uid), 'clothing');
+            // await addDoc(clothingCollectionRef, {
+            //     initialized: true,
+            //     message: 'This is a placeholder item. Remove it when adding actual clothing items.',
+            // });
 
             router.replace('../(tabs)/wardrobe');
         } catch (error: any) {
