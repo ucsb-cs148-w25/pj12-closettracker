@@ -15,6 +15,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   "person.fill": "people-alt",
   "shippingbox.fill": "archive",
+  "trash": "delete-outline",
+  "xmark.app": "cancel",
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

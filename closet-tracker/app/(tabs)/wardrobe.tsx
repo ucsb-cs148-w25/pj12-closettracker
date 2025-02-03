@@ -1,9 +1,10 @@
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, Button, View, Image, RefreshControl } from 'react-native';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 type ItemType = {
   id: string;
@@ -31,7 +32,7 @@ export default function WardrobeScreen() {
   const [selectMode, setSelectMode] = useState(false);
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
-  const [refreshing, setRefreshing] = useState(true); // Used for both initial load and pull-to-refresh
+  const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
 
   const auth = getAuth();
@@ -78,6 +79,9 @@ export default function WardrobeScreen() {
       setSelectedIds((prev) =>
         prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
       );
+      if (selectedIds.length === 1 && selectedIds[0] === itemId) {
+        handleCancelSelection();
+      }
     } else {
       router.push(`../(screens)/singleItem?item=${itemId}`);
     }
@@ -93,6 +97,21 @@ export default function WardrobeScreen() {
   const handleCancelSelection = () => {
     setSelectMode(false);
     setSelectedIds([]);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!user || selectedIds.length === 0) return;
+
+    try {
+      handleCancelSelection();
+      const promises = selectedIds.map((id) =>
+        deleteDoc(doc(db, "users", user.uid, "clothing", id))
+      );
+
+      await Promise.all(promises);
+    } catch (error) {
+      console.error("Error deleting items:", error);
+    }
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -114,40 +133,54 @@ export default function WardrobeScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        {!user ? (
+        <View style={styles.header}>
+          {selectMode ? (
+            <View style={styles.iconContainer}>
+              <Pressable onPress={handleCancelSelection}>
+                <IconSymbol name="xmark.app" color="gray" size={28} />
+              </Pressable>
+
+              <View style={styles.deleteIconWrapper}>
+                <Pressable onPress={handleDeleteSelected}>
+                  <IconSymbol name="trash" color="red" size={28} />
+                  {selectedIds.length > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{selectedIds.length}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.title}>Wardrobe</Text>
+          )}
+        </View>
+
+        {items.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
-            <Text style={styles.loginMessage}>Please log in first</Text>
+            <Text style={styles.emptyMessage}>Your wardrobe is empty.</Text>
           </View>
         ) : (
-          <>
-            <View style={styles.header}>
-              <Text style={styles.title}>Wardrobe</Text>
-              {selectMode && (
-                <Button title="Cancel Selection" onPress={handleCancelSelection} color="red" />
-              )}
-            </View>
-
-            <FlatList
-              contentContainerStyle={styles.clothesContainer}
-              style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-              data={items}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-              extraData={selectedIds}
-              numColumns={2}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={() => {
-                    setRefreshing(true);
-                    fetchItems();
-                  }}
-                  colors={['#4160fb']} // For Android pull-to-refresh color
-                  tintColor="#4160fb" // For iOS pull-to-refresh color
-                />
-              }
-            />
-          </>
+          <FlatList
+            contentContainerStyle={styles.clothesContainer}
+            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
+            data={items}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            extraData={selectedIds}
+            numColumns={2}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  fetchItems();
+                }}
+                colors={['#4160fb']}
+                tintColor="#4160fb"
+              />
+            }
+          />
         )}
       </SafeAreaView>
     </SafeAreaProvider>
@@ -199,9 +232,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginMessage: {
-    fontSize: 20,
+  emptyMessage: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+  },
+  iconContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 15,
+  },
+  deleteIconWrapper: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -10,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: 'bold',
-    color: 'red',
   },
 });
