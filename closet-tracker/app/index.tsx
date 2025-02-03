@@ -23,10 +23,6 @@ export default function Index() {
       {/* Navigation Buttons */}
       <Button title="Login" onPress={() => router.push('./(login)/login')} />
       <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
-
-      <TouchableOpacity onPress={() => router.replace('./(tabs)/wardrobe')}>
-        <Text style={styles.guestText}>Continue as Guest</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -49,11 +45,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     color: '#666',
-  },
-  guestText: {
-    marginTop: 20,
-    fontSize: 14,
-    color: '#007BFF',
-    textDecorationLine: 'underline',
   },
 });
