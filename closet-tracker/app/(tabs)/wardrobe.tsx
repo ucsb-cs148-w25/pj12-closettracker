@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { TextInput } from 'react-native-gesture-handler';
 
 type ItemType = {
   id: string;
@@ -34,6 +35,7 @@ export default function WardrobeScreen() {
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const auth = getAuth();
   const db = getFirestore();
@@ -114,6 +116,14 @@ export default function WardrobeScreen() {
     }
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  }
+
+  const filteredItems = items.filter((item) =>
+    item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderItem = ({ item }: { item: any }) => {
     const isSelected = selectedIds.includes(item.id);
     const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
@@ -156,15 +166,30 @@ export default function WardrobeScreen() {
           )}
         </View>
 
-        {items.length === 0 && !refreshing ? (
+        <View style={styles.searchContainer}>
+          <TextInput 
+            placeholder='Search'
+            placeholderTextColor={'#ccc'}
+            clearButtonMode='always'
+            style={styles.searchBox}
+            autoCapitalize='none'
+            autoCorrect={false}
+            value={searchQuery}
+            onChangeText={(query) => handleSearch(query)}
+          />
+        </View>
+
+        {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
-            <Text style={styles.emptyMessage}>Your wardrobe is empty.</Text>
+            <Text style={styles.emptyMessage}>
+              {searchQuery ? "No items found." : "Your wardrobe is empty."}
+            </Text>
           </View>
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
             style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-            data={items}
+            data={filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             extraData={selectedIds}
@@ -264,4 +289,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  searchBox: {
+    paddingHorizontal:20,
+    paddingVertical:10,
+    borderColor:'#ccc',
+    borderWidth:1,
+    borderRadius:8,
+    width:'95%',
+  },
+  searchContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+  }
 });
