@@ -170,13 +170,18 @@ export default function WardrobeScreen() {
           <TextInput 
             placeholder='Search'
             placeholderTextColor={'#ccc'}
-            clearButtonMode='always'
+            clearButtonMode='never'
             style={styles.searchBox}
             autoCapitalize='none'
             autoCorrect={false}
             value={searchQuery}
             onChangeText={(query) => handleSearch(query)}
           />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery("")} style={styles.clearButton}>
+              <IconSymbol name="xmark.circle" color="#ccc" size={20}/>
+            </Pressable>
+          )}
         </View>
 
         {filteredItems.length === 0 && !refreshing ? (
@@ -300,5 +305,10 @@ const styles = StyleSheet.create({
   searchContainer: {
     alignItems: 'center',
     marginBottom: 10,
-  }
+  },
+  clearButton: {
+    position: 'absolute',
+    right:10,
+    padding:10,
+  },
 });
