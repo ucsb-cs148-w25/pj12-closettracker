@@ -9,19 +9,21 @@ import { getFirestore, collection, addDoc } from "firebase/firestore";
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
 import { useRouter } from 'expo-router';
+import { removeBackground } from "@/removebg";
 
 
 export default function UploadScreen() {
   const selectImage = useSelectImage();
   const captureImage = useCameraImage();
   const [image, setImage] = useState<string | null | undefined>(null);
+  const [rmbgImage, setRmbgImage] = useState<string | null | undefined>(null);
   const [itemName, setItemName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   
   const handleSubmit = async () => {
-    if (!image || !itemName) {
-      alert("Please select an image and enter an item name.");
+    if (!rmbgImage || !itemName) {
+      alert("Please select an image, remove background, and enter an item name.");
       return;
     }
   
@@ -29,7 +31,7 @@ export default function UploadScreen() {
   
     try {  
       // extract base64 data from image URI
-      const base64 = image;
+      const base64 = rmbgImage;
       const arrayBuffer = decode(base64); // converting base64 to ArrayBuffer
       // console.log("Base64 data:", base64);
 
@@ -85,6 +87,20 @@ export default function UploadScreen() {
     }
   };
 
+  const handleRemoveBackground = async () => {
+    try {
+      const result = await removeBackground(image!);
+      setRmbgImage(result);
+    } catch (error) {
+      console.error("Error removing background:", error);
+    }
+  }
+
+  const handleClear = () => {
+    setImage(null);
+    setRmbgImage(null);
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -105,9 +121,9 @@ export default function UploadScreen() {
         {image ? (
           // Display selected image and options
           <View style={styles.imageContainer}>
-            <Image source={{ uri: `data:image/png;base64,${image}` }} style={styles.image} />
+            <Image source={{ uri: `data:image/jpeg;base64,${rmbgImage ? rmbgImage: image}` }} style={styles.image} />
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.optionButton} onPress={() => setImage(null)}>
+              <TouchableOpacity style={styles.optionButton} onPress={() => handleClear()}>
                 <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
               </TouchableOpacity>
 
@@ -144,11 +160,21 @@ export default function UploadScreen() {
         <View style={styles.lineDivider} />
 
         {/* Submit Button */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
-          <Text style={[styles.submitButtonText, { color: '#fff' }]}>
-            {loading ? "Uploading..." : "Submit"}
-          </Text>
-        </TouchableOpacity>
+        {image && (
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={rmbgImage ? handleSubmit : handleRemoveBackground}
+            disabled={loading}
+          >
+            <Text style={[styles.submitButtonText, { color: '#fff' }]}>
+              {loading
+                ? "Uploading..."
+                : rmbgImage
+                ? "Submit"
+                : "Remove Background"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -219,6 +245,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     borderRadius: 10,
+    resizeMode: 'contain',
   },
   buttonContainer: {
     marginTop: 15,
