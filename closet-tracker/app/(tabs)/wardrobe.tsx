@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable } from 'react-native';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -6,6 +6,7 @@ import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/f
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TextInput } from 'react-native-gesture-handler';
+import { Colors } from '@/constants/Colors';
 
 type ItemType = {
   id: string;
@@ -36,6 +37,7 @@ export default function WardrobeScreen() {
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const colorScheme = useColorScheme();
 
   const auth = getAuth();
   const db = getFirestore();
@@ -212,6 +214,11 @@ export default function WardrobeScreen() {
             }
           />
         )}
+        <TouchableOpacity
+          style={styles.laundryButton}
+          onPress={() => router.replace(`../(screens)/laundry`)}>
+            <IconSymbol name={"archivebox.fill"} color={Colors[colorScheme ?? 'light'].tabIconSelected} />
+        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -311,4 +318,17 @@ const styles = StyleSheet.create({
     right:10,
     padding:10,
   },
+  laundryButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    backgroundColor: '#fff',
+    borderRadius: 50,
+    position: 'absolute',
+    bottom: 100,
+    right: 50
+  }
 });
