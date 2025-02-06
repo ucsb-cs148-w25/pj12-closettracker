@@ -17,6 +17,7 @@ const MAPPING = {
   "shippingbox.fill": "archive",
   "trash": "delete-outline",
   "xmark.app": "cancel",
+  "archivebox.fill": "inventory"
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
