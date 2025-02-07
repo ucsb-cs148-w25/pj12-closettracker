@@ -217,7 +217,7 @@ export default function WardrobeScreen() {
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={() => router.replace(`../(screens)/laundry`)}>
-            <IconSymbol name={"archivebox.fill"} color={Colors[colorScheme ?? 'light'].tabIconSelected} />
+            <IconSymbol name={"archivebox.fill"} color={"#4160fb"} />
         </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
