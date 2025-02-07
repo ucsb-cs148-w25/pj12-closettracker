@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlatList, Text, StyleSheet, TextInput, Button, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-
+import { DocumentSnapshot } from "firebase/firestore"; 
 
 const clothingDataDropdowns = ({
     handleSubmit,
     name,
+    docSnapshot,
   }: {
     handleSubmit: (
         name: string | null,
@@ -15,7 +16,47 @@ const clothingDataDropdowns = ({
         brand: string, note: string
     ) => Promise<void>; //for asynch?
     name: string | null;
+    docSnapshot: DocumentSnapshot | null;
+
   }) => {
+
+  const [placeholders, setPlaceholders] = useState({
+    name: "Enter clothing name",
+    size: "Select size",
+    color: "Choose color",
+    clothingType: "Specify type",
+    brand: "Enter brand",
+    note: "Add a note",
+    wearCount: 0,
+  });
+
+  useEffect(() => {
+    //assign placeholder values ?
+    if (docSnapshot && docSnapshot.exists()) {
+      const data = docSnapshot.data();
+      // Assign values with placeholders
+      const placeholder_name = data.name || "Enter clothing name";
+      const placeholder_size = data.size || "Select size";
+      const placeholder_color = data.color || "Choose color";
+      const placeholder_clothingType = data.clothingType || "Specify type";
+      const placeholder_brand = data.brand || "Enter brand";
+      const placeholder_note = data.note || "Add a note";
+      const placeholder_wearCount = data.wearCount ?? 0; // Default to 0 if missing
+    
+      console.log("Extracted Values:", { placeholder_name, placeholder_size, placeholder_color, placeholder_clothingType, placeholder_brand, placeholder_note, placeholder_wearCount });
+
+      setPlaceholders({
+        name: placeholder_name,
+        size: placeholder_size,
+        color: placeholder_color,
+        clothingType: placeholder_clothingType,
+        brand: placeholder_brand,
+        note: placeholder_note,
+        wearCount: placeholder_wearCount,
+      });
+    }
+  }, [docSnapshot]); // Re-run effect when docSnapshot changes
+
   const [openSize, setOpenSize] = useState(false);
   const [size, setSize] = useState(null);
   const [sizes] = useState([
@@ -60,8 +101,9 @@ const clothingDataDropdowns = ({
   const [brand, setBrand] = useState('');
   const [note, setNote] = useState('');
   const [newName, setNewName] = useState(name || '')
+
   // FlatList data
-const data = [
+  const data = [
     {
       key: 'name',
       label: 'Name:',
@@ -69,7 +111,7 @@ const data = [
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder={name || 'Enter your name'}
+          placeholder={placeholders.name}
           value={newName}
           onChangeText={setNewName}
         />
@@ -85,9 +127,9 @@ const data = [
           items={sizes}
           setOpen={setOpenSize}
           setValue={setSize}
-          placeholder="Select a size"
+          placeholder={placeholders.size}
           style={styles.dropdown}
-          zIndex={3}
+          zIndex={3000}
         />
       ),
     },
@@ -101,9 +143,9 @@ const data = [
           items={colors}
           setOpen={setOpenColor}
           setValue={setColor}
-          placeholder="Select a color"
+          placeholder={placeholders.color}
           style={styles.dropdown}
-          zIndex={2}
+          zIndex={2000}
         />
       ),
     },
@@ -117,9 +159,9 @@ const data = [
           items={clothingTypes}
           setOpen={setOpenType}
           setValue={setClothingType}
-          placeholder="Select clothing type"
+          placeholder={placeholders.clothingType}
           style={styles.dropdown}
-          zIndex={1}
+          zIndex={1000}
         />
       ),
     },
@@ -130,7 +172,7 @@ const data = [
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder="Enter brand"
+          placeholder={placeholders.brand}
           value={brand}
           onChangeText={setBrand}
         />
@@ -143,7 +185,7 @@ const data = [
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder="Enter notes"
+          placeholder={placeholders.note}
           value={note}
           onChangeText={setNote}
           multiline={true}
@@ -159,20 +201,22 @@ const data = [
   ];
 
 
-    return (
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <View style={styles.dropdownContainer}>
-            {item.label && <Text style={styles.label}>{item.label}</Text>}
-            {item.dropdown}
-          </View>
-        )}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={styles.container}
-      />
-    );
-  };
+  return (
+    <FlatList
+      nestedScrollEnabled={true}
+
+      data={data}
+      renderItem={({ item }) => (
+        <View style={styles.dropdownContainer}>
+          {item.label && <Text style={styles.label}>{item.label}</Text>}
+          {item.dropdown}
+        </View>
+      )}
+      keyExtractor={(item) => item.key}
+      contentContainerStyle={styles.container}
+    />
+  ); 
+};
 
   const styles = StyleSheet.create({
     container: {
