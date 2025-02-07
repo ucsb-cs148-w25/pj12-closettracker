@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { auth } from '@/FirebaseConfig';
+import { useGoogleAuth } from '@/authService';
 
 export default function Index() {
+  const { handleSignIn } = useGoogleAuth();
   const router = useRouter();
 
   useEffect (() => {
@@ -23,6 +25,7 @@ export default function Index() {
       {/* Navigation Buttons */}
       <Button title="Login" onPress={() => router.push('./(login)/login')} />
       <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
+      <Button title="Google Sign In" onPress={handleSignIn} />
     </View>
   );
 }

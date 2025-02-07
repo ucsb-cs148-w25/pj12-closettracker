@@ -2,6 +2,10 @@
 FirebaseConfig.ts
 supabase.ts
 removebg.ts
+authService.ts
+
+android/
+ios/
 
 # dependencies
 node_modules/
