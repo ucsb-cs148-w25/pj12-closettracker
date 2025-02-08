@@ -1,11 +1,11 @@
-import { View, Text, TextInput, ActivityIndicator, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ActivityIndicator, TouchableHighlight, StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import beigeColors from '../aesthetic/beigeColors';
+import beigeColors from '@/aesthetic/beigeColors';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -62,9 +62,9 @@ export default function Login() {
                 {loading ? (
                     <ActivityIndicator size="large" color={beigeColors.mutedGold} />
                 ) : (
-                    <View style={styles.button}>
-                        <Text style={styles.buttonText} onPress={signIn}>Login</Text>
-                    </View>
+                    <TouchableHighlight style={styles.button} onPress={signIn}>
+                        <Text style={styles.buttonText}>Login</Text>
+                    </TouchableHighlight>
                 )}
             </ScrollView>
         </SafeAreaView>

@@ -1,7 +1,7 @@
 
 
 import { StyleSheet } from 'react-native';
-import beigeColors from '../aesthetic/beigeColors';
+import beigeColors from './beigeColors';
 
 export default StyleSheet.create({
     container: {

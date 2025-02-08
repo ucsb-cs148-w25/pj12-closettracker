@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ActivityIndicator, Button, StyleSheet } from 'react-native';
+import { Text, TextInput, ActivityIndicator, TouchableHighlight, StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,7 +6,7 @@ import { auth, db } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { doc, setDoc } from 'firebase/firestore';
-import beigeColors from '../aesthetic/beigeColors';
+import beigeColors from '@/aesthetic/beigeColors';
 
 export default function Signup() {
     const [email, setEmail] = useState('');
@@ -75,9 +75,9 @@ export default function Signup() {
                 {loading ? (
                     <ActivityIndicator size="large" color={beigeColors.mutedGold} />
                 ) : (
-                    <View style={styles.button}>
-                        <Text style={styles.buttonText} onPress={signUp}>Create Account</Text>
-                    </View>
+                    <TouchableHighlight style={styles.button} onPress={signUp}>
+                        <Text style={styles.buttonText}>Create Account</Text>
+                    </TouchableHighlight>
                 )}
             </ScrollView>
         </SafeAreaView>
