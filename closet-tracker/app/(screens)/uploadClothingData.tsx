@@ -152,7 +152,7 @@ const uploadClothingData = () => {
             <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
       )}
       <Text style={{color:'black', fontSize:20}}> {name} </Text> 
-      {clothingDataDropdowns({handleSubmit, name, docSnapshot})}
+      {clothingDataDropdowns({handleSubmit, docSnapshot})}
     </View>
 
     </SafeAreaProvider>
