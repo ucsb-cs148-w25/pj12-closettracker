@@ -56,6 +56,7 @@ export default function Index() {
         <>
           <Text style={styles.title}>Welcome, {userName || user.email}!</Text>
           <Button title="Log Out" onPress={handleSignOut} />
+          <Button title="canvas" onPress={() => router.push('../(screens)/canvas')} />
         </>
       ) : (
         <>
