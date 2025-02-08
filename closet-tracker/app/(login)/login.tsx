@@ -5,14 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
+import beigeColors from '../aesthetic/beigeColors';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [user, setUser] = useState<any>(null);
-        
-    useEffect (() => {
+
+    useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 router.replace('../(tabs)/wardrobe');
@@ -27,7 +27,6 @@ export default function Login() {
         setLoading(true);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            setUser(userCredential.user);
             router.replace('../(tabs)/wardrobe');
         } catch (error: any) {
             alert('Sign in failed: ' + error.message);
@@ -44,6 +43,7 @@ export default function Login() {
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
+                    placeholderTextColor="#FFFFFF"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -53,15 +53,18 @@ export default function Login() {
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
+                    placeholderTextColor="#FFFFFF"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
 
                 {loading ? (
-                    <ActivityIndicator size="large" color="#007BFF" />
+                    <ActivityIndicator size="large" color={beigeColors.mutedGold} />
                 ) : (
-                    <Button title="Login" onPress={signIn} />
+                    <View style={styles.button}>
+                        <Text style={styles.buttonText} onPress={signIn}>Login</Text>
+                    </View>
                 )}
             </ScrollView>
         </SafeAreaView>
@@ -71,7 +74,7 @@ export default function Login() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: beigeColors.beige, // Beige background
         paddingHorizontal: 20,
     },
     scrollContainer: {
@@ -84,15 +87,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
+        color: '#FFFFFF', // White text for contrast
     },
     input: {
         width: '100%',
         padding: 12,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: beigeColors.taupe, // Darker brown border
         borderRadius: 8,
         marginBottom: 15,
         fontSize: 16,
         textAlign: 'center',
+        backgroundColor: beigeColors.softBrown, // Dark brown input fields
+        color: '#FFFFFF', // White text inside input fields
+    },
+    button: {
+        backgroundColor: beigeColors.taupe, // Dark brownish-grey button
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        width: '100%',
+        marginTop: 10,
+    },
+    buttonText: {
+        color: '#FFFFFF', // White button text
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
