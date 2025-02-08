@@ -1,4 +1,4 @@
-// src/styles/styles.js
+
 
 import { StyleSheet } from 'react-native';
 import beigeColors from '../aesthetic/beigeColors';

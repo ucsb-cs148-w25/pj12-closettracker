@@ -74,7 +74,7 @@ export default function Login() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: beigeColors.beige, // Beige background
+        backgroundColor: beigeColors.beige,
         paddingHorizontal: 20,
     },
     scrollContainer: {
@@ -87,22 +87,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
-        color: '#FFFFFF', // White text for contrast
+        color: '#FFFFFF',
     },
     input: {
         width: '100%',
         padding: 12,
         borderWidth: 1,
-        borderColor: beigeColors.taupe, // Darker brown border
+        borderColor: beigeColors.taupe,
         borderRadius: 8,
         marginBottom: 15,
         fontSize: 16,
         textAlign: 'center',
-        backgroundColor: beigeColors.softBrown, // Dark brown input fields
-        color: '#FFFFFF', // White text inside input fields
+        backgroundColor: beigeColors.softBrown,
+        color: '#FFFFFF',
     },
     button: {
-        backgroundColor: beigeColors.taupe, // Dark brownish-grey button
+        backgroundColor: beigeColors.taupe,
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     buttonText: {
-        color: '#FFFFFF', // White button text
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: 'bold',
     },
