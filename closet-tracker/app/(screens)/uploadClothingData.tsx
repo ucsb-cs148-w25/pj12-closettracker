@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, Button, View, ActivityIndicator, Image } from 'react-native';
 import {SafeAreaProvider } from 'react-native-safe-area-context';
-import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore"; 
+import { doc, updateDoc, getDoc, getFirestore, serverTimestamp } from "firebase/firestore"; 
 import { auth } from '@/FirebaseConfig';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import clothingDataDropdowns from '@/components/UploadClothingComponents';
@@ -136,6 +136,7 @@ const uploadClothingData = () => {
         brand: brand,
         note: note,
         wearCount: 0,
+        dateUploaded: serverTimestamp()
       });
       
       //go back to wardrobe
