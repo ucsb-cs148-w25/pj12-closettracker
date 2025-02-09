@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet } from "react-native";
+import { Image, StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,6 +22,7 @@ function clamp(val: number, min: number, max: number) {
 
 export default function DraggableResizableImage({ uri }: { uri: string }) {
   const [imageSize, setImageSize] = useState({ width: 100, height: 100 }); // Default size to avoid undefined
+  const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
 
   useEffect(() => {
     if (uri) {
@@ -70,14 +71,14 @@ export default function DraggableResizableImage({ uri }: { uri: string }) {
       { translateY: translationY.value },
       { scale: scale.value },
     ],
-    width: imageSize.width,
-    height: imageSize.height,
+    width: ScreenWidth,
+    height: ScreenWidth * (imageSize.height / imageSize.width),
   }));
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <GestureDetector gesture={Gesture.Simultaneous(dragGesture, pinchGesture)}>
-        <Animated.View style={[animatedStyle, styles.imageContainer]}>
+        <Animated.View style={animatedStyle}>
           <Image
             source={{ uri }}
             style={styles.image}
@@ -94,9 +95,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  imageContainer: {
-    backgroundColor: "black",
   },
   image: {
     width: "100%",

@@ -6,7 +6,6 @@ import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/f
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TextInput } from 'react-native-gesture-handler';
-import { Colors } from '@/constants/Colors';
 
 type ItemType = {
   id: string;
@@ -118,6 +117,11 @@ export default function WardrobeScreen() {
     }
   };
 
+  const handleAddOutfit = () => {
+    if (selectedIds.length === 0) return;
+    router.push(`../(screens)/canvas?item=${JSON.stringify(selectedIds)}`);
+  }
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   }
@@ -150,6 +154,10 @@ export default function WardrobeScreen() {
             <View style={styles.iconContainer}>
               <Pressable onPress={handleCancelSelection}>
                 <IconSymbol name="xmark.app" color="gray" size={28} />
+              </Pressable>
+
+              <Pressable onPress={handleAddOutfit}>
+                <IconSymbol name="pencil.and.list.clipboard" color="green" size={28} />
               </Pressable>
 
               <View style={styles.deleteIconWrapper}>
