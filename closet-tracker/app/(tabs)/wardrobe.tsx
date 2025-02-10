@@ -2,7 +2,7 @@ import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, Re
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TextInput } from 'react-native-gesture-handler';
@@ -46,7 +46,9 @@ export default function WardrobeScreen() {
   const fetchItems = useCallback(() => {
     if (user) {
       const itemsRef = collection(db, "users", user.uid, "clothing");
-      const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
+      const q = query(itemsRef, orderBy("dateUploaded", "desc"));
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedItems = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
