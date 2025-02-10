@@ -253,8 +253,8 @@ export default function WardrobeScreen() {
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={handleLaundrySelected}>
-            <IconSymbol name={"archivebox.fill"} color={"#4160fb"} />        
-          </TouchableOpacity>
+          <IconSymbol name={"archivebox.fill"} color={"#4160fb"} />        
+        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
   );
