@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Button,
-} from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Button } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '@/FirebaseConfig';
@@ -32,6 +22,7 @@ export default function UserProfile() {
   const [image, setImage] = useState<string | null>(null);
   const [editedImage, setEditedImage] = useState<string | null>(null);
   const [description, setDescription] = useState('');
+  const [originalDescription, setOriginalDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [stats, setStats] = useState<Stat[]>([
     { label: 'Number of Clothes', value: 0, type: 'text' },
@@ -69,7 +60,7 @@ export default function UserProfile() {
               label: 'Most Worn Item',
               value:
                 wardrobeItems.length > 0
-                  ? (wardrobeItems[0] as any).image // TODO: need wearCount metadata. or update this stat accordingly
+                  ? (wardrobeItems[0] as any).image // TODO: need wearCount metadata or update this stat accordingly
                   : null,
               type: 'image',
             },
@@ -162,7 +153,9 @@ export default function UserProfile() {
     }
   };
 
+  // if press cancel, revert back to original description and pfp
   const handleCancelEdit = () => {
+    setDescription(originalDescription);
     setEditedImage(null);
     setIsEditing(false);
   };
@@ -252,8 +245,10 @@ export default function UserProfile() {
           ) : (
             <Button
               title="Edit Profile"
+              // saving current pfp and description in case user cancels
               onPress={() => {
                 setEditedImage(image);
+                setOriginalDescription(description);
                 setIsEditing(true);
               }}
             />
@@ -274,7 +269,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20, // Ensure extra space at the bottom so the logout button is accessible
+    paddingBottom: 20,
   },
   title: {
     fontSize: 24,
