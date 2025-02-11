@@ -135,6 +135,7 @@ const uploadClothingData = () => {
         brand: brand,
         note: note,
         wearCount: 0,
+        dateUploaded: serverTimestamp()
       });
       
       //go back to wardrobe
