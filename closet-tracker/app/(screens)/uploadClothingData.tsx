@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, Button, View, ActivityIndicator, Image } from 'react-native';
 import {SafeAreaProvider } from 'react-native-safe-area-context';
-import { doc, updateDoc, getDoc, getFirestore, serverTimestamp } from "firebase/firestore"; 
+
+import { doc, updateDoc, getDoc, getFirestore, DocumentSnapshot, serverTimestamp } from "firebase/firestore"; 
 import { auth } from '@/FirebaseConfig';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import clothingDataDropdowns from '@/components/UploadClothingComponents';
@@ -25,11 +26,12 @@ const uploadClothingData = () => {
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  const { item_id } = useLocalSearchParams(); // Get query params
+  let { item_id } = useLocalSearchParams(); // Get query params
+
   const router = useRouter();
   const db = getFirestore();
   const user = auth.currentUser;
-
+  const [docSnapshot, setDocSnapshot] = useState<DocumentSnapshot | null>(null);
 
   useEffect(() => {
     const fetchItemData = async () => {
@@ -50,6 +52,7 @@ const uploadClothingData = () => {
         const itemDoc = await getDoc(docRef);
         if (itemDoc.exists()) {
           console.log("Document data:", itemDoc.data());
+          setDocSnapshot(itemDoc)
         } else {
           console.log("No such document!");
         }
@@ -59,18 +62,6 @@ const uploadClothingData = () => {
         const imageUrl = itemData?.image;
         const dataName = itemData?.itemName;
         if (imageUrl) {
-        //   // Fetch image from Supabase Storage
-        //   const { data, error } = await supabase
-        //     .storage
-        //     .from('closetImages')
-        //     .download(imageUrl);
-          
-        //   if (error) {
-        //     setError('Error fetching image from Supabase');
-        //     setLoading(false);
-        //     return;
-        //   }
-        //   const uri = URL.createObjectURL(data); // Directly use `data`, which is a Blob
           setImageUri(imageUrl); 
         } 
         else {
@@ -120,12 +111,14 @@ const uploadClothingData = () => {
       const userid = user.uid
       const docRef = doc(db, "users", userid, "clothing", String(item_id))
       
-      const docSnapshot = await getDoc(docRef);
-      if (docSnapshot.exists()) {
-        console.log("Document data:", docSnapshot.data());
-      } else {
-        console.log("No such document!");
-      }
+      // const snapshot = await getDoc(docRef);
+      // if (snapshot.exists()) {
+      //   console.log("Document data:", snapshot.data());
+      //   setDocSnapshot(snapshot); // ✅ Update state when the document is fetched
+      // } else {
+      //   console.log("No such document!");
+      //   // setDocSnapshot();
+      // }
 
       // Step 2: Set a new document (or update if it exists)
       await updateDoc(docRef, {
@@ -147,10 +140,11 @@ const uploadClothingData = () => {
     }
 };
 
-//   if (loading) { return <ActivityIndicator  style={styles.container} size="large" color="black" />; }
-//   if (error)   { return <View style={styles.container}>
-//                             {error && ( <Text style={styles.errorContainer}>{error}</Text> )}
-//                         </View>}
+  // BUG causes hooking error 
+  // if (loading) { return <ActivityIndicator  style={styles.container} size="large" color="black" />; }
+  // if (error)   { return <View style={styles.container}>
+  //                           {error && ( <Text style={styles.errorContainer}>{error}</Text> )}
+  //                       </View>}
 
   return (
     <SafeAreaProvider>
@@ -160,7 +154,7 @@ const uploadClothingData = () => {
             <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
       )}
       <Text style={{color:'black', fontSize:20}}> {name} </Text> 
-      {clothingDataDropdowns({handleSubmit, name})}
+      {clothingDataDropdowns({handleSubmit, docSnapshot})}
     </View>
 
     </SafeAreaProvider>

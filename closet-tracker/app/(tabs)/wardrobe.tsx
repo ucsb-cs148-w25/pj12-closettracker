@@ -120,6 +120,12 @@ export default function WardrobeScreen() {
     }
   };
 
+  const handleEdit = () => {
+    if (!user || selectedIds.length !== 1) return;
+    router.push(`../(screens)/uploadClothingData?item_id=${selectedIds[0]}`);
+  };
+
+
   const handleLaundrySelected = async () => {
     if (!user || selectedIds.length === 0) 
       router.push("../(screens)/laundry"); // Exit if no user or no items selected
@@ -155,7 +161,6 @@ export default function WardrobeScreen() {
     }
   };
 
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   }
@@ -189,6 +194,12 @@ export default function WardrobeScreen() {
               <Pressable onPress={handleCancelSelection}>
                 <IconSymbol name="xmark.app" color="gray" size={28} />
               </Pressable>
+
+              { selectedIds.length === 1 ? (
+                <Pressable onPress={handleEdit}>
+                  <IconSymbol name="pencil" color="gray" size={28} />
+                </Pressable>
+              ) : null }
 
               <View style={styles.deleteIconWrapper}>
                 <Pressable onPress={handleDeleteSelected}>
