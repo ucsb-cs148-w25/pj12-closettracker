@@ -2,7 +2,7 @@ import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, Re
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { TextInput } from 'react-native-gesture-handler';
@@ -46,7 +46,9 @@ export default function WardrobeScreen() {
   const fetchItems = useCallback(() => {
     if (user) {
       const itemsRef = collection(db, "users", user.uid, "clothing");
-      const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
+      const q = query(itemsRef, orderBy("dateUploaded", "desc"));
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedItems = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -121,6 +123,42 @@ export default function WardrobeScreen() {
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
     router.push(`../(screens)/uploadClothingData?item_id=${selectedIds[0]}`);
+  };
+
+
+  const handleLaundrySelected = async () => {
+    if (!user || selectedIds.length === 0) 
+      router.push("../(screens)/laundry"); // Exit if no user or no items selected
+  
+    try {
+      handleCancelSelection(); // Exit selection mode
+  
+      // Move items from "wardrobe" to "laundry"
+      const promises = selectedIds.map(async (id) => {
+        const wardrobeRef = doc(db, "users", user.uid, "clothing", id); // Reference to wardrobe item
+        const laundryRef = doc(db, "users", user.uid, "laundry", id);  // Reference to laundry item
+  
+        // Fetch wardrobe item data
+        const itemSnapshot = await getDoc(wardrobeRef);
+        if (itemSnapshot.exists()) {
+          console.log("Moving item:", itemSnapshot.data());
+          // Move the item to the laundry collection
+          await setDoc(laundryRef, itemSnapshot.data());
+          // Remove the item from the wardrobe collection
+          await deleteDoc(wardrobeRef);
+        } else{
+          console.log(`Item with ID ${id} does not exist in wardrobe.`);
+        }
+      });
+  
+      // Wait for all items to be moved
+      await Promise.all(promises);
+  
+      // Navigate to the laundry screen after moving items
+      router.push("../(screens)/laundry");
+    } catch (error) {
+      console.error("Error moving items:", error);
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -227,8 +265,8 @@ export default function WardrobeScreen() {
         )}
         <TouchableOpacity
           style={styles.laundryButton}
-          onPress={() => router.replace(`../(screens)/laundry`)}>
-            <IconSymbol name={"archivebox.fill"} color={Colors[colorScheme ?? 'light'].tabIconSelected} />
+          onPress={handleLaundrySelected}>
+          <IconSymbol name={"archivebox.fill"} color={"#4160fb"} />        
         </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
