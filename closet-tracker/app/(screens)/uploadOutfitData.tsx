@@ -52,11 +52,19 @@ const uploadOutfitData = () => {
         // Extract the image_url from the document data
         const itemData = itemDoc.data();
         const imageUrl = itemData?.image;
+        const name = itemData?.name;
         if (imageUrl) {
           setImageUri(imageUrl); 
         } 
         else {
           setError('No image URL found');
+        }
+
+        if (name) {
+          setName(name);
+        }
+        else {
+          setError('No name found');
         }
       } catch (err) {
         setError('Error fetching item data');
@@ -76,10 +84,6 @@ const uploadOutfitData = () => {
       alert("Please sign in before uploading your clothes.");
       return;
     }
-    if (!name) {
-      alert("Please enter a name for the outfit item.");
-      return;
-    }
     
     try {
       // Step 1: Get the current document (if you need to use the data)
@@ -97,7 +101,6 @@ const uploadOutfitData = () => {
       await updateDoc(docRef, {
         name: name,
         note: note,
-
       });
       
       //go back to wardrobe
@@ -114,7 +117,7 @@ const uploadOutfitData = () => {
         <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
       )}
       <Text style={{color:'black', fontSize:20}}> {name} </Text> 
-      {outfitDataDropdowns({handleSubmit})}
+      {outfitDataDropdowns({handleSubmit, name})}
     </SafeAreaView>
     
   );

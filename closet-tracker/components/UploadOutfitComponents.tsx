@@ -4,14 +4,16 @@ import { FlatList, Text, StyleSheet, TextInput, Button, View } from 'react-nativ
 
 export default function outfitDataDropdowns ({
     handleSubmit,
+    name
   }: {
     handleSubmit: (
         name: string | null,
         note: string
-    ) => Promise<void>; //for asynch?
+    ) => Promise<void>,
+    name: string | null
   }) {
   const [note, setNote] = useState('');
-  const [newName, setNewName] = useState('')
+  const [newName, setNewName] = useState(name || '');
   // FlatList data
 const data = [
     {
@@ -21,7 +23,7 @@ const data = [
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder={'Enter your name'}
+          placeholder={name || 'Enter outfit name'}
           value={newName}
           onChangeText={setNewName}
         />
