@@ -52,7 +52,9 @@
     "react-native-screens": "~4.4.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "supabase": "^2.9.6"
+    "supabase": "^2.9.6",
+    "react-native-view-shot": "~4.0.3",
+    "expo-media-library": "~17.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

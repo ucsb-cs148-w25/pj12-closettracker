@@ -1,17 +1,101 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { SafeAreaView, View, StyleSheet, Text, Image } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import { SafeAreaView, View, StyleSheet, Text, Image, Button } from "react-native";
 import DraggableResizableImage from "@/components/DraggableResizableImage";
 import { useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getFirestore, addDoc } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist";
-import { SharedValue } from "react-native-reanimated";
+import ViewShot, { captureRef } from "react-native-view-shot";
+import supabase from '@/supabase';
+import { decode } from 'base64-arraybuffer';
+import { useRouter } from 'expo-router';
 
 export default function CanvasScreen() {
   const param = useLocalSearchParams();
   const itemIds = JSON.parse(Array.isArray(param.item) ? param.item[0] : param.item);
   const [itemUri, setItemUri] = useState<{ id: string; uri: string; name: string }[]>([]);
+
+  const router = useRouter();
+  const viewRef = useRef<ViewShot>(null);
+
+  const takeScreenshot = async () => {
+    try {
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.8,
+        result: 'base64',
+      });
+      await handleSubmit(uri);
+
+    } catch (error) {
+      console.error('Failed to capture screenshot:', error);
+    }
+  };
+
+  const handleSubmit = async (outfitImageUri : string) => {
+    if (!outfitImageUri) {
+      alert("Error: no screenshots taken.");
+      return;
+    }
+    else if(!itemUri || itemUri.length === 0) {
+      alert("Error: no items to upload.");
+      return;
+    }
+  
+    try {  
+      // extract base64 data from image URI
+      const base64 = outfitImageUri;
+      const arrayBuffer = decode(base64); // converting base64 to ArrayBuffer
+      // console.log("Base64 data:", base64);
+
+      const fileName = `image_${Date.now()}.jpg`;
+      const filePath = `user_${getAuth().currentUser?.uid}/${fileName}`;
+  
+      // uploading to supabase
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('closetImages')
+        .upload(filePath, arrayBuffer, {
+        contentType: 'image/jpeg',
+      });  
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw uploadError;
+      }
+  
+      // retrieve pub url of uploaded image
+      const { data: urlData } = supabase.storage
+        .from('closetImages')
+        .getPublicUrl(filePath);
+  
+      const imageUrl = urlData.publicUrl;
+      console.log("Public URL:", imageUrl);
+  
+      // store in firestore
+      const auth = getAuth();
+      const db = getFirestore();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        alert("Please sign in before uploading your outfits.");
+        return;
+      }
+  
+      const docRef = await addDoc(collection(db, "users", user.uid, "outfit"), {
+        image: imageUrl,
+        clothingIds: itemUri.map((item) => item.id),
+      });
+  
+      alert("Item uploaded successfully!");
+      
+      console.log(docRef.id)
+      router.push(`../(screens)/uploadOutfitData?item_id=${docRef.id}`);
+
+    } catch (error) {
+      console.error("Error uploading item: ", error);
+      alert("Failed to upload item.");
+    }
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -59,11 +143,13 @@ export default function CanvasScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Canvas with clothing items */}
-      <View style={styles.canvas}>
-        {itemUri.map(({ id, uri }) => (
-          <DraggableResizableImage key={id} uri={uri}/>
-        ))}
-      </View>
+      <ViewShot style={styles.canvas} ref={viewRef} options={{ format: 'png', quality: 0.9 }}>
+        <View>
+          {itemUri.map(({ id, uri }) => (
+            <DraggableResizableImage key={id} uri={uri}/>
+          ))}
+        </View>
+      </ViewShot>
 
       {/* Draggable Layer List (Horizontal) */}
       <View style={styles.layerContainer}>
@@ -76,6 +162,7 @@ export default function CanvasScreen() {
           renderItem={renderItem}
           contentContainerStyle={{ paddingHorizontal: 10 }}
         />
+        <Button title="Take Screenshot" onPress={takeScreenshot} />
       </View>
     </SafeAreaView>
   );
@@ -91,7 +178,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   layerContainer: {
-    height: 120, // Reduced height for better UX
+    height: 150, // Reduced height for better UX
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderColor: "#ddd",
@@ -101,7 +188,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   layerItem: {
     flexDirection: "column",
