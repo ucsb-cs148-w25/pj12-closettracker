@@ -34,6 +34,13 @@ export default function TabLayout() {
         }}
        />
       <Tabs.Screen
+        name="outfit"
+        options={{
+          title: 'Outfits',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="hanger" color={color} />,
+        }}
+       />
+      <Tabs.Screen
         name="upload"
         options={{
           title: 'Upload',

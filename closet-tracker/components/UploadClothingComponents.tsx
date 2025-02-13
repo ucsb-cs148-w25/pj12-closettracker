@@ -4,11 +4,11 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { DocumentSnapshot } from "firebase/firestore"; 
 
 const clothingDataDropdowns = ({
-    handleSubmit,
+    handleClothingSubmit,
     docSnapshot,
   }: {
-    handleSubmit: (
-        name: string | null,
+    handleClothingSubmit: (
+        itemName: string | null,
         size: string | null,
         color: string | null, 
         clothingType: string | null, 
@@ -19,12 +19,12 @@ const clothingDataDropdowns = ({
   }) => {
 
   const [placeholders, setPlaceholders] = useState({
-    name: null,
+    itemName: "",
     size: null,
     color: null,
     clothingType: null,
-    brand: null,
-    note: null,
+    brand: "",
+    note: "",
     wearCount: 0,
   });
 
@@ -33,7 +33,7 @@ const clothingDataDropdowns = ({
     if (docSnapshot && docSnapshot.exists()) {
       const data = docSnapshot.data();
       // Assign values with placeholders
-      const placeholder_name = data.name || "";
+      const placeholder_name = data.itemName || "";
       const placeholder_size = data.size || null;
       const placeholder_color = data.color || null;
       const placeholder_clothingType = data.clothingType || null;
@@ -44,7 +44,7 @@ const clothingDataDropdowns = ({
       console.log("Extracted Values:", { placeholder_name, placeholder_size, placeholder_color, placeholder_clothingType, placeholder_brand, placeholder_note, placeholder_wearCount });
 
       setPlaceholders({
-        name: placeholder_name,
+        itemName: placeholder_name,
         size: placeholder_size,
         color: placeholder_color,
         clothingType: placeholder_clothingType,
@@ -96,7 +96,7 @@ const clothingDataDropdowns = ({
 
   const [brand, setBrand] = useState(placeholders.brand);
   const [note, setNote] = useState(placeholders.note);
-  const [newName, setNewName] = useState(placeholders.name)
+  const [newName, setNewName] = useState(placeholders.itemName)
   const [size, setSize] = useState(placeholders.size);
   const [clothingType, setClothingType] = useState(placeholders.clothingType);
   const [color, setColor] = useState(placeholders.color);
@@ -104,26 +104,22 @@ const clothingDataDropdowns = ({
   useEffect(() => {
     setBrand(placeholders.brand);
     setNote(placeholders.note);
-    setNewName(placeholders.name);
+    setNewName(placeholders.itemName);
     setSize(placeholders.size);
     setClothingType(placeholders.clothingType);
     setColor(placeholders.color);
   }, [placeholders]);
 
-  useEffect(() => {
-    console.log('brand ', brand,'note ', note, 'size ', size, 'color ',  color, 'name ', newName, 'type ', clothingType);
-  }, [brand, note, size, color, newName, clothingType]);
-
   // FlatList data
   const data = [
     {
-      key: 'name',
+      key: 'itemName',
       label: 'Name:',
       dropdown: (
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder={placeholders.name || "Set name"}
+          placeholder={placeholders.itemName || "Set name"}
           value={newName }
           onChangeText={setNewName}
         />
@@ -207,7 +203,7 @@ const clothingDataDropdowns = ({
     {
       key: 'submit',
       dropdown: (
-        <Button title="Submit" onPress={() => handleSubmit(newName, size, color, clothingType, brand, note)} />
+        <Button title="Submit" onPress={() => handleClothingSubmit(newName, size, color, clothingType, brand, note)} />
       ),
     },
   ];
