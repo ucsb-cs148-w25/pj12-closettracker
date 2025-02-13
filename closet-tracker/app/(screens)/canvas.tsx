@@ -13,7 +13,7 @@ import { decode } from 'base64-arraybuffer';
 export default function CanvasScreen() {
   const param = useLocalSearchParams();
   const itemIds = JSON.parse(Array.isArray(param.item) ? param.item[0] : param.item);
-  const [itemUri, setItemUri] = useState<{ id: string; uri: string; name: string }[]>([]);
+  const [itemUri, setItemUri] = useState<{ id: string; uri: string; itemName: string }[]>([]);
   const [outfitName, setOutfitName] = useState(""); // Outfit name input state
 
   const router = useRouter();
@@ -74,13 +74,13 @@ export default function CanvasScreen() {
       }
 
       const docRef = await addDoc(collection(db, "users", user.uid, "outfit"), {
-        name: outfitName.trim(),
+        itemName: outfitName.trim(),
         image: imageUrl,
         clothingIds: itemUri.map((item) => item.id),
       });
 
       alert("Outfit uploaded successfully!");
-      router.push(`../(screens)/uploadOutfitData?item_id=${docRef.id}`);
+      router.push(`../(screens)/editItem?item_id=${docRef.id}&collections=outfit`);
     } catch (error) {
       console.error("Error uploading outfit: ", error);
       alert("Failed to upload outfit.");
@@ -107,7 +107,7 @@ export default function CanvasScreen() {
         const fetchedImages = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           uri: doc.data().image,
-          name: doc.data().itemName,
+          itemName: doc.data().itemName,
         }));
 
         setItemUri(fetchedImages);
@@ -119,11 +119,11 @@ export default function CanvasScreen() {
     fetchItems();
   }, []);
 
-  const renderItem = (params: RenderItemParams<{ id: string; uri: string; name: string }>) => (
+  const renderItem = (params: RenderItemParams<{ id: string; uri: string; itemName: string }>) => (
     <ScaleDecorator>
       <View style={styles.layerItem} onTouchStart={params.drag}>
         <Image source={{ uri: params.item.uri }} style={styles.layerImage} />
-        <Text style={styles.layerText}>{params.item.name}</Text>
+        <Text style={styles.layerText}>{params.item.itemName}</Text>
       </View>
     </ScaleDecorator>
   );
