@@ -77,7 +77,7 @@ export default function UploadScreen() {
       setItemName("");
       
       console.log(docRef.id)
-      router.push(`../(screens)/uploadClothingData?item_id=${docRef.id}`);
+      router.push(`../(screens)/editItem?item_id=${docRef.id}&collections=clothing`);
 
     } catch (error) {
       console.error("Error uploading item: ", error);
