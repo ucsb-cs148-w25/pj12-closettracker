@@ -9,3 +9,6 @@ I used ChatGPT to assist in writing documentation for our MVP follow-up. More sp
 
 ## Andrew
 I used AI tools like ChatGPT and GitHub Copilot to refine my React Native pages and components, optimize performance, and debug errors. ChatGPT helped me understand issues and improve structure, while Copilot provided code suggestions and fixes. By leveraging AI, I streamlined development, overcame challenges, and enhanced my closet tracker app efficiently.
+
+## Victor 
+I use AI tools like ChatGPT in various ways, one of which is learning new libraries quickly on the fly. While it isn't a perfect method, it is efficient. Using these models, I generate dropdown structures and implement unit testing. This allows me to produce meaningful code for the project while simultaneously learning new frameworks and technologies. I believe the benefit of these models hinges on my effort to understand the code they generate. By doing so, I use AI as a tool to accelerate my learning. However, this approach also introduces challenges, such as encountering bugs and errors that are harder to resolve due to gaps in my initial knowledge.
