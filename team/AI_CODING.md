@@ -6,3 +6,6 @@ I used Copilot and ChatGPT to generate code snippets for the frontend. Since man
 
 ## Gretchen
 I used ChatGPT to assist in writing documentation for our MVP follow-up. More specifically, I had it summarize the most salient pieces of feedback from the other teams. This was especially useful as combing through 90+ comments proved to be a bit tedious, and there were many points that I missed or overlooked. With ChatGPT, however, I was able to pinpoint exactly what people wanted to see with our application. The summarized results were pretty accurate as well and seemed to do a great job picking out the more prominent/repeated suggestions. Through using this tool, our team was then able to come up with action items for each specific critique. This helped us significantly with planning as we knew which components needed to be worked on the most. Moving forward, ChatGPT seems like a great option to understand more about people's perceptions of our application and even help generate documentation.
+
+## Andrew
+I used AI tools like ChatGPT and GitHub Copilot to refine my React Native pages and components, optimize performance, and debug errors. ChatGPT helped me understand issues and improve structure, while Copilot provided code suggestions and fixes. By leveraging AI, I streamlined development, overcame challenges, and enhanced my closet tracker app efficiently.
