@@ -7,7 +7,7 @@ jest.mock('firebase/firestore', () => ({
   DocumentSnapshot: jest.fn().mockImplementation(() => ({
     exists: jest.fn().mockReturnValue(true),
     data: jest.fn().mockReturnValue({
-      name: 'Test Shirt',
+      itemName: 'Test Shirt',
       size: 'M',
       color: 'Blue',
       clothingType: 'T-Shirt',
@@ -26,7 +26,10 @@ describe('ClothingDataDropdowns Component', () => {
 
   it('renders correctly with placeholder values from docSnapshot', () => {
     const { getByPlaceholderText } = render(
-      <ClothingDataDropdowns handleSubmit={mockHandleSubmit} docSnapshot={mockDocSnapshot} />
+      <ClothingDataDropdowns 
+        handleClothingSubmit={mockHandleSubmit} 
+        docSnapshot={mockDocSnapshot} 
+      />
     );
 
     // Test the initial placeholder values based on docSnapshot
@@ -40,7 +43,7 @@ describe('ClothingDataDropdowns Component', () => {
 
   it('handles user input and form submission correctly', async () => {
     const { getByPlaceholderText, getByText } = render(
-      <ClothingDataDropdowns handleSubmit={mockHandleSubmit} docSnapshot={mockDocSnapshot} />
+      <ClothingDataDropdowns handleClothingSubmit={mockHandleSubmit} docSnapshot={mockDocSnapshot} />
     );
 
     // Change text inputs
