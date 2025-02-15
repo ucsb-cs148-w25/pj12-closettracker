@@ -15,3 +15,6 @@ I use AI tools like ChatGPT in various ways, one of which is learning new librar
 
 ## Daisy
 I used ChatGPT to install packages or fix package version differences. It managed to fix my package issues and allow the code to run efficiently. AI is useful and will continue to be usefule in these situations since it's able to tailor a solution for my computer and the version issue I am having whereas the internet only really provides generalized troubleshooting methods. To ensure that it is correct because sometimes it doesnt give me a correct solution is to continuousely test and run it locally.
+
+## Anvitha
+I used ChatGPT to enhance my implementation of the laundry tracking feature by learning how to increment the laundry count dynamically and incorporate visual effects. Initially, I was struggling with updating state efficiently, but with ChatGPT’s guidance, I was able to refine my approach and ensure smooth updates. Additionally, I experimented with adding animations to improve the user experience, making the interactions feel more intuitive and engaging. This process not only helped me implement the functionality faster but also deepened my understanding of how React handles state updates and UI effects. Leveraging AI in this way made my development process more efficient and creative, allowing me to build a more polished and interactive feature.
