@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { auth } from '@/FirebaseConfig';
+import beigeColors from '@/aesthetic/beigeColors';
 
 export default function Index() {
   const router = useRouter();
@@ -21,8 +22,19 @@ export default function Index() {
       <Text style={styles.subtitle}>The app's tagline or description goes here.</Text>
 
       {/* Navigation Buttons */}
-      <Button title="Login" onPress={() => router.push('./(login)/login')} />
-      <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} />
+      <TouchableOpacity 
+      onPress={() => router.push('./(login)/login')} 
+      style={styles.button}
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      {/* <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} /> */}
+      <TouchableOpacity
+      onPress={() => router.push('./(login)/signup')}
+      style={styles.button}
+      >
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -33,17 +45,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: beigeColors.beige,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: beigeColors.darkBeige,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#666',
+    color: beigeColors.brown,
+  },
+  button: {
+    backgroundColor: beigeColors.taupe,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: beigeColors.darkBeige,
+    fontSize: 16,
   },
 });
