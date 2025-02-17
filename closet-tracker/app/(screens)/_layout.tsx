@@ -7,6 +7,7 @@ export default function RootLayout() {
         <Stack.Screen name="editItem" options={{ headerShown: false }} />
         <Stack.Screen name="laundry" options={{ headerShown: false }} />
         <Stack.Screen name="canvas" options={{ headerShown: false }} />
+        <Stack.Screen name="createOutfit" options={{ headerShown: false }} />
     </Stack>
   );
 }
