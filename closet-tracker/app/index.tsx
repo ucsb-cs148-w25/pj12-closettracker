@@ -23,15 +23,14 @@ export default function Index() {
 
       {/* Navigation Buttons */}
       <TouchableOpacity 
-      onPress={() => router.push('./(login)/login')} 
-      style={styles.button}
+        onPress={() => router.push('./(login)/login')} 
+        style={[styles.button, {backgroundColor: beigeColors.cream}]}
       >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-      {/* <Button title="Sign Up" onPress={() => router.push('./(login)/signup')} /> */}
       <TouchableOpacity
-      onPress={() => router.push('./(login)/signup')}
-      style={styles.button}
+        onPress={() => router.push('./(login)/signup')}
+        style={[styles.button, {backgroundColor: beigeColors.taupe}]}
       >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
@@ -45,7 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: beigeColors.beige,
+    backgroundColor: beigeColors.lightBeige,
   },
   title: {
     fontSize: 28,
@@ -60,7 +59,6 @@ const styles = StyleSheet.create({
     color: beigeColors.brown,
   },
   button: {
-    backgroundColor: beigeColors.taupe,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

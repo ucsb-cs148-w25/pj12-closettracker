@@ -74,7 +74,7 @@ export default function Login() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: beigeColors.beige,
+        backgroundColor: beigeColors.lightBeige,
         paddingHorizontal: 20,
     },
     scrollContainer: {

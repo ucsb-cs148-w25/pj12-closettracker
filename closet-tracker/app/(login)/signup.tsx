@@ -101,7 +101,7 @@ export default function Signup() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: beigeColors.beige,
+        backgroundColor: beigeColors.lightBeige,
         paddingHorizontal: 20,
     },
     scrollContainer: {
