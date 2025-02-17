@@ -228,11 +228,6 @@ export default function WardrobeScreen() {
           onPress={handleLaundrySelected}>
           <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={{position: 'absolute', bottom: 100, left: 20}}
-          onPress={() => router.push("../(screens)/createOutfit")}>
-          <Text>Create Outfit</Text>
-        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
   );
