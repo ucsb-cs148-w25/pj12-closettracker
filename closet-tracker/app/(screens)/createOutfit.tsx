@@ -12,7 +12,7 @@ import SearchBar from '@/components/searchBar';
 
 export default function createOutfit() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [selectMode, setSelectMode] = useState(false);
+    const [selectMode, setSelectMode] = useState(true);
     const router = useRouter();
     const [items, setItems] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(true);
@@ -100,6 +100,7 @@ export default function createOutfit() {
     );
 
     const renderItem = ({ item }: { item: any }) => {
+        if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
         const isSelected = selectedIds.includes(item.id);
         const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
         const textColor = isSelected ? 'white' : 'black';
@@ -150,7 +151,7 @@ export default function createOutfit() {
                     <FlatList
                         contentContainerStyle={styles.clothesContainer}
                         style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-                        data={filteredItems}
+                        data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
                         renderItem={renderItem}
                         keyExtractor={(item) => item.id}
                         extraData={selectedIds}
@@ -169,9 +170,10 @@ export default function createOutfit() {
                     />
                 )}
                 <TouchableOpacity
-                    style={{position: 'absolute', bottom: 100, right: 50}}
-                    onPress= {() => router.back()}>
-                    <Text>Go Back</Text>
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
+                    <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
                 </TouchableOpacity>
             </SafeAreaView>
         </SafeAreaProvider>
@@ -210,21 +212,17 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#666',
     },
-    laundryButton: {
+    backButton: {
+        borderWidth: 1,
+        borderColor: '#ccc',
         alignItems: 'center',
         justifyContent: 'center',
         width: 80,
         height: 80,
-        backgroundColor: '#9e9785',
+        backgroundColor: '#fff',
         borderRadius: 50,
         position: 'absolute',
         bottom: 100,
-        right: 20,
-        // shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
+        right: 20
     }
 });

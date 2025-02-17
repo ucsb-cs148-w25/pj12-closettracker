@@ -11,7 +11,7 @@ type ClothingItemProps = {
 
 export const ClothingItem = ({ item, onPress, onLongPress, backgroundColor, textColor }: ClothingItemProps) => (
   <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.item, { backgroundColor }]}> 
-    {item.image && <Image source={{ uri: item.image }} style={styles.itemImage} />} 
+    {item.image && <Image source={{ uri: item.image }} style={styles.itemImage} resizeMode='contain'/>} 
     <Text style={[styles.itemText, { color: textColor }]}>{item.itemName}</Text>
   </TouchableOpacity>
 );
@@ -19,19 +19,20 @@ export const ClothingItem = ({ item, onPress, onLongPress, backgroundColor, text
 const styles = StyleSheet.create({
   item: {
     flex: 1,
-    margin: 10,
-    padding: 10,
+    margin: 8,
+    aspectRatio: 1,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   itemImage: {
-    width: 100,
-    height: 100,
+    width: "90%",
+    height: "80%",
     borderRadius: 8,
     marginBottom: 5,
   },
   itemText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });
