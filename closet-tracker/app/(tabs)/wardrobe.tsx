@@ -439,7 +439,7 @@ export default function WardrobeScreen() {
         {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
             <Text style={styles.emptyMessage}>
-              {searchQuery ? "No items found." : "Your wardrobe is empty."}
+              {(searchQuery || filters.size || filters.color || filters.clothingType || filters.brand || filters.notes) ? "No items found." : "Your wardrobe is empty."}
             </Text>
           </View>
         ) : (
