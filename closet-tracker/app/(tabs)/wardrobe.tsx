@@ -322,6 +322,9 @@ export default function WardrobeScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Filter Options</Text>
+              <Pressable onPress={() => {setFilters({ size: null, color: null, clothingType: null, brand: '', notes: '' }); setFilterModalVisible(false);}} style={styles.exitButtonModal}>
+                <IconSymbol name="xmark.circle" color="#ccc" size={28} />
+              </Pressable>
               <Text style={styles.filterLabel}>Size</Text>
               <View style={styles.filterGroup}>
                 {['xs', 's', 'm', 'l', 'xl'].map((size) => (
@@ -656,6 +659,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+  },
+  exitButtonModal: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
   },
   clearButtonText: {
     color: '#000',
