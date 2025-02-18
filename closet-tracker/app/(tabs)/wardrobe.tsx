@@ -43,8 +43,7 @@ export default function WardrobeScreen() {
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // new state for filters
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  // active filters
   const [filters, setFilters] = useState<{
     size: string | null;
     color: string | null;
@@ -58,6 +57,10 @@ export default function WardrobeScreen() {
     brand: '',
     notes: '',
   });
+  // store original filters when opening modal
+  const [originalFilters, setOriginalFilters] = useState(filters);
+
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -188,7 +191,7 @@ export default function WardrobeScreen() {
     setSearchQuery(query);
   }
 
-  // filtering ON TOP of search
+  // filtering ON TOP of search using active filters
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.itemName
       .toLowerCase()
@@ -279,7 +282,11 @@ export default function WardrobeScreen() {
             <View style={styles.nonSelectHeader}>
               <Text style={styles.title}>Wardrobe</Text>
               <Pressable
-                onPress={() => setFilterModalVisible(true)}
+                onPress={() => {
+                  // store the current filters when opening the modal
+                  setOriginalFilters(filters);
+                  setFilterModalVisible(true);
+                }}
                 style={styles.filterIcon}
               >
                 <IconSymbol
@@ -322,7 +329,13 @@ export default function WardrobeScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Filter Options</Text>
-              <Pressable onPress={() => {setFilters({ size: null, color: null, clothingType: null, brand: '', notes: '' }); setFilterModalVisible(false);}} style={styles.exitButtonModal}>
+              <Pressable 
+                onPress={() => {
+                  setFilters(originalFilters);
+                  setFilterModalVisible(false);
+                }} 
+                style={styles.exitButtonModal}
+              >
                 <IconSymbol name="xmark.circle" color="#ccc" size={28} />
               </Pressable>
               <Text style={styles.filterLabel}>Size</Text>
@@ -369,26 +382,23 @@ export default function WardrobeScreen() {
               </View>
               <Text style={styles.filterLabel}>Clothing Type</Text>
               <View style={styles.filterGroup}>
-                {['t-shirt', 'top', 'jeans', 'trousers', 'shorts'].map(
-                  (type) => (
-                    <Pressable
-                      key={type}
-                      style={[
-                        styles.filterOption,
-                        filters.clothingType === type && styles.selectedOption,
-                      ]}
-                      onPress={() =>
-                        setFilters({
-                          ...filters,
-                          clothingType:
-                            filters.clothingType === type ? null : type,
-                        })
-                      }
-                    >
-                      <Text style={styles.filterOptionText}>{type}</Text>
-                    </Pressable>
-                  )
-                )}
+                {['t-shirt', 'top', 'jeans', 'trousers', 'shorts'].map((type) => (
+                  <Pressable
+                    key={type}
+                    style={[
+                      styles.filterOption,
+                      filters.clothingType === type && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        clothingType: filters.clothingType === type ? null : type,
+                      })
+                    }
+                  >
+                    <Text style={styles.filterOptionText}>{type}</Text>
+                  </Pressable>
+                ))}
               </View>
               <Text style={styles.filterLabel}>Brand</Text>
               <TextInput
