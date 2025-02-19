@@ -1,32 +1,20 @@
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { TextInput } from 'react-native-gesture-handler';
+//import { TextInput } from 'react-native-gesture-handler';
+import { ClothingItem } from '@/components/ClothingItem';
+import { MultiSelectActions } from '@/components/MultiSelectActions';
+import SearchBar from '@/components/searchBar';
 
-type ItemType = {
-  id: string;
-  itemName: string;
-  image: string;
-};
-
-type ItemProps = {
-  item: ItemType;
-  onPress: () => void;
-  onLongPress: () => void;
-  backgroundColor: string;
-  textColor: string;
-};
-
-const Item = ({ item, onPress, onLongPress, backgroundColor, textColor }: ItemProps) => (
-  <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.item, { backgroundColor }]}>
-    {item.image && <Image source={{ uri: item.image }} style={styles.itemImage} />}
-    <Text style={[styles.itemText, { color: textColor }]}>{item.itemName}</Text>
-  </TouchableOpacity>
-);
+// type ItemType = {
+//   id: string;
+//   itemName: string;
+//   image: string;
+// };
 
 export default function WardrobeScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -119,11 +107,6 @@ export default function WardrobeScreen() {
     }
   };
 
-  const handleAddOutfit = () => {
-    if (selectedIds.length === 0) return;
-    router.push(`../(screens)/canvas?item=${JSON.stringify(selectedIds)}`);
-  }
-    
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
     router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=clothing`);
@@ -173,12 +156,13 @@ export default function WardrobeScreen() {
   );
 
   const renderItem = ({ item }: { item: any }) => {
+    if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
     const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
     const textColor = isSelected ? 'white' : 'black';
 
     return (
-      <Item
+      <ClothingItem
         item={item}
         onPress={() => handleItemPress(item.id)}
         onLongPress={() => handleItemLongPress(item.id)}
@@ -193,54 +177,24 @@ export default function WardrobeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           {selectMode ? (
-            <View style={styles.iconContainer}>
-              <Pressable onPress={handleCancelSelection}>
-                <IconSymbol name="xmark.app" color="gray" size={28} />
-              </Pressable>
-
-              <Pressable onPress={handleAddOutfit}>
-                <IconSymbol name="pencil.and.list.clipboard" color="green" size={28} />
-              </Pressable>
-
-              { selectedIds.length === 1 ? (
-                <Pressable onPress={handleEdit}>
-                  <IconSymbol name="pencil" color="gray" size={28} />
-                </Pressable>
-              ) : null }
-
-              <View style={styles.deleteIconWrapper}>
-                <Pressable onPress={handleDeleteSelected}>
-                  <IconSymbol name="trash" color="red" size={28} />
-                  {selectedIds.length > 0 && (
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{selectedIds.length}</Text>
-                    </View>
-                  )}
-                </Pressable>
-              </View>
-            </View>
+            <MultiSelectActions
+              selectedIds={selectedIds}
+              handleCancelSelection={handleCancelSelection}
+              handleAddOutfit={() => {}}
+              showAddOutfit={false}
+              handleEdit={handleEdit}
+              handleDeleteSelected={handleDeleteSelected}
+            />
           ) : (
             <Text style={styles.title}>Wardrobe</Text>
           )}
         </View>
 
-        <View style={styles.searchContainer}>
-          <TextInput 
-            placeholder='Search'
-            placeholderTextColor={'#ccc'}
-            clearButtonMode='never'
-            style={styles.searchBox}
-            autoCapitalize='none'
-            autoCorrect={false}
-            value={searchQuery}
-            onChangeText={(query) => handleSearch(query)}
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery("")} style={styles.clearButton}>
-              <IconSymbol name="xmark.circle" color="#ccc" size={20}/>
-            </Pressable>
-          )}
-        </View>
+        <SearchBar
+          searchQuery={searchQuery}
+          handleSearch={handleSearch}
+          clearSearch={() => setSearchQuery('')}
+        />
 
         {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
@@ -252,7 +206,7 @@ export default function WardrobeScreen() {
           <FlatList
             contentContainerStyle={styles.clothesContainer}
             style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-            data={filteredItems}
+            data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             extraData={selectedIds}
@@ -301,25 +255,6 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: "center",
   },
-  item: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8,
-    width: '45%',
-    aspectRatio: 1,
-    borderRadius: 10,
-    backgroundColor: '#a5b4fd',
-  },
-  itemText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  itemImage: {
-    width: "100%",
-    height: "80%",
-    borderRadius: 10,
-    marginBottom: 8,
-  },
   centeredMessage: {
     flex: 1,
     justifyContent: 'center',
@@ -329,50 +264,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: '#666',
-  },
-  iconContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: 15,
-  },
-  deleteIconWrapper: {
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: -5,
-    right: -10,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minWidth: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  searchBox: {
-    paddingHorizontal:20,
-    paddingVertical:10,
-    borderColor:'#ccc',
-    borderWidth:1,
-    borderRadius:8,
-    width:'95%',
-  },
-  searchContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  clearButton: {
-    position: 'absolute',
-    right:10,
-    padding:10,
   },
   laundryButton: {
     alignItems: 'center',
