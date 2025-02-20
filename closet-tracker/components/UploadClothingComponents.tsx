@@ -156,6 +156,9 @@ const clothingDataDropdowns = ({
           style={styles.dropdown}
           zIndex={2000}
           listMode={"SCROLLVIEW"}
+          searchable={true}
+          searchContainerStyle={{borderBottomWidth: 0}}
+          searchTextInputStyle={styles.input}
         />
       ),
     },
@@ -173,6 +176,9 @@ const clothingDataDropdowns = ({
           style={styles.dropdown}
           zIndex={1000}
           listMode={"SCROLLVIEW"}
+          searchable={true}
+          searchContainerStyle={{borderBottomWidth: 0}}
+          searchTextInputStyle={styles.input}
         />
       ),
     },
