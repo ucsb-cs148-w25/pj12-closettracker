@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, Text, StyleSheet, TextInput, Button, View } from 'react-native';
+import { FlatList, Text, StyleSheet, TextInput, Button, View, KeyboardAvoidingView, Platform } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { DocumentSnapshot } from "firebase/firestore"; 
 
@@ -138,6 +138,7 @@ const clothingDataDropdowns = ({
           placeholder={placeholders.size || "Select size"}
           style={styles.dropdown}
           zIndex={3000}
+          listMode={"SCROLLVIEW"}
         />
       ),
     },
@@ -154,6 +155,7 @@ const clothingDataDropdowns = ({
           placeholder={placeholders.color || "Select color"}
           style={styles.dropdown}
           zIndex={2000}
+          listMode={"SCROLLVIEW"}
         />
       ),
     },
@@ -170,6 +172,7 @@ const clothingDataDropdowns = ({
           placeholder={placeholders.clothingType || "Select clothing type"}
           style={styles.dropdown}
           zIndex={1000}
+          listMode={"SCROLLVIEW"}
         />
       ),
     },
@@ -210,19 +213,22 @@ const clothingDataDropdowns = ({
 
 
   return (
-    <FlatList
-      nestedScrollEnabled={true}
-
-      data={data}
-      renderItem={({ item }) => (
-        <View style={styles.dropdownContainer}>
-          {item.label && <Text style={styles.label}>{item.label}</Text>}
-          {item.dropdown}
-        </View>
-      )}
-      keyExtractor={(item) => item.key}
-      contentContainerStyle={styles.container}
-    />
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={{flex: 1}}>
+      <FlatList
+        nestedScrollEnabled={true}
+        data={data}
+        renderItem={({ item }) => (
+          <View style={styles.dropdownContainer}>
+            {item.label && <Text style={styles.label}>{item.label}</Text>}
+            {item.dropdown}
+          </View>
+        )}
+        keyExtractor={(item) => item.key}
+        contentContainerStyle={styles.container}
+      />
+    </KeyboardAvoidingView>
   ); 
 };
 
