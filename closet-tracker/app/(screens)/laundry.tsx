@@ -1,12 +1,10 @@
 import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { auth } from '@/FirebaseConfig';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { TextInput } from 'react-native-gesture-handler';
-import { Colors } from '@/constants/Colors';
 
 type ItemType = {
   id: string;
@@ -31,6 +29,8 @@ const Item = ({ item, onPress, onLongPress, backgroundColor, textColor }: ItemPr
 
 export default function LaundryScreen() {
   const [laundryItems, setLaundryItems] = useState<any[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectMode, setSelectMode] = useState(false);
   const [refreshing, setRefreshing] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const colorScheme = useColorScheme();
@@ -60,8 +60,35 @@ export default function LaundryScreen() {
     fetchLaundryItems();
   }, [fetchLaundryItems]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const handleMoveToWardrobe = async () => {
+    if (!user) return;
+    if (selectedIds.length === 0) {
+      router.replace("../(tabs)/wardrobe");
+      return;
+    }
+    try {
+      setSelectMode(false);
+      setSelectedIds([]);
+      
+      const promises = selectedIds.map(async (id) => {
+        const laundryRef = doc(db, "users", user.uid, "laundry", id);
+        const wardrobeRef = doc(db, "users", user.uid, "clothing", id);
+        const itemSnapshot = await getDoc(laundryRef);
+        
+        if (itemSnapshot.exists()) {
+          await setDoc(wardrobeRef, itemSnapshot.data());
+          await deleteDoc(laundryRef);
+        }
+      });
+  
+      await Promise.all(promises);
+  
+      // Navigate back and trigger wardrobe refresh
+      router.replace("../(tabs)/wardrobe");
+  
+    } catch (error) {
+      console.error("Error moving items:", error);
+    }
   };
 
   const filteredItems = laundryItems.filter((item) =>
@@ -86,61 +113,39 @@ export default function LaundryScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Laundry</Text>
-        </View>
-
-        <View style={styles.searchContainer}>
-          <TextInput 
-            placeholder='Search'
-            placeholderTextColor={'#ccc'}
-            clearButtonMode='never'
-            style={styles.searchBox}
-            autoCapitalize='none'
-            autoCorrect={false}
-            value={searchQuery}
-            onChangeText={(query) => handleSearch(query)}
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery("")} style={styles.clearButton}>
-              <IconSymbol name="xmark.circle" color="#ccc" size={20}/>
-            </Pressable>
+        <FlatList
+          contentContainerStyle={styles.clothesContainer}
+          data={laundryItems}
+          renderItem={({ item }) => (
+            <Item
+              item={item}
+              onPress={() => {
+                if (selectMode) {
+                  setSelectedIds((prev) =>
+                    prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+                  );
+                }
+              }}
+              onLongPress={() => {
+                if (!selectMode) {
+                  setSelectMode(true);
+                  setSelectedIds([item.id]);
+                }
+              }}
+              backgroundColor={selectedIds.includes(item.id) ? '#4160fb' : '#a5b4fd'}
+              textColor={selectedIds.includes(item.id) ? 'white' : 'black'}
+            />
           )}
-        </View>
-
-        {filteredItems.length === 0 && !refreshing ? (
-          <View style={styles.centeredMessage}>
-            <Text style={styles.emptyMessage}>
-              {searchQuery ? "No items found." : "Your laundry is empty."}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            contentContainerStyle={styles.clothesContainer}
-            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
-            data={filteredItems}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => {
-                  setRefreshing(true);
-                  fetchLaundryItems();
-                }}
-                colors={['#4160fb']}
-                tintColor="#4160fb"
-              />
-            }
-          />
-        )}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.replace("../(tabs)/wardrobe")}
-        >
-          <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
-        </TouchableOpacity>
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchLaundryItems} />}
+        />
+          <TouchableOpacity 
+            style={styles.laundryButton} 
+            onPress={handleMoveToWardrobe}>
+            <IconSymbol name="tshirt.fill" color="#4160fb" />
+          </TouchableOpacity>
+        
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -217,6 +222,20 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   backButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    backgroundColor: '#fff',
+    borderRadius: 50,
+    position: 'absolute',
+    bottom: 100,
+    right: 50
+  },
+
+  laundryButton: {
     borderWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
