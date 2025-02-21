@@ -1,4 +1,3 @@
-import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -17,7 +16,7 @@ import SearchBar from '@/components/searchBar';
 //   image: string;
 // };
 
-export default function WardrobeScreen() {
+export default function OutfitScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
   const router = useRouter();
@@ -25,16 +24,14 @@ export default function WardrobeScreen() {
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const colorScheme = useColorScheme();
 
   const auth = getAuth();
   const db = getFirestore();
 
-  // Fetch wardrobe items
+  // Fetch outfit items
   const fetchItems = useCallback(() => {
     if (user) {
-      console.log("Fetching wardrobe items for user:", user.uid);
-      const itemsRef = collection(db, "users", user.uid, "clothing");
+      const itemsRef = collection(db, "users", user.uid, "outfit");
       const q = query(itemsRef, orderBy("dateUploaded", "desc"));
       
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -42,15 +39,11 @@ export default function WardrobeScreen() {
           id: doc.id,
           ...doc.data(),
         }));
-
-        console.log("Wardrobe items fetched:", fetchedItems);
         setItems(fetchedItems);
         setRefreshing(false);
       });
-
       return unsubscribe;
     } else {
-      console.log("No user found. Clearing wardrobe items.");
       setItems([]); // Clear items if logged out
       setRefreshing(false);
     }
@@ -66,11 +59,12 @@ export default function WardrobeScreen() {
   }, []);
 
   // Fetch items when user changes
-  useFocusEffect(
-    useCallback(() => {
-      fetchItems();
-    }, [fetchItems])
-  );
+  useEffect(() => {
+    const unsubscribe = fetchItems();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [fetchItems]);
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -81,7 +75,7 @@ export default function WardrobeScreen() {
         handleCancelSelection();
       }
     } else {
-      router.push(`../(screens)/singleItem?item=${itemId}&collections=clothing`);
+      router.push(`../(screens)/singleItem?item=${itemId}&collections=outfit`);
     }
   };
 
@@ -103,7 +97,7 @@ export default function WardrobeScreen() {
     try {
       handleCancelSelection();
       const promises = selectedIds.map((id) =>
-        deleteDoc(doc(db, "users", user.uid, "clothing", id))
+        deleteDoc(doc(db, "users", user.uid, "outfit", id))
       );
 
       await Promise.all(promises);
@@ -114,42 +108,7 @@ export default function WardrobeScreen() {
 
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
-    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=clothing`);
-  };
-
-  const handleLaundrySelected = async () => {
-    if (!user || selectedIds.length === 0) 
-      router.push("../(screens)/laundry"); // Exit if no user or no items selected
-  
-    try {
-      handleCancelSelection(); // Exit selection mode
-  
-      // Move items from "wardrobe" to "laundry"
-      const promises = selectedIds.map(async (id) => {
-        const wardrobeRef = doc(db, "users", user.uid, "clothing", id); // Reference to wardrobe item
-        const laundryRef = doc(db, "users", user.uid, "laundry", id);  // Reference to laundry item
-  
-        // Fetch wardrobe item data
-        const itemSnapshot = await getDoc(wardrobeRef);
-        if (itemSnapshot.exists()) {
-          console.log("Moving item:", itemSnapshot.data());
-          // Move the item to the laundry collection
-          await setDoc(laundryRef, itemSnapshot.data());
-          // Remove the item from the wardrobe collection
-          await deleteDoc(wardrobeRef);
-        } else{
-          console.log(`Item with ID ${id} does not exist in wardrobe.`);
-        }
-      });
-  
-      // Wait for all items to be moved
-      await Promise.all(promises);
-  
-      // Navigate to the laundry screen after moving items
-      router.push("../(screens)/laundry");
-    } catch (error) {
-      console.error("Error moving items:", error);
-    }
+    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=outfit`);
   };
 
   const handleSearch = (query: string) => {
@@ -191,7 +150,7 @@ export default function WardrobeScreen() {
               handleDeleteSelected={handleDeleteSelected}
             />
           ) : (
-            <Text style={styles.title}>Wardrobe</Text>
+            <Text style={styles.title}>Outfits</Text>
           )}
         </View>
 
@@ -204,7 +163,7 @@ export default function WardrobeScreen() {
         {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
             <Text style={styles.emptyMessage}>
-              {searchQuery ? "No items found." : "Your wardrobe is empty."}
+              {searchQuery ? "No items found." : "Your don't have any outfits."}
             </Text>
           </View>
         ) : (
@@ -230,11 +189,10 @@ export default function WardrobeScreen() {
           />
         )}
         <TouchableOpacity
-          style={styles.laundryButton}
-          onPress={handleLaundrySelected}>
-          <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
+          style={styles.createButton}
+          onPress={() => router.push("../(screens)/createOutfit")}>
+          <IconSymbol name={"plus"} color={"#fff"} />        
         </TouchableOpacity>
-        
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -271,12 +229,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666',
   },
-  laundryButton: {
+  createButton: {
     alignItems: 'center',
     justifyContent: 'center',
     width: 80,
     height: 80,
-    backgroundColor: '#9e9785',
+    backgroundColor: '#4160fb',
     borderRadius: 50,
     position: 'absolute',
     bottom: 100,

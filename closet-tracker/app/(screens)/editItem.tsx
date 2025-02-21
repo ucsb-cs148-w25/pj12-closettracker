@@ -1,35 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, Button, View, ActivityIndicator, Image } from 'react-native';
-import {SafeAreaProvider } from 'react-native-safe-area-context';
-import { doc, updateDoc, getDoc, getFirestore, serverTimestamp } from "firebase/firestore"; 
+import { Text, StyleSheet, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { doc, updateDoc, getDoc, getFirestore, DocumentSnapshot, serverTimestamp } from "firebase/firestore"; 
 import { auth } from '@/FirebaseConfig';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import outfitDataDropdowns from '@/components/UploadOutfitComponents';
 import clothingDataDropdowns from '@/components/UploadClothingComponents';
-import supabase from '@/supabase';
 
-type ItemData = {
-    id: string;
-    name: string;
-    clothingType: string;
-    size: string;
-    color: string;
-    brand: string;
-    note: string;
-    image_url: string;
-    wearCount: number;
-};
-
-const uploadClothingData = () => {
-  const [name, setName] = useState<string | null>(null)
+export default function EditItem () {
+  const [itemName, setItemName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  const { item_id } = useLocalSearchParams(); // Get query params
+  const { item_id, collections } = useLocalSearchParams(); // Get query params
+  const collectionId = Array.isArray(collections) ? collections[0] : collections;
   const router = useRouter();
   const db = getFirestore();
   const user = auth.currentUser;
-
+  const [docSnapshot, setDocSnapshot] = useState<DocumentSnapshot | null>(null);
 
   useEffect(() => {
     const fetchItemData = async () => {
@@ -45,11 +34,12 @@ const uploadClothingData = () => {
         }
 
         const userid = user.uid
-        const docRef = doc(db, "users", userid, "clothing", String(item_id))
+        const docRef = doc(db, "users", userid, collectionId, String(item_id))
           
         const itemDoc = await getDoc(docRef);
         if (itemDoc.exists()) {
           console.log("Document data:", itemDoc.data());
+          setDocSnapshot(itemDoc)
         } else {
           console.log("No such document!");
         }
@@ -59,29 +49,17 @@ const uploadClothingData = () => {
         const imageUrl = itemData?.image;
         const dataName = itemData?.itemName;
         if (imageUrl) {
-        //   // Fetch image from Supabase Storage
-        //   const { data, error } = await supabase
-        //     .storage
-        //     .from('closetImages')
-        //     .download(imageUrl);
-          
-        //   if (error) {
-        //     setError('Error fetching image from Supabase');
-        //     setLoading(false);
-        //     return;
-        //   }
-        //   const uri = URL.createObjectURL(data); // Directly use `data`, which is a Blob
           setImageUri(imageUrl); 
         } 
         else {
           setError('No image URL found');
         }
 
-        if(dataName){
-          setName(dataName)
-        } 
-        else{
-          setError('No name found'); //Fixme might over write no url errpr
+        if (dataName) {
+          setItemName(dataName);
+        }
+        else {
+          setError('No name found');
         }
       } catch (err) {
         setError('Error fetching item data');
@@ -92,44 +70,29 @@ const uploadClothingData = () => {
     
     fetchItemData();
   }, [item_id]);
-  
-  const handleSubmit = async (
-    name: string | null,
+    
+  const handleClothingSubmit = async (
+    itemName: string | null,
     size: string | null,
     color: string | null,
     clothingType: string | null,
     brand: string,
     note: string
   ) => {
-    console.log('Clothing Item Data:');
-    console.log({
-      name,
-      size,
-      color,
-      clothingType,
-      brand,
-      note,
-    });
+    if (!user) {
+      alert("Please sign in before uploading your clothes.");
+      return;
+    }
     
     try {
       // Step 1: Get the current document (if you need to use the data)
-      if (!user) {
-        alert("Please sign in before uploading your clothes.");
-        return;
-      }
       const userid = user.uid
       const docRef = doc(db, "users", userid, "clothing", String(item_id))
       
-      const docSnapshot = await getDoc(docRef);
-      if (docSnapshot.exists()) {
-        console.log("Document data:", docSnapshot.data());
-      } else {
-        console.log("No such document!");
-      }
 
       // Step 2: Set a new document (or update if it exists)
       await updateDoc(docRef, {
-        name: name,
+        itemName: itemName,
         size: size,
         color: color,
         clothingType: clothingType,
@@ -140,33 +103,55 @@ const uploadClothingData = () => {
       });
       
       //go back to wardrobe
-      router.push(`../(tabs)/wardrobe`);
-      console.log('Clothing item data added to Firestore:', docRef);
+      router.replace(`../(tabs)/wardrobe`);
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
-};
+  };
+  
+  const handleOutfitSubmit = async (
+    itemName: string | null,
+    note: string
+  ) => {
+    if (!user) {
+      alert("Please sign in before uploading your clothes.");
+      return;
+    }
+    
+    try {
+      // Step 1: Get the current document (if you need to use the data)
+      const userid = user.uid
+      const docRef = doc(db, "users", userid, "outfit", String(item_id))
+      
 
-//   if (loading) { return <ActivityIndicator  style={styles.container} size="large" color="black" />; }
-//   if (error)   { return <View style={styles.container}>
-//                             {error && ( <Text style={styles.errorContainer}>{error}</Text> )}
-//                         </View>}
+      // Step 2: Set a new document (or update if it exists)
+      await updateDoc(docRef, {
+        itemName: itemName,
+        note: note,
+        wearCount: 0,
+        dateUploaded: serverTimestamp()
+      });
+      
+      //go back to outfit
+      router.replace(`../(tabs)/outfit`);
+    } catch (error) {
+      console.error('Error interacting with Firestore: ', error);
+    }
+  };
 
   return (
-    <SafeAreaProvider>
-
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {imageUri && (
-            <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
+        <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
       )}
-      <Text style={{color:'black', fontSize:20}}> {name} </Text> 
-      {clothingDataDropdowns({handleSubmit, name})}
-    </View>
-
-    </SafeAreaProvider>
-    
+      <Text style={{color:'black', fontSize:20}}> {itemName} </Text> 
+      {collectionId === 'outfit' ? (
+        outfitDataDropdowns({handleOutfitSubmit, docSnapshot})
+      ) : (
+        clothingDataDropdowns({handleClothingSubmit, docSnapshot})
+      )}
+    </SafeAreaView>
   );
-  
 };
 const styles = StyleSheet.create({
     container: {
@@ -187,5 +172,3 @@ const styles = StyleSheet.create({
         width: '80%',              // You can adjust the width as needed
       },
   });
-
-export default uploadClothingData;

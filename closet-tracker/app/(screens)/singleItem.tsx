@@ -9,8 +9,9 @@ import { db } from "@/FirebaseConfig";
 import {SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function singleItem() {
-  const { item } = useLocalSearchParams(); // Get query params
+  const { item, collections } = useLocalSearchParams(); // Get query params
   const itemId = Array.isArray(item) ? item[0] : item;
+  const collectionId = Array.isArray(collections) ? collections[0] : collections;
   const router = useRouter();
   //console.log('Item from query param:', item);  // Debugging: Check if item is passed correctly
   
@@ -29,7 +30,7 @@ export default function singleItem() {
       }
 
       const userId = user.uid; // Get the logged-in user's ID
-      const itemRef = doc(db, "users", userId, "clothing", itemId);
+      const itemRef = doc(db, "users", userId, collectionId, itemId);
 
       try {
         const docSnap = await getDoc(itemRef);
@@ -68,7 +69,7 @@ export default function singleItem() {
         )}
         <Text style={styles.title}>{itemData.itemName}</Text>
         {/* <TimesWornComponent /> */}
-        <Button title="Back to Wardrobe" onPress={() => router.back()} />
+        <Button title="Back" onPress={() => router.back()} />
       </View>
     </SafeAreaProvider>
   );
