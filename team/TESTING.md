@@ -12,5 +12,5 @@ Going forward our plan is to expand upon our current component and integration t
 
 
 
-The unit test can be found in folder: closet-tracker/components/__tests__/ClothingDataDropdowns.test.tsx
-The component test can be found in folder: closet-tracker/components/__tests__/editItem_components.test.tsx
+- The unit test can be found in folder: closet-tracker/components/__tests__/ClothingDataDropdowns.test.tsx
+- The component test can be found in folder: closet-tracker/components/__tests__/editItem_components.test.tsx
