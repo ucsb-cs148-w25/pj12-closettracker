@@ -1,3 +1,4 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -32,6 +33,7 @@ export default function WardrobeScreen() {
   // Fetch wardrobe items
   const fetchItems = useCallback(() => {
     if (user) {
+      console.log("Fetching wardrobe items for user:", user.uid);
       const itemsRef = collection(db, "users", user.uid, "clothing");
       const q = query(itemsRef, orderBy("dateUploaded", "desc"));
       
@@ -40,11 +42,15 @@ export default function WardrobeScreen() {
           id: doc.id,
           ...doc.data(),
         }));
+
+        console.log("Wardrobe items fetched:", fetchedItems);
         setItems(fetchedItems);
         setRefreshing(false);
       });
+
       return unsubscribe;
     } else {
+      console.log("No user found. Clearing wardrobe items.");
       setItems([]); // Clear items if logged out
       setRefreshing(false);
     }
@@ -60,12 +66,11 @@ export default function WardrobeScreen() {
   }, []);
 
   // Fetch items when user changes
-  useEffect(() => {
-    const unsubscribe = fetchItems();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [fetchItems]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchItems();
+    }, [fetchItems])
+  );
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -229,6 +234,7 @@ export default function WardrobeScreen() {
           onPress={handleLaundrySelected}>
           <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
         </TouchableOpacity>
+        
       </SafeAreaView>
     </SafeAreaProvider>
   );
