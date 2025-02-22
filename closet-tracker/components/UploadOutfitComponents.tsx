@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, Text, StyleSheet, TextInput, Button, View } from 'react-native';
+import { FlatList, Text, StyleSheet, TextInput, Button, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { DocumentSnapshot } from "firebase/firestore"; 
 
-export default function outfitDataDropdowns ({
+export default function OutfitDataDropdowns ({
     handleOutfitSubmit,
     docSnapshot,
   }: {
@@ -79,8 +79,12 @@ export default function outfitDataDropdowns ({
   ];
 
 
-    return (
+  return (
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={{flex: 1}}>
       <FlatList
+        nestedScrollEnabled={true}
         data={data}
         renderItem={({ item }) => (
           <View style={styles.dropdownContainer}>
@@ -92,8 +96,9 @@ export default function outfitDataDropdowns ({
         contentContainerStyle={styles.container}
         style={{ width: '100%' }}
       />
-    );
-  };
+    </KeyboardAvoidingView>
+  );
+};
 
   const styles = StyleSheet.create({
     container: {
@@ -108,20 +113,6 @@ export default function outfitDataDropdowns ({
     dropdownContainer: {
       marginBottom: 10,
       width: '100%',
-    },
-    dropdown: {
-      height: 50,
-      width: '100%',
-      borderColor: '#ccc',
-      borderWidth: 1,
-      borderRadius: 4,
-    },
-    dropdownList: {
-      marginTop: 5,
-      width: '100%',
-      backgroundColor: '#fff',
-      borderWidth: 1,
-      borderColor: '#ccc',
     },
     input: {
       height: 40,

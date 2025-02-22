@@ -66,9 +66,6 @@ export default function createOutfit() {
             setSelectedIds((prev) =>
                 prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
             );
-            if (selectedIds.length === 1 && selectedIds[0] === itemId) {
-                handleCancelSelection();
-            }
         } else {
             router.push(`../(screens)/singleItem?item=${itemId}&collections=clothing`);
         }
@@ -79,11 +76,6 @@ export default function createOutfit() {
             setSelectMode(true);
             setSelectedIds([itemId]);
         }
-    };
-
-    const handleCancelSelection = () => {
-        setSelectMode(false);
-        setSelectedIds([]);
     };
 
     const handleAddOutfit = () => {
@@ -123,7 +115,8 @@ export default function createOutfit() {
                     {selectMode ? (
                         <MultiSelectActions
                             selectedIds={selectedIds}
-                            handleCancelSelection={handleCancelSelection}
+                            showCancel={false}
+                            handleCancelSelection={() => {}}
                             handleAddOutfit={handleAddOutfit}
                             handleEdit={() => {}}
                             showEdit={false}

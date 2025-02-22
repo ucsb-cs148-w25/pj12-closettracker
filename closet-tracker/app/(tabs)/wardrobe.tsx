@@ -25,7 +25,6 @@ export default function WardrobeScreen() {
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const colorScheme = useColorScheme();
 
   const auth = getAuth();
   const db = getFirestore();
@@ -33,7 +32,6 @@ export default function WardrobeScreen() {
   // Fetch wardrobe items
   const fetchItems = useCallback(() => {
     if (user) {
-      console.log("Fetching wardrobe items for user:", user.uid);
       const itemsRef = collection(db, "users", user.uid, "clothing");
       const q = query(itemsRef, orderBy("dateUploaded", "desc"));
       
@@ -43,7 +41,6 @@ export default function WardrobeScreen() {
           ...doc.data(),
         }));
 
-        console.log("Wardrobe items fetched:", fetchedItems);
         setItems(fetchedItems);
         setRefreshing(false);
       });
@@ -118,8 +115,11 @@ export default function WardrobeScreen() {
   };
 
   const handleLaundrySelected = async () => {
-    if (!user || selectedIds.length === 0) 
+    if (!user) return;
+    if (selectedIds.length === 0) {
       router.push("../(screens)/laundry"); // Exit if no user or no items selected
+      return;
+    }
   
     try {
       handleCancelSelection(); // Exit selection mode
@@ -132,7 +132,6 @@ export default function WardrobeScreen() {
         // Fetch wardrobe item data
         const itemSnapshot = await getDoc(wardrobeRef);
         if (itemSnapshot.exists()) {
-          console.log("Moving item:", itemSnapshot.data());
           // Move the item to the laundry collection
           await setDoc(laundryRef, itemSnapshot.data());
           // Remove the item from the wardrobe collection
