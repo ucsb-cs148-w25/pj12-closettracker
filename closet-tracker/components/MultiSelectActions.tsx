@@ -6,6 +6,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 interface MultiSelectActionsProps {
   selectedIds: string[];
   handleCancelSelection: () => void;
+  showCancel?: boolean;
   handleAddOutfit: () => void;
   showAddOutfit?: boolean;
   handleEdit: () => void;
@@ -17,6 +18,7 @@ interface MultiSelectActionsProps {
 export const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({
   selectedIds,
   handleCancelSelection,
+  showCancel = true,
   handleAddOutfit,
   showAddOutfit = true,
   handleEdit,
@@ -26,9 +28,9 @@ export const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({
 }) => {
   return (
     <View style={styles.iconContainer}>
-      <Pressable onPress={handleCancelSelection}>
+      {showCancel ? (<Pressable onPress={handleCancelSelection}>
         <IconSymbol name="xmark.app" color="gray" size={28} />
-      </Pressable>
+      </Pressable>): <View/>}
 
       {showAddOutfit && (<Pressable onPress={handleAddOutfit}>
         <IconSymbol name="pencil.and.list.clipboard" color="green" size={28} />
