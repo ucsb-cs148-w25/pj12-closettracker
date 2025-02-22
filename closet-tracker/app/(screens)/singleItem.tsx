@@ -1,41 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Button, StyleSheet } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router'; // Correct hook for local search params
-// import { IncreaseWearButton, DecreaseWearButton } from '@/components/SingleItemComponents'
-import TimesWornComponent from '@/components/SingleItemComponents' 
-import { doc, getDoc, DocumentData } from "firebase/firestore";
+import { View, Text, Image, Button, StyleSheet, Pressable } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import TimesWornComponent from '@/components/SingleItemComponents'
+import { doc, getDoc, updateDoc, DocumentData } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "@/FirebaseConfig";
-import {SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function singleItem() {
-  const { item, collections } = useLocalSearchParams(); // Get query params
+  const { item, collections } = useLocalSearchParams();
   const itemId = Array.isArray(item) ? item[0] : item;
   const collectionId = Array.isArray(collections) ? collections[0] : collections;
   const router = useRouter();
-  //console.log('Item from query param:', item);  // Debugging: Check if item is passed correctly
-  
+
   const [itemData, setItemData] = useState<DocumentData | null>(null);
+  const [wearCount, setWearCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchItem = async () => {
       if (!itemId) return;
 
-      const auth = getAuth(); // Get Firebase Auth instance
-      const user = auth.currentUser; // Get the logged-in user
+      const auth = getAuth();
+      const user = auth.currentUser;
 
       if (!user) {
         console.error("No user is logged in!");
         return;
       }
 
-      const userId = user.uid; // Get the logged-in user's ID
+      const userId = user.uid;
       const itemRef = doc(db, "users", userId, collectionId, itemId);
 
       try {
         const docSnap = await getDoc(itemRef);
         if (docSnap.exists()) {
           setItemData(docSnap.data());
+          setWearCount(docSnap.data().wearCount || 0);
         } else {
           console.log("No such document!");
         }
@@ -47,19 +47,29 @@ export default function singleItem() {
     fetchItem();
   }, [itemId]);
 
+  const updateWearCount = async (newCount: number) => {
+    if (!itemId || newCount < 0) return;
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const userId = user.uid;
+    const itemRef = doc(db, "users", userId, collectionId, itemId);
+
+    try {
+      await updateDoc(itemRef, { wearCount: newCount });
+      setWearCount(newCount);
+    } catch (error) {
+      console.error("Error updating wear count:", error);
+    }
+  };
+
   if (!itemData) {
     return <Text>Loading...</Text>;
   }
 
-  // const handleIncrement = () => {
-  //   const newWearCount = itemData.wearCount + 1;
-  //   setItemData({ ...itemData, wearCount: newWearCount});
-  // };
 
-  // const handleDecrement = () => {
-  //   const newWearCount = itemData.wearCount > 0 ? itemData.wearCount - 1 : 0;
-  //   setItemData({ ...itemData, wearCount: newWearCount});
-  // };
 
   return (
     <SafeAreaProvider>
@@ -68,7 +78,18 @@ export default function singleItem() {
           <Image source={{ uri: itemData.image }} style={styles.image} />
         )}
         <Text style={styles.title}>{itemData.itemName}</Text>
-        {/* <TimesWornComponent /> */}
+        <Text style={styles.wearCountText}>Times Worn: {wearCount}</Text>
+
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={() => updateWearCount(wearCount - 1)} style={styles.button}>
+            <Text style={styles.buttonText}>-</Text>
+          </Pressable>
+          <Pressable onPress={() => updateWearCount(wearCount + 1)} style={styles.button}>
+            <Text style={styles.buttonText}>+</Text>
+          </Pressable>
+        </View>
+
+        { }
         <Button title="Back" onPress={() => router.back()} />
       </View>
     </SafeAreaProvider>
@@ -84,20 +105,44 @@ const styles = StyleSheet.create({
     backgroundColor: 'FFEFCB',
   },
   row: {
-    flexDirection: 'row',  // Arrange items in a row (horizontally)
-    alignItems: 'center',  // Center the icons vertically
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-  },image: {
-    width: 300,  
-    height: 300, 
-    marginBottom: 20,  
-    resizeMode: 'contain', // Keeps the aspect ratio of the image
-    borderRadius: 50, 
-    shadowColor: '#000', // Shadow for iOS
+  },
+  wearCountText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: '#4160fb',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  image: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
+    resizeMode: 'contain',
+    borderRadius: 50,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
