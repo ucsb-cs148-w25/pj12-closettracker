@@ -10,7 +10,7 @@ The tests first verified that the editItem page was rendered. The second test ch
 
 Going forward our plan is to expand upon our current component and integration tests to make them more robust. Although we don't have an immediate need for extensive component tests we would like the existing ones to serve as a basis for future tests and hence we have deemed it critical that we should expand upon the current tests for the editItem page. We would like to explore new frameworks and technologies for integrated testing that might work with our tech stack better. 
 
-
+### Files
 
 - The unit test can be found in folder: closet-tracker/components/__tests__/ClothingDataDropdowns.test.tsx
 - The component test can be found in folder: closet-tracker/components/__tests__/editItem_components.test.tsx
