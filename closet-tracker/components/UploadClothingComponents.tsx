@@ -3,7 +3,7 @@ import { FlatList, Text, StyleSheet, TextInput, Button, View, KeyboardAvoidingVi
 import DropDownPicker from 'react-native-dropdown-picker';
 import { DocumentSnapshot } from "firebase/firestore"; 
 
-const clothingDataDropdowns = ({
+export default function ClothingDataDropdowns ({
     handleClothingSubmit,
     docSnapshot,
   }: {
@@ -16,7 +16,7 @@ const clothingDataDropdowns = ({
     ) => Promise<void>; //for asynch?
     docSnapshot: DocumentSnapshot | null;
 
-  }) => {
+  }) {
 
   const [placeholders, setPlaceholders] = useState({
     itemName: "",
@@ -275,5 +275,3 @@ const styles = StyleSheet.create({
   },
   
 });
-
-export default clothingDataDropdowns;

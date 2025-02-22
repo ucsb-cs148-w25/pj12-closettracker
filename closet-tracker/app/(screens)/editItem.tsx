@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { doc, updateDoc, getDoc, getFirestore, DocumentSnapshot, serverTimestamp } from "firebase/firestore"; 
+import { doc, updateDoc, getDoc, getFirestore, DocumentSnapshot, serverTimestamp, collection } from "firebase/firestore"; 
 import { auth } from '@/FirebaseConfig';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import outfitDataDropdowns from '@/components/UploadOutfitComponents';
-import clothingDataDropdowns from '@/components/UploadClothingComponents';
+import OutfitDataDropdowns from '@/components/UploadOutfitComponents';
+import ClothingDataDropdowns from '@/components/UploadClothingComponents';
 
 export default function EditItem () {
   const [itemName, setItemName] = useState<string | null>(null)
@@ -108,6 +108,44 @@ export default function EditItem () {
       console.error('Error interacting with Firestore: ', error);
     }
   };
+    
+  const handleLaundrySubmit = async (
+    itemName: string | null,
+    size: string | null,
+    color: string | null,
+    clothingType: string | null,
+    brand: string,
+    note: string
+  ) => {
+    if (!user) {
+      alert("Please sign in before uploading your clothes.");
+      return;
+    }
+    
+    try {
+      // Step 1: Get the current document (if you need to use the data)
+      const userid = user.uid
+      const docRef = doc(db, "users", userid, "laundry", String(item_id))
+      
+
+      // Step 2: Set a new document (or update if it exists)
+      await updateDoc(docRef, {
+        itemName: itemName,
+        size: size,
+        color: color,
+        clothingType: clothingType,
+        brand: brand,
+        note: note,
+        wearCount: 0,
+        dateUploaded: serverTimestamp()
+      });
+      
+      //go back to wardrobe
+      router.replace(`../(tabs)/wardrobe`);
+    } catch (error) {
+      console.error('Error interacting with Firestore: ', error);
+    }
+  };
   
   const handleOutfitSubmit = async (
     itemName: string | null,
@@ -146,9 +184,13 @@ export default function EditItem () {
       )}
       <Text style={{color:'black', fontSize:20}}> {itemName} </Text> 
       {collectionId === 'outfit' ? (
-        outfitDataDropdowns({handleOutfitSubmit, docSnapshot})
+        <OutfitDataDropdowns handleOutfitSubmit={handleOutfitSubmit} docSnapshot={docSnapshot}/>
+      ) : collectionId === 'clothing' ? (
+        <ClothingDataDropdowns handleClothingSubmit={handleClothingSubmit} docSnapshot={docSnapshot}/>
+      ) : collectionId === 'laundry' ? (
+        <ClothingDataDropdowns handleClothingSubmit={handleLaundrySubmit} docSnapshot={docSnapshot}/>
       ) : (
-        clothingDataDropdowns({handleClothingSubmit, docSnapshot})
+        <Text> Collection not found </Text>
       )}
     </SafeAreaView>
   );
