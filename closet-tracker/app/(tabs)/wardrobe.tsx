@@ -1,21 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme, Modal, TextInput } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
-import { useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-//import { TextInput } from 'react-native-gesture-handler';
-import { ClothingItem } from '@/components/ClothingItem';
-import { MultiSelectActions } from '@/components/MultiSelectActions';
-import SearchBar from '@/components/searchBar';
-
-// type ItemType = {
-//   id: string;
-//   itemName: string;
-//   image: string;
-// };
+import { useRouter } from "expo-router";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { ClothingItem } from "@/components/ClothingItem";
+import { MultiSelectActions } from "@/components/MultiSelectActions";
+import SearchBar from "@/components/searchBar";
 
 export default function WardrobeScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -25,7 +18,22 @@ export default function WardrobeScreen() {
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const colorScheme = useColorScheme();
+
+  const [filters, setFilters] = useState<{
+    size: string | null;
+    color: string | null;
+    clothingType: string | null;
+    brand: string;
+    notes: string;
+  }>({
+    size: null,
+    color: null,
+    clothingType: null,
+    brand: '',
+    notes: '',
+  });
+  const [originalFilters, setOriginalFilters] = useState(filters);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -33,7 +41,6 @@ export default function WardrobeScreen() {
   // Fetch wardrobe items
   const fetchItems = useCallback(() => {
     if (user) {
-      console.log("Fetching wardrobe items for user:", user.uid);
       const itemsRef = collection(db, "users", user.uid, "clothing");
       const q = query(itemsRef, orderBy("dateUploaded", "desc"));
       
@@ -43,7 +50,6 @@ export default function WardrobeScreen() {
           ...doc.data(),
         }));
 
-        console.log("Wardrobe items fetched:", fetchedItems);
         setItems(fetchedItems);
         setRefreshing(false);
       });
@@ -54,7 +60,7 @@ export default function WardrobeScreen() {
       setItems([]); // Clear items if logged out
       setRefreshing(false);
     }
-  }, [user]);
+  }, [user, db]);
 
   // Handle authentication changes
   useEffect(() => {
@@ -71,6 +77,37 @@ export default function WardrobeScreen() {
       fetchItems();
     }, [fetchItems])
   );
+
+  // Define a custom order for sizes
+  const sizeOrder: { [key: string]: number } = { xs: 0, s: 1, m: 2, l: 3, xl: 4 };
+
+  // Compute dynamic filter options from data
+  const availableSizes = Array.from(new Set(items.map(item => item.size).filter(Boolean)));
+  const sortedAvailableSizes = availableSizes.sort(
+    (a, b) => (sizeOrder[a.toLowerCase()] ?? Infinity) - (sizeOrder[b.toLowerCase()] ?? Infinity)
+  );
+  const availableColors = Array.from(new Set(items.map(item => item.color).filter(Boolean)));
+  const availableClothingTypes = Array.from(new Set(items.map(item => item.clothingType).filter(Boolean)));
+
+  const filteredItems = items.filter((item) => {
+    const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSize = filters.size 
+      ? (item.size ? item.size.toLowerCase() === filters.size.toLowerCase() : false)
+      : true;
+    const matchesColor = filters.color 
+      ? (item.color ? item.color.toLowerCase() === filters.color.toLowerCase() : false)
+      : true;
+    const matchesClothingType = filters.clothingType 
+      ? (item.clothingType ? item.clothingType.toLowerCase() === filters.clothingType.toLowerCase() : false)
+      : true;
+    const matchesBrand = filters.brand 
+      ? (item.brand ? item.brand.toLowerCase().includes(filters.brand.toLowerCase()) : false)
+      : true;
+    const matchesNotes = filters.notes 
+      ? (item.notes ? item.notes.toLowerCase().includes(filters.notes.toLowerCase()) : false)
+      : true;
+    return matchesSearch && matchesSize && matchesColor && matchesClothingType && matchesBrand && matchesNotes;
+  });
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -118,8 +155,11 @@ export default function WardrobeScreen() {
   };
 
   const handleLaundrySelected = async () => {
-    if (!user || selectedIds.length === 0) 
+    if (!user) return;
+    if (selectedIds.length === 0) {
       router.push("../(screens)/laundry"); // Exit if no user or no items selected
+      return;
+    }
   
     try {
       handleCancelSelection(); // Exit selection mode
@@ -132,7 +172,6 @@ export default function WardrobeScreen() {
         // Fetch wardrobe item data
         const itemSnapshot = await getDoc(wardrobeRef);
         if (itemSnapshot.exists()) {
-          console.log("Moving item:", itemSnapshot.data());
           // Move the item to the laundry collection
           await setDoc(laundryRef, itemSnapshot.data());
           // Remove the item from the wardrobe collection
@@ -154,11 +193,7 @@ export default function WardrobeScreen() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-  }
-
-  const filteredItems = items.filter((item) =>
-    item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
@@ -191,7 +226,18 @@ export default function WardrobeScreen() {
               handleDeleteSelected={handleDeleteSelected}
             />
           ) : (
-            <Text style={styles.title}>Wardrobe</Text>
+            <View style={styles.nonSelectHeader}>
+              <Text style={styles.title}>Wardrobe</Text>
+              <Pressable 
+                onPress={() => {
+                  setOriginalFilters(filters); // store current filters in case of cancel
+                  setFilterModalVisible(true);
+                }}
+                style={styles.filterIcon}
+              >
+                <IconSymbol name="line.horizontal.3.decrease.circle" color="gray" size={28} />
+              </Pressable>
+            </View>
           )}
         </View>
 
@@ -204,7 +250,9 @@ export default function WardrobeScreen() {
         {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
             <Text style={styles.emptyMessage}>
-              {searchQuery ? "No items found." : "Your wardrobe is empty."}
+              {searchQuery || filters.size || filters.color || filters.clothingType || filters.brand || filters.notes
+                ? "No items found."
+                : "Your wardrobe is empty."}
             </Text>
           </View>
         ) : (
@@ -234,7 +282,130 @@ export default function WardrobeScreen() {
           onPress={handleLaundrySelected}>
           <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
         </TouchableOpacity>
-        
+
+        <Modal
+          visible={filterModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setFilterModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Filter Options</Text>
+              <Pressable 
+                onPress={() => {
+                  // cancel filtering – revert to the original filters
+                  setFilters(originalFilters);
+                  setFilterModalVisible(false);
+                }} 
+                style={styles.exitButtonModal}
+              >
+                <IconSymbol name="xmark.circle" color="#ccc" size={28} />
+              </Pressable>
+
+              <Text style={styles.filterLabel}>Size</Text>
+              <View style={styles.filterGroup}>
+                {sortedAvailableSizes.map((size) => (
+                  <Pressable
+                    key={size}
+                    style={[
+                      styles.filterOption,
+                      filters.size === size && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        size: filters.size === size ? null : size,
+                      })
+                    }
+                  >
+                    <Text style={styles.filterOptionText}>{size.toUpperCase()}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Text style={styles.filterLabel}>Color</Text>
+              <View style={styles.filterGroup}>
+                {availableColors.map((color) => (
+                  <Pressable
+                    key={color}
+                    style={[
+                      styles.filterOption,
+                      filters.color === color && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        color: filters.color === color ? null : color,
+                      })
+                    }
+                  >
+                    <Text style={styles.filterOptionText}>{color}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Text style={styles.filterLabel}>Clothing Type</Text>
+              <View style={styles.filterGroup}>
+                {availableClothingTypes.map((type) => (
+                  <Pressable
+                    key={type}
+                    style={[
+                      styles.filterOption,
+                      filters.clothingType === type && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        clothingType: filters.clothingType === type ? null : type,
+                      })
+                    }
+                  >
+                    <Text style={styles.filterOptionText}>{type}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              <Text style={styles.filterLabel}>Brand</Text>
+              <TextInput
+                placeholder="Enter brand"
+                placeholderTextColor="#ccc"
+                style={styles.filterTextInput}
+                value={filters.brand}
+                onChangeText={(text) => setFilters({ ...filters, brand: text })}
+              />
+
+              <Text style={styles.filterLabel}>Notes</Text>
+              <TextInput
+                placeholder="Enter notes"
+                placeholderTextColor="#ccc"
+                style={styles.filterTextInput}
+                value={filters.notes}
+                onChangeText={(text) => setFilters({ ...filters, notes: text })}
+              />
+
+              <View style={styles.filterButtonsContainer}>
+                <TouchableOpacity style={styles.applyButton} onPress={() => setFilterModalVisible(false)}>
+                  <Text style={styles.applyButtonText}>Apply Filters</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.clearButtonModal}
+                  onPress={() =>
+                    setFilters({
+                      size: null,
+                      color: null,
+                      clothingType: null,
+                      brand: '',
+                      notes: '',
+                    })
+                  }
+                >
+                  <Text style={styles.clearButtonText}>Clear Filters</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -247,15 +418,20 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   header: {
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  nonSelectHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginBottom: 10,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
+  },
+  filterIcon: {
+    padding: 5,
   },
   clothesContainer: {
     alignItems: 'stretch',
@@ -287,5 +463,84 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  exitButtonModal: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+  },
+  filterLabel: {
+    marginTop: 10,
+    fontWeight: 'bold',
+  },
+  filterGroup: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginVertical: 5,
+  },
+  filterOption: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  selectedOption: {
+    backgroundColor: '#4160fb',
+    borderColor: '#4160fb',
+  },
+  filterOptionText: {
+    color: '#000',
+  },
+  filterTextInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 8,
+    marginTop: 5,
+  },
+  filterButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  applyButton: {
+    backgroundColor: '#4160fb',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  applyButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  clearButtonModal: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  clearButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
 });

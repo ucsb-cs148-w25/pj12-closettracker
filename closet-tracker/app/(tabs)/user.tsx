@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '@/FirebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import { doc, getDoc, updateDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
 
@@ -47,7 +47,8 @@ export default function UserProfile() {
         }
 
         const wardrobeRef = collection(db, 'users', authUser.uid, 'clothing');
-        const unsubscribeWardrobe = onSnapshot(wardrobeRef, (snapshot) => {
+        const q = query(wardrobeRef, orderBy('wearCount', 'desc'));
+        const unsubscribeWardrobe = onSnapshot(q, (snapshot) => {
           const wardrobeItems = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
