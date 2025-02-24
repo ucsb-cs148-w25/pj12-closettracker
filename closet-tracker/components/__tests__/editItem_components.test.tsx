@@ -9,8 +9,8 @@ jest.mock('firebase/firestore', () => ({
   getDoc: jest.fn().mockResolvedValue({
     exists: jest.fn(() => true),
     data: jest.fn(() => ({
-      itemName: "Test Item",
-      image: "https://example.com/test-image.jpg",
+      itemName: "dont exist",
+      image: "dont exist",
     })),
   }),
   getFirestore: jest.fn(),
@@ -20,7 +20,7 @@ jest.mock('firebase/firestore', () => ({
 // Mock Firebase Auth
 jest.mock('@/FirebaseConfig', () => ({
   auth: {
-    currentUser: { uid: 'test-user-id' },
+    currentUser: { uid: 'dont exist' },
   },
 }));
 
@@ -30,7 +30,7 @@ jest.mock('expo-router', () => ({
     replace: jest.fn(),
   }),
   useLocalSearchParams: () => ({
-    item_id: '123',
+    item_id: 'dont exist',
     collections: 'clothing',
   }),
 }));
