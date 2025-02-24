@@ -81,7 +81,14 @@ export default function WardrobeScreen() {
     }, [fetchItems])
   );
 
+  // Define a custom order for sizes
+  const sizeOrder: { [key: string]: number } = { xs: 0, s: 1, m: 2, l: 3, xl: 4 };
+
+  // Compute dynamic filter options from data
   const availableSizes = Array.from(new Set(items.map(item => item.size).filter(Boolean)));
+  const sortedAvailableSizes = availableSizes.sort(
+    (a, b) => (sizeOrder[a.toLowerCase()] ?? Infinity) - (sizeOrder[b.toLowerCase()] ?? Infinity)
+  );
   const availableColors = Array.from(new Set(items.map(item => item.color).filter(Boolean)));
   const availableClothingTypes = Array.from(new Set(items.map(item => item.clothingType).filter(Boolean)));
 
@@ -299,7 +306,7 @@ export default function WardrobeScreen() {
 
               <Text style={styles.filterLabel}>Size</Text>
               <View style={styles.filterGroup}>
-                {availableSizes.map((size) => (
+                {sortedAvailableSizes.map((size) => (
                   <Pressable
                     key={size}
                     style={[
