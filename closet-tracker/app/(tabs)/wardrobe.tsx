@@ -259,7 +259,7 @@ export default function WardrobeScreen() {
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
-            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
+            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0, height: '100%' }}
             data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}

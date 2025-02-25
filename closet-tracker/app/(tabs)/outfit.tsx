@@ -1,3 +1,4 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,12 +10,6 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
-
-// type ItemType = {
-//   id: string;
-//   itemName: string;
-//   image: string;
-// };
 
 export default function OutfitScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -47,7 +42,7 @@ export default function OutfitScreen() {
       setItems([]); // Clear items if logged out
       setRefreshing(false);
     }
-  }, [user]);
+  }, [user, db]);
 
   // Handle authentication changes
   useEffect(() => {
@@ -59,12 +54,11 @@ export default function OutfitScreen() {
   }, []);
 
   // Fetch items when user changes
-  useEffect(() => {
-    const unsubscribe = fetchItems();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [fetchItems]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchItems();
+    }, [fetchItems])
+  );
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -169,7 +163,7 @@ export default function OutfitScreen() {
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
-            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
+            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0, height: '100%' }}
             data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}

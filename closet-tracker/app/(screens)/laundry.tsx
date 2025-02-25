@@ -253,6 +253,7 @@ export default function LaundryScreen() {
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
+            style={{ height: '100%' }}
             data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
