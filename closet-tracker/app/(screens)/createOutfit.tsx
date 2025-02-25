@@ -166,26 +166,26 @@ export default function createOutfit() {
                             showDelete={false}
                         />
                     ) : (
-                        <View style={styles.nonSelectHeader}>
-                            <Text style={styles.title}>Wardrobe</Text>
-                            <Pressable 
-                                onPress={() => {
-                                setOriginalFilters(filters); // store current filters in case of cancel
-                                setFilterModalVisible(true);
-                                }}
-                                style={styles.filterIcon}
-                            >
-                                <IconSymbol name="line.horizontal.3.decrease.circle" color="gray" size={28} />
-                            </Pressable>
-                        </View>
+                        <Text style={styles.title}>Wardrobe</Text>
                     )}
                 </View>
 
-                <SearchBar
-                    searchQuery={searchQuery}
-                    handleSearch={handleSearch}
-                    clearSearch={() => setSearchQuery('')}
-                />
+                <View style={styles.nonSelectHeader}>
+                    <SearchBar
+                        searchQuery={searchQuery}
+                        handleSearch={handleSearch}
+                        clearSearch={() => setSearchQuery('')}
+                    />
+                    <Pressable 
+                        onPress={() => {
+                        setOriginalFilters(filters); // store current filters in case of cancel
+                        setFilterModalVisible(true);
+                        }}
+                        style={styles.filterIcon}
+                    >
+                        <IconSymbol name="line.horizontal.3.decrease.circle" color="gray" size={28} />
+                    </Pressable>
+                </View>
 
                 {filteredItems.length === 0 && !refreshing ? (
                     <View style={styles.centeredMessage}>
@@ -198,6 +198,7 @@ export default function createOutfit() {
                 ) : (
                     <FlatList
                         contentContainerStyle={styles.clothesContainer}
+                        style={{ height: '100%' }}
                         data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
                         renderItem={renderItem}
                         keyExtractor={(item) => item.id}
@@ -255,9 +256,9 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     nonSelectHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     title: {
         fontSize: 32,
@@ -265,6 +266,8 @@ const styles = StyleSheet.create({
     },
     filterIcon: {
         padding: 5,
+        marginRight: 10,
+        marginBottom: 10,
     },
     clothesContainer: {
         alignItems: 'stretch',
