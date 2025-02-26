@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Button, StyleSheet, Pressable } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import TimesWornComponent from '@/components/SingleItemComponents'
-import { doc, getDoc, updateDoc, DocumentData } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "@/FirebaseConfig";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -15,6 +15,16 @@ export default function singleItem() {
 
   const [itemData, setItemData] = useState<DocumentData | null>(null);
   const [wearCount, setWearCount] = useState<number>(0);
+  const [isPublic, setIsPublic] = useState(false);
+  const [publicDocId, setPublicDocId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState(getAuth().currentUser);
+
+  useEffect(() => {
+    const unsubscribe = getAuth().onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -47,6 +57,20 @@ export default function singleItem() {
     fetchItem();
   }, [itemId]);
 
+  useEffect(() => {
+    const checkPublicStatus = async () => {
+      if (collectionId !== 'outfit' || !currentUser) return;
+      const publicDocRef = doc(db, "users", currentUser.uid, "public", itemId);
+      const publicDocSnap = await getDoc(publicDocRef);
+      if (publicDocSnap.exists()) {
+        setIsPublic(true);
+        const data = publicDocSnap.data();
+        setPublicDocId(data.publicRef);
+      }
+    };
+    checkPublicStatus();
+  }, [collectionId, itemId, currentUser]);
+
   const updateWearCount = async (newCount: number) => {
     if (!itemId || newCount < 0) return;
 
@@ -65,11 +89,42 @@ export default function singleItem() {
     }
   };
 
+  const handleMakePublic = async () => {
+    if (collectionId !== 'outfit' || !currentUser) return;
+    try {
+      const outfitRef = doc(db, "users", currentUser.uid, 'outfit', itemId);
+      const newPublicDoc = await addDoc(collection(db, "public"), {
+        outfitRef,
+        userRef: doc(db, "users", currentUser.uid),
+        likes: [],
+        likesCount: 0,
+        timestamp: new Date(),
+      });
+      await setDoc(doc(db, "users", currentUser.uid, "public", itemId), {
+        publicRef: newPublicDoc.id,
+      });
+      setIsPublic(true);
+      setPublicDocId(newPublicDoc.id);
+    } catch (error) {
+      console.error("Error making public:", error);
+    }
+  };
+
+  const handleMakePrivate = async () => {
+    if (collectionId !== 'outfit' || !currentUser || !publicDocId) return;
+    try {
+      await deleteDoc(doc(db, "public", publicDocId));
+      await deleteDoc(doc(db, "users", currentUser.uid, "public", itemId));
+      setIsPublic(false);
+      setPublicDocId(null);
+    } catch (error) {
+      console.error("Error making private:", error);
+    }
+  };
+
   if (!itemData) {
     return <Text>Loading...</Text>;
   }
-
-
 
   return (
     <SafeAreaProvider>
@@ -89,7 +144,17 @@ export default function singleItem() {
           </Pressable>
         </View>
 
-        { }
+        {collectionId === 'outfit' && (
+          isPublic ? (
+            <TouchableOpacity onPress={handleMakePrivate} style={styles.publicButton}>
+              <Text style={styles.publicButtonText}>Make Private</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={handleMakePublic} style={styles.publicButton}>
+              <Text style={styles.publicButtonText}>Make Public</Text>
+            </TouchableOpacity>
+          )
+        )}
         <Button title="Back" onPress={() => router.back()} />
       </View>
     </SafeAreaProvider>
@@ -146,5 +211,23 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
+  },
+  publicButton: {
+    backgroundColor: '#4160fb',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  publicButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
