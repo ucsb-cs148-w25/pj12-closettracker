@@ -82,7 +82,7 @@ export default function OutfitDataDropdowns ({
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={{flex: 1}}>
+      style={{width: '100%', flex: 1}}>
       <FlatList
         nestedScrollEnabled={true}
         data={data}

@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
+import { StyleSheet, FlatList, Text, TouchableOpacity, View, RefreshControl, Pressable, Modal } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
@@ -9,6 +9,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
+import FilterModal from '@/components/FilterModal';
 
 export default function LaundryScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -18,6 +19,22 @@ export default function LaundryScreen() {
   const [refreshing, setRefreshing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [filters, setFilters] = useState<{
+    size: string | null;
+    color: string | null;
+    clothingType: string | null;
+    brand: string;
+    notes: string;
+  }>({
+    size: null,
+    color: null,
+    clothingType: null,
+    brand: '',
+    notes: '',
+  });
+  const [originalFilters, setOriginalFilters] = useState(filters);
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
 
   const auth = getAuth();
   const db = getFirestore();
@@ -43,7 +60,7 @@ export default function LaundryScreen() {
       setLaundryItems([]); // Clear items if logged out
       setRefreshing(false);
     }
-  }, [user]);
+  }, [user, db]);
 
   // Handle authentication changes
   useEffect(() => {
@@ -60,6 +77,37 @@ export default function LaundryScreen() {
       fetchLaundryItems();
     }, [fetchLaundryItems])
   );
+
+  // Define a custom order for sizes
+  const sizeOrder: { [key: string]: number } = { xs: 0, s: 1, m: 2, l: 3, xl: 4 };
+
+  // Compute dynamic filter options from data
+  const availableSizes = Array.from(new Set(laundryItems.map(item => item.size).filter(Boolean)));
+  const sortedAvailableSizes = availableSizes.sort(
+    (a, b) => (sizeOrder[a.toLowerCase()] ?? Infinity) - (sizeOrder[b.toLowerCase()] ?? Infinity)
+  );
+  const availableColors = Array.from(new Set(laundryItems.map(item => item.color).filter(Boolean)));
+  const availableClothingTypes = Array.from(new Set(laundryItems.map(item => item.clothingType).filter(Boolean)));
+
+  const filteredItems = laundryItems.filter((item) => {
+    const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSize = filters.size 
+      ? (item.size ? item.size.toLowerCase() === filters.size.toLowerCase() : false)
+      : true;
+    const matchesColor = filters.color 
+      ? (item.color ? item.color.toLowerCase() === filters.color.toLowerCase() : false)
+      : true;
+    const matchesClothingType = filters.clothingType 
+      ? (item.clothingType ? item.clothingType.toLowerCase() === filters.clothingType.toLowerCase() : false)
+      : true;
+    const matchesBrand = filters.brand 
+      ? (item.brand ? item.brand.toLowerCase().includes(filters.brand.toLowerCase()) : false)
+      : true;
+    const matchesNotes = filters.notes 
+      ? (item.notes ? item.notes.toLowerCase().includes(filters.notes.toLowerCase()) : false)
+      : true;
+    return matchesSearch && matchesSize && matchesColor && matchesClothingType && matchesBrand && matchesNotes;
+  });
 
   const handleItemPress = (itemId: string) => {
     if (selectMode) {
@@ -140,10 +188,7 @@ export default function LaundryScreen() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-  }
-  const filteredItems = laundryItems.filter((item) =>
-    item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
@@ -176,7 +221,18 @@ export default function LaundryScreen() {
               handleDeleteSelected={handleDeleteSelected}
             />
           ) : (
-            <Text style={styles.title}>Laundry</Text>
+            <View style={styles.nonSelectHeader}>
+              <Text style={styles.title}>Laundry</Text>
+              <Pressable 
+                onPress={() => {
+                  setOriginalFilters(filters); // store current filters in case of cancel
+                  setFilterModalVisible(true);
+                }}
+                style={styles.filterIcon}
+              >
+                <IconSymbol name="line.horizontal.3.decrease.circle" color="gray" size={28} />
+              </Pressable>
+            </View>
           )}
         </View>
 
@@ -189,13 +245,15 @@ export default function LaundryScreen() {
         {filteredItems.length === 0 && !refreshing ? (
           <View style={styles.centeredMessage}>
             <Text style={styles.emptyMessage}>
-              {searchQuery ? "No items found." : "Your laundry bin is empty."}
+              {searchQuery || filters.size || filters.color || filters.clothingType || filters.brand || filters.notes
+                ? "No items found."
+                : "Your wardrobe is empty."}
             </Text>
           </View>
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
-            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
+            style={{ height: '100%' }}
             data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
@@ -219,7 +277,23 @@ export default function LaundryScreen() {
           onPress={handleMoveToWardrobe}>
           <IconSymbol name={"tshirt.fill"} color={"#4160fb"} />
         </TouchableOpacity>
-        
+
+        <Modal
+          visible={filterModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setFilterModalVisible(false)}
+        >
+          <FilterModal
+            setFilters={setFilters}
+            filters={filters}
+            originalFilters={originalFilters}
+            setFilterModalVisible={setFilterModalVisible}
+            sortedAvailableSizes={sortedAvailableSizes}
+            availableColors={availableColors}
+            availableClothingTypes={availableClothingTypes}
+          />
+        </Modal>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -232,16 +306,20 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   header: {
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  nonSelectHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginBottom: 10,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    paddingHorizontal: 15,
+  },
+  filterIcon: {
+    padding: 5,
   },
   clothesContainer: {
     alignItems: 'stretch',

@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         alignItems: 'center',
         marginBottom: 10,
+        flexGrow: 1,
       },
     searchBox: {
         paddingHorizontal:20,
