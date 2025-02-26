@@ -27,17 +27,17 @@ export default function TabLayout() {
       }}>
       
       <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+       />
+      <Tabs.Screen
         name="wardrobe"
         options={{
           title: 'Wardrobe',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="shippingbox.fill" color={color} />,
-        }}
-       />
-      <Tabs.Screen
-        name="outfit"
-        options={{
-          title: 'Outfits',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="hanger" color={color} />,
         }}
        />
       <Tabs.Screen
@@ -47,6 +47,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="outfit"
+        options={{
+          title: 'Outfits',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="hanger" color={color} />,
+        }}
+       />
       <Tabs.Screen
         name="user"
         options={{
