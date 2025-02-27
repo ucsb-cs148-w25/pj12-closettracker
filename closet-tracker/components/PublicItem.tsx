@@ -1,18 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { getDoc } from 'firebase/firestore';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import { getDoc, updateDoc, arrayUnion, arrayRemove, increment, doc } from 'firebase/firestore';
+import { db } from '@/FirebaseConfig';
 
-interface PublicItemProps {
-  item: any;
-  onLike: (item: any) => void;
-}
-
-export default function PublicItem({ item, onLike }: PublicItemProps) {
+export default function PublicItem({ item }: { item: any }) {
   const [userImg, setUserImg] = useState<string>(' ');
   const [userName, setUserName] = useState<string>('');
   const [itemName, setItemName] = useState<string>('');
   const [outfitImg, setOutfitImg] = useState<string>('');
   const [lastEdited, setLastEdited] = useState<Date | null>(null);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const auth = getAuth();
+  const [currentUser, setCurrentUser] = useState(auth.currentUser);
+
+  // Dynamically detect if the user has changed
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, [auth]);
+
+  const handleLike = async (item: any) => {
+    if (!currentUser) return;
+    const liked = item.likes && item.likes.includes(currentUser.uid);
+    try {
+      await updateDoc(doc(db, "public", item.id), 
+        liked 
+          ? { likes: arrayRemove(currentUser.uid), likesCount: increment(-1) } 
+          : { likes: arrayUnion(currentUser.uid), likesCount: increment(1) }
+      );
+    } catch (error) {
+      console.error("Error updating like:", error);
+    }
+  };
+
+  const liked = currentUser && item.likes && item.likes.includes(currentUser.uid);
 
   useEffect(() => {
     if (item.userRef) {
@@ -42,6 +66,18 @@ export default function PublicItem({ item, onLike }: PublicItemProps) {
     }
   }, [item]);
 
+  const handlePress = async () => {
+    if (likeLoading) return;
+    setLikeLoading(true);
+    try {
+      await handleLike(item);
+    } catch (error) {
+      console.error("Error in like/unlike action", error);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
   return (
     <View style={styles.publicItem}>
       <View style={styles.publicItemHeader}>
@@ -53,8 +89,12 @@ export default function PublicItem({ item, onLike }: PublicItemProps) {
       ) : null}
       <Text style={styles.itemName}>{itemName}</Text>
       <View style={styles.likeContainer}>
-        <TouchableOpacity style={styles.likeButton} onPress={() => onLike(item)}>
-          <Text style={styles.likeButtonText}>Like</Text>
+        <TouchableOpacity style={styles.likeButton} onPress={handlePress} disabled={likeLoading}>
+          {likeLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.likeButtonText}>{liked ? "Unlike" : "Like"}</Text>
+          )}
         </TouchableOpacity>
         <Text style={styles.likeCount}>{item.likes ? item.likes.length : 0}</Text>
       </View>
