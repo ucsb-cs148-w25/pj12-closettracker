@@ -18,6 +18,7 @@ export default function singleItem() {
   const [isPublic, setIsPublic] = useState(false);
   const [publicDocId, setPublicDocId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState(getAuth().currentUser);
+  const [loading, setLoading] = useState(false); // renamed from "makingPublic"
 
   useEffect(() => {
     const unsubscribe = getAuth().onAuthStateChanged((user) => {
@@ -91,6 +92,12 @@ export default function singleItem() {
 
   const handleMakePublic = async () => {
     if (collectionId !== 'outfit' || !currentUser) return;
+    if (isPublic) {
+      alert('This item is already public.');
+      return;
+    }
+    if (loading) return;
+    setLoading(true);
     try {
       const outfitRef = doc(db, "users", currentUser.uid, 'outfit', itemId);
       const newPublicDoc = await addDoc(collection(db, "public"), {
@@ -107,11 +114,15 @@ export default function singleItem() {
       setPublicDocId(newPublicDoc.id);
     } catch (error) {
       console.error("Error making public:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleMakePrivate = async () => {
     if (collectionId !== 'outfit' || !currentUser || !publicDocId) return;
+    if (loading) return;
+    setLoading(true);
     try {
       await deleteDoc(doc(db, "public", publicDocId));
       await deleteDoc(doc(db, "users", currentUser.uid, "public", itemId));
@@ -119,6 +130,8 @@ export default function singleItem() {
       setPublicDocId(null);
     } catch (error) {
       console.error("Error making private:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -146,11 +159,19 @@ export default function singleItem() {
 
         {collectionId === 'outfit' && (
           isPublic ? (
-            <TouchableOpacity onPress={handleMakePrivate} style={styles.publicButton}>
+            <TouchableOpacity 
+              onPress={handleMakePrivate} 
+              style={[styles.publicButton, loading && styles.disabledButton]} 
+              disabled={loading}
+            >
               <Text style={styles.publicButtonText}>Make Private</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={handleMakePublic} style={styles.publicButton}>
+            <TouchableOpacity 
+              onPress={handleMakePublic} 
+              style={[styles.publicButton, loading && styles.disabledButton]} 
+              disabled={loading}
+            >
               <Text style={styles.publicButtonText}>Make Public</Text>
             </TouchableOpacity>
           )
@@ -224,6 +245,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  disabledButton: {
+    backgroundColor: 'gray',
   },
   publicButtonText: {
     color: '#fff',
