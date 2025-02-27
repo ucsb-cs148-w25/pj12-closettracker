@@ -18,7 +18,7 @@ export default function singleItem() {
   const [isPublic, setIsPublic] = useState(false);
   const [publicDocId, setPublicDocId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState(getAuth().currentUser);
-  const [loading, setLoading] = useState(false); // renamed from "makingPublic"
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = getAuth().onAuthStateChanged((user) => {
@@ -136,7 +136,7 @@ export default function singleItem() {
   };
 
   if (!itemData) {
-    return <Text>Loading...</Text>;
+    return <SafeAreaProvider><Text>Loading...</Text></SafeAreaProvider>;
   }
 
   return (

@@ -102,21 +102,6 @@ export default function HomeScreen() {
     ]).start();
   };
 
-  // New function to like a public item
-  const handleLike = async (item: any) => {
-    if (!user) return;
-    const liked = item.likes && item.likes.includes(user.uid);
-    try {
-      await updateDoc(doc(db, "public", item.id), 
-        liked 
-          ? { likes: arrayRemove(user.uid), likesCount: increment(-1) } 
-          : { likes: arrayUnion(user.uid), likesCount: increment(1) }
-      );
-    } catch (error) {
-      console.error("Error updating like:", error);
-    }
-  };
-
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '720deg'],
@@ -157,7 +142,7 @@ export default function HomeScreen() {
           style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0 }}
           renderItem={({ item }) => (
             <View style={{ width: width - 32, alignSelf: 'center', marginVertical: 8, marginRight: 16 }}>
-              <PublicItem item={item} onLike={handleLike} />
+              <PublicItem item={item} />
             </View>
           )}
           keyExtractor={item => item.id}
