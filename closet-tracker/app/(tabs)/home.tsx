@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, Platform, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Image, Platform, StyleSheet, Animated, Easing, Dimensions, ActivityIndicator } from 'react-native';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, getCountFromServer, updateDoc, arrayUnion, query, orderBy, increment, arrayRemove } from "firebase/firestore";
@@ -13,6 +13,7 @@ export default function HomeScreen() {
   const [laundryCount, setLaundryCount] = useState(0);
   const [clothingCount, setClothingCount] = useState(0);
   const [publicItems, setPublicItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   
   const auth = getAuth();
   const db = getFirestore();
@@ -76,6 +77,7 @@ export default function HomeScreen() {
   // Handle wash: trigger loading/rotation, then run wash, then animate complete text
   const handleWash = async () => {
     if (!user) return;
+    setLoading(true);
     startRotation();
     try {
       const laundryRef = collection(db, "users", user.uid, "laundry");
@@ -93,6 +95,7 @@ export default function HomeScreen() {
       console.error("Error washing items:", error);
     }
     stopRotation();
+    setLoading(false);
 
     // Animate completion text opacity: fade in then fade out.
     completeOpacity.setValue(0);
@@ -119,10 +122,10 @@ export default function HomeScreen() {
           <Text style={styles.statNumber}>{clothingCount}</Text>
           <Text>Clean Clothes</Text>
         </View>
-        <TouchableOpacity style={styles.washButton} onPress={handleWash}>
-          <Animated.Text style={[styles.washText, { transform: [{ rotate: rotation }] }]}>
-            Wash
-          </Animated.Text>
+        <TouchableOpacity style={styles.washButton} onPress={handleWash} disabled={loading}>
+            <Animated.Text style={[styles.washText, { transform: [{ rotate: rotation }] }]}>
+              Wash
+            </Animated.Text>
         </TouchableOpacity>
       </View>
       {/* Animated complete text */}
