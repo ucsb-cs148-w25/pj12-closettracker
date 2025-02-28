@@ -34,8 +34,7 @@ You will see options to:
 
 - The app currently runs locally and is not deployed to a cloud platform.
 Ensure you keep your API keys and config files private.
-- If any setup issues arise, refer to the development team for troubleshooting.
-Updating the Deployment Documentation
+- Reach out to our team for configuration files and API keys.
 
 Victor Nardi is responsible for maintaining this document and updating it throughout the quarter.
 
