@@ -107,23 +107,6 @@ export default function createOutfit() {
       return matchesSearch && matchesSize && matchesColor && matchesClothingType && matchesBrand && matchesNotes;
     });
 
-    const handleItemPress = (itemId: string) => {
-        if (selectMode) {
-            setSelectedIds((prev) =>
-                prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
-            );
-        } else {
-            router.push(`../(screens)/singleItem?item=${itemId}&collections=clothing`);
-        }
-    };
-
-    const handleItemLongPress = (itemId: string) => {
-        if (!selectMode) {
-            setSelectMode(true);
-            setSelectedIds([itemId]);
-        }
-    };
-
     const handleAddOutfit = () => {
         if (selectedIds.length === 0) return;
         router.push(`../(screens)/canvas?item=${JSON.stringify(selectedIds)}`);
@@ -142,8 +125,8 @@ export default function createOutfit() {
         return (
             <ClothingItem
                 item={item}
-                onPress={() => handleItemPress(item.id)}
-                onLongPress={() => handleItemLongPress(item.id)}
+                onPress={() => {}}
+                onLongPress={() => {}}
                 backgroundColor={backgroundColor}
                 textColor={textColor}
             />

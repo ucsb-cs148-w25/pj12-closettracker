@@ -1,6 +1,6 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, Redirect } from 'expo-router';
+import { useRouter, Redirect, Link } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 
 export default function Auth() {
@@ -16,9 +16,13 @@ export default function Auth() {
       <Text style={styles.title}>Closet Tracker</Text>
       <Text style={styles.subtitle}>The app's tagline or description goes here.</Text>
 
-      {/* Navigation Buttons */}
-      <Button title="Login" onPress={() => router.push('./login')} />
-      <Button title="Sign Up" onPress={() => router.push('./signup')} />
+      {/* Navigation Links */}
+      <Link href="/login" style={styles.link}>
+        <Text>Login</Text>
+      </Link>
+      <Link href="/signup" style={styles.link}>
+        <Text>Sign Up</Text>
+      </Link>
     </SafeAreaView>
   );
 }
@@ -41,5 +45,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     color: '#666',
+  },
+  link: {
+    fontSize: 18,
+    color: '#1E90FF',
+    marginVertical: 10,
   },
 });
