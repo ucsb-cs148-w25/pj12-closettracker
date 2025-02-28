@@ -3,27 +3,28 @@
 ### Prerequisites
 Before setting up Closet Tracker locally, ensure you have the following:
 
-- Node.js (version > 20.0.0)
-- npm installed
-- API keys and configuration files (Contact the development team to obtain these)
+- **Node.js** (version > 20.0.0)
+- **npm** installed
+- API keys and configuration files (Contact the development team to obtain these))
 
 ### Installation & Setup
 
-#### Clone the repository
+1. **Clone the repository**
    ```sh
    git clone <repository_url>
    cd closet-tracker
+   ```
 
-#### Install dependencies
-**npm install**
+2. **Install dependencies**
+   ```npm install```
 
-#### Set up configuration files
+3. **Set up configuration files**
 
 Obtain the required API keys and config files from the development team.
 Place them in the appropriate locations as specified in the team’s setup guide.
 
-#### Start the application
-npx expo start
+4. **Start the application**
+   ```npx expo start```
 
 You will see options to:
 
