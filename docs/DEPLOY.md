@@ -11,7 +11,7 @@ Before setting up Closet Tracker locally, ensure you have the following:
 
 1. **Clone the repository**
    ```sh
-   git clone <repository_url>
+   git clone git@github.com:ucsb-cs148-w25/pj12-closettracker.git
    cd closet-tracker
    ```
 
