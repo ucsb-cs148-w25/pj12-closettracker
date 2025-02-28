@@ -2,7 +2,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -10,6 +9,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
+import { useUser } from '@/context/UserContext';
 
 export default function OutfitScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -17,10 +17,9 @@ export default function OutfitScreen() {
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { currentUser: user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const auth = getAuth();
   const db = getFirestore();
 
   // Fetch outfit items
@@ -43,15 +42,6 @@ export default function OutfitScreen() {
       setRefreshing(false);
     }
   }, [user, db]);
-
-  // Handle authentication changes
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setRefreshing(true);
-    });
-    return () => unsubscribeAuth();
-  }, []);
 
   // Fetch items when user changes
   useFocusEffect(

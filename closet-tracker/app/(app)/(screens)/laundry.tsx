@@ -1,8 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, View, RefreshControl, Pressable, Modal } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -10,6 +9,7 @@ import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
 import FilterModal from '@/components/FilterModal';
+import { useUser } from '@/context/UserContext';
 
 export default function LaundryScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -17,7 +17,7 @@ export default function LaundryScreen() {
   const router = useRouter();
   const [laundryItems, setLaundryItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { currentUser : user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
 
   const [filters, setFilters] = useState<{
@@ -36,7 +36,6 @@ export default function LaundryScreen() {
   const [originalFilters, setOriginalFilters] = useState(filters);
   const [filterModalVisible, setFilterModalVisible] = useState(false)
 
-  const auth = getAuth();
   const db = getFirestore();
 
   const fetchLaundryItems = useCallback(() => {
@@ -61,15 +60,6 @@ export default function LaundryScreen() {
       setRefreshing(false);
     }
   }, [user, db]);
-
-  // Handle authentication changes
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setRefreshing(true);
-    });
-    return () => unsubscribeAuth();
-  }, []);
 
   // Fetch items when user changes
   useFocusEffect(

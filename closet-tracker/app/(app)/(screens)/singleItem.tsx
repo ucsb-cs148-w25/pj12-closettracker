@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, Button, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import TimesWornComponent from '@/components/SingleItemComponents'
+// import TimesWornComponent from '@/components/SingleItemComponents'
 import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import { db } from "@/FirebaseConfig";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useUser } from '@/context/UserContext';
 
 export default function singleItem() {
   const { item, collections } = useLocalSearchParams();
@@ -17,30 +17,19 @@ export default function singleItem() {
   const [wearCount, setWearCount] = useState<number>(0);
   const [isPublic, setIsPublic] = useState(false);
   const [publicDocId, setPublicDocId] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState(getAuth().currentUser);
+  const { currentUser } = useUser();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = getAuth().onAuthStateChanged((user) => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     const fetchItem = async () => {
       if (!itemId) return;
 
-      const auth = getAuth();
-      const user = auth.currentUser;
-
-      if (!user) {
+      if (!currentUser) {
         console.error("No user is logged in!");
         return;
       }
 
-      const userId = user.uid;
-      const itemRef = doc(db, "users", userId, collectionId, itemId);
+      const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
 
       try {
         const docSnap = await getDoc(itemRef);
@@ -75,12 +64,9 @@ export default function singleItem() {
   const updateWearCount = async (newCount: number) => {
     if (!itemId || newCount < 0) return;
 
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) return;
+    if (!currentUser) return;
 
-    const userId = user.uid;
-    const itemRef = doc(db, "users", userId, collectionId, itemId);
+    const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
 
     try {
       await updateDoc(itemRef, { wearCount: newCount });

@@ -4,12 +4,12 @@ import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getAuth } from "firebase/auth";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
 import { useRouter } from 'expo-router';
 import { removeBackground } from "@/removebg";
+import { useUser } from "@/context/UserContext";
 
 
 export default function UploadScreen() {
@@ -20,6 +20,7 @@ export default function UploadScreen() {
   const [itemName, setItemName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { currentUser } = useUser();
   
   const handleSubmit = async () => {
     if (!rmbgImage || !itemName) {
@@ -36,7 +37,7 @@ export default function UploadScreen() {
       // console.log("Base64 data:", base64);
 
       const fileName = `image_${Date.now()}.jpg`;
-      const filePath = `user_${getAuth().currentUser?.uid}/${fileName}`;
+      const filePath = `user_${currentUser?.uid}/${fileName}`;
   
       // uploading to supabase
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -58,16 +59,14 @@ export default function UploadScreen() {
       console.log("Public URL:", imageUrl);
   
       // store in firestore
-      const auth = getAuth();
       const db = getFirestore();
-      const user = auth.currentUser;
   
-      if (!user) {
+      if (!currentUser) {
         alert("Please sign in before uploading your clothes.");
         return;
       }
   
-      const docRef = await addDoc(collection(db, "users", user.uid, "clothing"), {
+      const docRef = await addDoc(collection(db, "users", currentUser.uid, "clothing"), {
         itemName: itemName,
         image: imageUrl,
       });

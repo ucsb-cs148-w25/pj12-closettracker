@@ -9,12 +9,14 @@ import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-nativ
 import ViewShot, { captureRef } from "react-native-view-shot";
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
+import { useUser } from "@/context/UserContext";
 
 export default function CanvasScreen() {
   const param = useLocalSearchParams();
   const itemIds = JSON.parse(Array.isArray(param.item) ? param.item[0] : param.item);
   const [itemUri, setItemUri] = useState<{ id: string; uri: string; itemName: string }[]>([]);
   const [outfitName, setOutfitName] = useState(""); // Outfit name input state
+  const { currentUser } = useUser();
 
   const router = useRouter();
   const viewRef = useRef<ViewShot>(null);
@@ -49,7 +51,7 @@ export default function CanvasScreen() {
       const arrayBuffer = decode(base64); 
 
       const fileName = `image_${Date.now()}.jpg`;
-      const filePath = `user_${getAuth().currentUser?.uid}/${fileName}`;
+      const filePath = `user_${currentUser?.uid}/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('outfitImages')
@@ -66,14 +68,13 @@ export default function CanvasScreen() {
 
       const auth = getAuth();
       const db = getFirestore();
-      const user = auth.currentUser;
 
-      if (!user) {
+      if (!currentUser) {
         alert("Please sign in before uploading your outfits.");
         return;
       }
 
-      const docRef = await addDoc(collection(db, "users", user.uid, "outfit"), {
+      const docRef = await addDoc(collection(db, "users", currentUser.uid, "outfit"), {
         itemName: outfitName.trim(),
         image: imageUrl,
         clothingIds: itemUri.map((item) => item.id),
@@ -92,15 +93,14 @@ export default function CanvasScreen() {
       if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) return;
 
       const auth = getAuth();
-      const user = auth.currentUser;
 
-      if (!user) {
+      if (!currentUser) {
         console.error("No user is logged in!");
         return;
       }
 
       try {
-        const ClothingRef = collection(db, "users", user.uid, "clothing");
+        const ClothingRef = collection(db, "users", currentUser.uid, "clothing");
         const q = query(ClothingRef, where("__name__", "in", itemIds));
         const querySnapshot = await getDocs(q);
 
