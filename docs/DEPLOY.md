@@ -10,8 +10,9 @@ Before setting up Closet Tracker locally, ensure you have the following:
 ### Installation & Setup
 
 #### Clone the repository
-**git clone <repository_url>**
-**cd closet-tracker**
+   ```sh
+   git clone <repository_url>
+   cd closet-tracker
 
 #### Install dependencies
 **npm install**
