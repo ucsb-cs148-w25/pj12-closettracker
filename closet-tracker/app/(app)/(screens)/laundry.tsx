@@ -157,7 +157,7 @@ export default function LaundryScreen() {
   const handleMoveToWardrobe = async () => {
     if (!user) return;
     if (selectedIds.length === 0) {
-      router.replace("../(tabs)/wardrobe");
+      router.back();
       return;
     }
     try {
@@ -179,7 +179,7 @@ export default function LaundryScreen() {
       await Promise.all(promises);
   
       // Navigate back and trigger wardrobe refresh
-      router.replace("../(tabs)/wardrobe");
+      router.back();
   
     } catch (error) {
       console.error("Error moving items:", error);

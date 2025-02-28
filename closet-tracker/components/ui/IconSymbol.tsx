@@ -13,6 +13,7 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
   "person.fill": "people-alt",
   "shippingbox.fill": "archive",
   "trash": "delete-outline",

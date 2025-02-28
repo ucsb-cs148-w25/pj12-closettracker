@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
-import EditItem from '@/app/(screens)/editItem';
+import EditItem from '@/app/(app)/(screens)/editItem';
 
 // Mock Firebase
 jest.mock('firebase/firestore', () => ({
