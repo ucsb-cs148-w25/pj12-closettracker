@@ -1,27 +1,39 @@
-import { View, Text, TextInput, ActivityIndicator, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Text, TextInput, ActivityIndicator, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { auth } from '@/FirebaseConfig';
+import { auth, db } from '@/FirebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useRouter, Link } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { doc, setDoc } from 'firebase/firestore';
 import beigeColors from '@/aesthetic/beigeColors';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
-export default function Login() {
+export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
 
-    const signIn = async () => {
+    const signUp = async () => {
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                name: name,
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+            });
+
             router.replace('/');
         } catch (error: any) {
-            alert('Sign in failed: ' + error.message);
+            alert('Sign up failed: ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -29,16 +41,15 @@ export default function Login() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Link href="/auth">
-                <IconSymbol
-                    name="chevron.left"
-                    size={30}
-                    color="#FFFFFF"
-                />
-            </Link>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={styles.title}>Sign In</Text>
-
+                <Text style={styles.title}>Sign Up</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Name"
+                    placeholderTextColor="#FFFFFF"
+                    value={name}
+                    onChangeText={setName}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -48,7 +59,6 @@ export default function Login() {
                     autoCapitalize="none"
                     keyboardType="email-address"
                 />
-
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
@@ -58,11 +68,19 @@ export default function Login() {
                     secureTextEntry
                 />
 
+                <TextInput
+                    style={styles.input}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                />
+
                 {loading ? (
                     <ActivityIndicator size="large" color={beigeColors.mutedGold} />
                 ) : (
-                    <TouchableHighlight style={styles.button} onPress={signIn}>
-                        <Text style={styles.buttonText}>Login</Text>
+                    <TouchableHighlight style={styles.button} onPress={signUp}>
+                        <Text style={styles.buttonText}>Create Account</Text>
                     </TouchableHighlight>
                 )}
             </ScrollView>
