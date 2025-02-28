@@ -1,8 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, FlatList, Text, TouchableOpacity, View, RefreshControl, Pressable, Modal } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { getAuth, onAuthStateChanged } from '@firebase/auth';
 import { getFirestore, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -10,6 +9,7 @@ import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
 import FilterModal from '@/components/FilterModal';
+import { useUser } from '@/context/UserContext';
 
 export default function createOutfit() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -17,7 +17,7 @@ export default function createOutfit() {
     const router = useRouter();
     const [items, setItems] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(true);
-    const [user, setUser] = useState<any>(null);
+    const { currentUser : user } = useUser();
     const [searchQuery, setSearchQuery] = useState("");
 
     const [filters, setFilters] = useState<{
@@ -36,7 +36,6 @@ export default function createOutfit() {
     const [originalFilters, setOriginalFilters] = useState(filters);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
 
-    const auth = getAuth();
     const db = getFirestore();
 
     // Fetch wardrobe items
@@ -59,15 +58,6 @@ export default function createOutfit() {
             setRefreshing(false);
         }
     }, [user]);
-
-    // Handle authentication changes
-    useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-            setRefreshing(true);
-        });
-        return () => unsubscribeAuth();
-    }, []);
     
     // Fetch items when user changes
     useFocusEffect(
@@ -107,23 +97,6 @@ export default function createOutfit() {
       return matchesSearch && matchesSize && matchesColor && matchesClothingType && matchesBrand && matchesNotes;
     });
 
-    const handleItemPress = (itemId: string) => {
-        if (selectMode) {
-            setSelectedIds((prev) =>
-                prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
-            );
-        } else {
-            router.push(`../(screens)/singleItem?item=${itemId}&collections=clothing`);
-        }
-    };
-
-    const handleItemLongPress = (itemId: string) => {
-        if (!selectMode) {
-            setSelectMode(true);
-            setSelectedIds([itemId]);
-        }
-    };
-
     const handleAddOutfit = () => {
         if (selectedIds.length === 0) return;
         router.push(`../(screens)/canvas?item=${JSON.stringify(selectedIds)}`);
@@ -142,8 +115,8 @@ export default function createOutfit() {
         return (
             <ClothingItem
                 item={item}
-                onPress={() => handleItemPress(item.id)}
-                onLongPress={() => handleItemLongPress(item.id)}
+                onPress={() => {}}
+                onLongPress={() => {}}
                 backgroundColor={backgroundColor}
                 textColor={textColor}
             />

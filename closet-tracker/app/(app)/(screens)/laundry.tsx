@@ -1,23 +1,23 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme, Modal, TextInput } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, FlatList, Text, TouchableOpacity, View, RefreshControl, Pressable, Modal } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
-import { useRouter } from "expo-router";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { ClothingItem } from "@/components/ClothingItem";
-import { MultiSelectActions } from "@/components/MultiSelectActions";
-import SearchBar from "@/components/searchBar";
+import { useRouter } from 'expo-router';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { ClothingItem } from '@/components/ClothingItem';
+import { MultiSelectActions } from '@/components/MultiSelectActions';
+import SearchBar from '@/components/searchBar';
 import FilterModal from '@/components/FilterModal';
+import { useUser } from '@/context/UserContext';
 
-export default function WardrobeScreen() {
+export default function LaundryScreen() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
   const router = useRouter();
-  const [items, setItems] = useState<any[]>([]);
+  const [laundryItems, setLaundryItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { currentUser : user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
 
   const [filters, setFilters] = useState<{
@@ -34,63 +34,52 @@ export default function WardrobeScreen() {
     notes: '',
   });
   const [originalFilters, setOriginalFilters] = useState(filters);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
 
-  const auth = getAuth();
   const db = getFirestore();
 
-  // Fetch wardrobe items
-  const fetchItems = useCallback(() => {
+  const fetchLaundryItems = useCallback(() => {
     if (user) {
-      const itemsRef = collection(db, "users", user.uid, "clothing");
-      const q = query(itemsRef, orderBy("dateUploaded", "desc"));
-      
+      const laundryRef = collection(db, "users", user.uid, "laundry");
+      const q = query(laundryRef, orderBy("dateUploaded", "desc"));
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedItems = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        setItems(fetchedItems);
+        setLaundryItems(fetchedItems);
         setRefreshing(false);
       });
 
       return unsubscribe;
     } else {
       console.log("No user found. Clearing wardrobe items.");
-      setItems([]); // Clear items if logged out
+      setLaundryItems([]); // Clear items if logged out
       setRefreshing(false);
     }
   }, [user, db]);
 
-  // Handle authentication changes
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setRefreshing(true);
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
   // Fetch items when user changes
   useFocusEffect(
     useCallback(() => {
-      fetchItems();
-    }, [fetchItems])
+      fetchLaundryItems();
+    }, [fetchLaundryItems])
   );
 
   // Define a custom order for sizes
   const sizeOrder: { [key: string]: number } = { xs: 0, s: 1, m: 2, l: 3, xl: 4 };
 
   // Compute dynamic filter options from data
-  const availableSizes = Array.from(new Set(items.map(item => item.size).filter(Boolean)));
+  const availableSizes = Array.from(new Set(laundryItems.map(item => item.size).filter(Boolean)));
   const sortedAvailableSizes = availableSizes.sort(
     (a, b) => (sizeOrder[a.toLowerCase()] ?? Infinity) - (sizeOrder[b.toLowerCase()] ?? Infinity)
   );
-  const availableColors = Array.from(new Set(items.map(item => item.color).filter(Boolean)));
-  const availableClothingTypes = Array.from(new Set(items.map(item => item.clothingType).filter(Boolean)));
+  const availableColors = Array.from(new Set(laundryItems.map(item => item.color).filter(Boolean)));
+  const availableClothingTypes = Array.from(new Set(laundryItems.map(item => item.clothingType).filter(Boolean)));
 
-  const filteredItems = items.filter((item) => {
+  const filteredItems = laundryItems.filter((item) => {
     const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSize = filters.size 
       ? (item.size ? item.size.toLowerCase() === filters.size.toLowerCase() : false)
@@ -119,7 +108,7 @@ export default function WardrobeScreen() {
         handleCancelSelection();
       }
     } else {
-      router.push(`../(screens)/singleItem?item=${itemId}&collections=clothing`);
+      router.push(`../(screens)/singleItem?item=${itemId}&collections=laundry`);
     }
   };
 
@@ -141,7 +130,7 @@ export default function WardrobeScreen() {
     try {
       handleCancelSelection();
       const promises = selectedIds.map((id) =>
-        deleteDoc(doc(db, "users", user.uid, "clothing", id))
+        deleteDoc(doc(db, "users", user.uid, "laundry", id))
       );
 
       await Promise.all(promises);
@@ -152,41 +141,36 @@ export default function WardrobeScreen() {
 
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
-    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=clothing`);
+    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=laundry`);
   };
 
-  const handleLaundrySelected = async () => {
+  const handleMoveToWardrobe = async () => {
     if (!user) return;
     if (selectedIds.length === 0) {
-      router.push("../(screens)/laundry"); // Exit if no user or no items selected
+      router.back();
       return;
     }
-  
     try {
-      handleCancelSelection(); // Exit selection mode
-  
-      // Move items from "wardrobe" to "laundry"
+      handleCancelSelection();
+      
       const promises = selectedIds.map(async (id) => {
-        const wardrobeRef = doc(db, "users", user.uid, "clothing", id); // Reference to wardrobe item
-        const laundryRef = doc(db, "users", user.uid, "laundry", id);  // Reference to laundry item
-  
-        // Fetch wardrobe item data
-        const itemSnapshot = await getDoc(wardrobeRef);
+        const wardrobeRef = doc(db, "users", user.uid, "clothing", id);
+        const laundryRef = doc(db, "users", user.uid, "laundry", id);
+        const itemSnapshot = await getDoc(laundryRef);
+        
         if (itemSnapshot.exists()) {
-          // Move the item to the laundry collection
-          await setDoc(laundryRef, itemSnapshot.data());
-          // Remove the item from the wardrobe collection
-          await deleteDoc(wardrobeRef);
+          await setDoc(wardrobeRef, itemSnapshot.data());
+          await deleteDoc(laundryRef);
         } else{
-          console.log(`Item with ID ${id} does not exist in wardrobe.`);
+          console.log(`Item with ID ${id} does not exist in laundry.`);
         }
       });
   
-      // Wait for all items to be moved
       await Promise.all(promises);
   
-      // Navigate to the laundry screen after moving items
-      router.push("../(screens)/laundry");
+      // Navigate back and trigger wardrobe refresh
+      router.back();
+  
     } catch (error) {
       console.error("Error moving items:", error);
     }
@@ -228,7 +212,7 @@ export default function WardrobeScreen() {
             />
           ) : (
             <View style={styles.nonSelectHeader}>
-              <Text style={styles.title}>Wardrobe</Text>
+              <Text style={styles.title}>Laundry</Text>
               <Pressable 
                 onPress={() => {
                   setOriginalFilters(filters); // store current filters in case of cancel
@@ -259,7 +243,7 @@ export default function WardrobeScreen() {
         ) : (
           <FlatList
             contentContainerStyle={styles.clothesContainer}
-            style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0, height: '100%' }}
+            style={{ height: '100%' }}
             data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
@@ -270,7 +254,7 @@ export default function WardrobeScreen() {
                 refreshing={refreshing}
                 onRefresh={() => {
                   setRefreshing(true);
-                  fetchItems();
+                  fetchLaundryItems();
                 }}
                 colors={['#4160fb']}
                 tintColor="#4160fb"
@@ -280,8 +264,8 @@ export default function WardrobeScreen() {
         )}
         <TouchableOpacity
           style={styles.laundryButton}
-          onPress={handleLaundrySelected}>
-          <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
+          onPress={handleMoveToWardrobe}>
+          <IconSymbol name={"tshirt.fill"} color={"#4160fb"} />
         </TouchableOpacity>
 
         <Modal
@@ -342,11 +326,13 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   laundryButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
     width: 80,
     height: 80,
-    backgroundColor: '#9e9785',
+    backgroundColor: '#fff',
     borderRadius: 50,
     position: 'absolute',
     bottom: 100,

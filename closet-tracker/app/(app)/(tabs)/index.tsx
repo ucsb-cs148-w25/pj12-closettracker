@@ -1,35 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, Platform, StyleSheet, Animated, Easing, Dimensions, ActivityIndicator } from 'react-native';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, getCountFromServer, updateDoc, arrayUnion, query, orderBy, increment, arrayRemove } from "firebase/firestore";
 import PublicItem from '@/components/PublicItem';
+import { useUser } from '@/context/UserContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
   // State for user, counts, and public items
-  const [user, setUser] = useState<any>(null);
+  const { currentUser : user } = useUser();
   const [laundryCount, setLaundryCount] = useState(0);
   const [clothingCount, setClothingCount] = useState(0);
   const [publicItems, setPublicItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const auth = getAuth();
   const db = getFirestore();
 
   // Animated values
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const completeOpacity = useRef(new Animated.Value(0)).current;
-
-  // Listen for auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) fetchCounts(currentUser.uid);
-    });
-    return unsubscribe;
-  }, []);
 
   // Fetch counts of clothing and laundry items
   const fetchCounts = async (uid: string) => {
@@ -45,6 +35,8 @@ export default function HomeScreen() {
 
   // Set up listener for public items
   useEffect(() => {
+    if (!user) return;
+    fetchCounts(user.uid);
     const publicRef = collection(db, "public");
     // Firestore does not allow ordering by array length; instead, we order by "likesCount"
     const q = query(publicRef, orderBy("likesCount", "desc"));
@@ -53,7 +45,7 @@ export default function HomeScreen() {
       setPublicItems(items);
     });
     return unsubscribe;
-  }, []);
+  }, [user, db]);
 
   // Start a rotation loop when loading
   const startRotation = () => {

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { doc, updateDoc, getDoc, getFirestore, DocumentSnapshot, serverTimestamp, collection } from "firebase/firestore"; 
-import { auth } from '@/FirebaseConfig';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import OutfitDataDropdowns from '@/components/UploadOutfitComponents';
 import ClothingDataDropdowns from '@/components/UploadClothingComponents';
+import { useUser } from '@/context/UserContext';
 
 export default function EditItem () {
   const [itemName, setItemName] = useState<string | null>(null)
@@ -17,7 +17,7 @@ export default function EditItem () {
   const collectionId = Array.isArray(collections) ? collections[0] : collections;
   const router = useRouter();
   const db = getFirestore();
-  const user = auth.currentUser;
+  const { currentUser : user } = useUser();
   const [docSnapshot, setDocSnapshot] = useState<DocumentSnapshot | null>(null);
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function EditItem () {
       });
       
       //go back to wardrobe
-      router.replace(`../(tabs)/wardrobe`);
+      router.back();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
@@ -141,7 +141,7 @@ export default function EditItem () {
       });
       
       //go back to wardrobe
-      router.replace(`../(tabs)/wardrobe`);
+      router.back();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
@@ -171,7 +171,7 @@ export default function EditItem () {
       });
       
       //go back to outfit
-      router.replace(`../(tabs)/outfit`);
+      router.back();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }

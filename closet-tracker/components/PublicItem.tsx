@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { getAuth } from 'firebase/auth';
 import { getDoc, updateDoc, arrayUnion, arrayRemove, increment, doc } from 'firebase/firestore';
 import { db } from '@/FirebaseConfig';
+import { useUser } from '@/context/UserContext';
 
 export default function PublicItem({ item }: { item: any }) {
   const [userImg, setUserImg] = useState<string>(' ');
@@ -11,16 +11,7 @@ export default function PublicItem({ item }: { item: any }) {
   const [outfitImg, setOutfitImg] = useState<string>('');
   const [lastEdited, setLastEdited] = useState<Date | null>(null);
   const [likeLoading, setLikeLoading] = useState(false);
-  const auth = getAuth();
-  const [currentUser, setCurrentUser] = useState(auth.currentUser);
-
-  // Dynamically detect if the user has changed
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
-  }, [auth]);
+  const { currentUser } = useUser();
 
   const handleLike = async (item: any) => {
     if (!currentUser) return;

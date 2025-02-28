@@ -3,11 +3,10 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ScrollView,
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '@/FirebaseConfig';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { useRouter } from 'expo-router';
 import { doc, getDoc, updateDoc, collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
+import { useUser } from '@/context/UserContext';
 
 interface Stat {
   label: string;
@@ -16,7 +15,7 @@ interface Stat {
 }
 
 export default function UserProfile() {
-  const [user, setUser] = useState<User | null>(null);
+  const { currentUser: user } = useUser();
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
@@ -30,14 +29,11 @@ export default function UserProfile() {
   ]);
   const [wardrobeData, setWardrobeData] = useState<any[]>([]);
 
-  const router = useRouter();
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      setUser(authUser);
+    const unsubscribe = async () => {
       setLoading(false);
-      if (authUser) {
-        const userRef = doc(db, 'users', authUser.uid);
+      if (user) {
+        const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
@@ -46,7 +42,7 @@ export default function UserProfile() {
           setImage(userData?.profilePicture || null);
         }
 
-        const wardrobeRef = collection(db, 'users', authUser.uid, 'clothing');
+        const wardrobeRef = collection(db, 'users', user.uid, 'clothing');
         const q = query(wardrobeRef, orderBy('wearCount', 'desc'));
         const unsubscribeWardrobe = onSnapshot(q, (snapshot) => {
           const wardrobeItems = snapshot.docs.map((doc) => ({
@@ -67,19 +63,15 @@ export default function UserProfile() {
             },
           ]);
         });
-
-        return () => unsubscribeWardrobe();
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
+    };
+    unsubscribe();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
       await auth.signOut();
       console.log('User signed out successfully');
-      router.replace('/');
     } catch (error) {
       console.log('Error signing out: ', error);
     }
