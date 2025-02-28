@@ -12,7 +12,7 @@ Before setting up Closet Tracker locally, ensure you have the following:
 1. **Clone the repository**
    ```sh
    git clone git@github.com:ucsb-cs148-w25/pj12-closettracker.git
-   cd closet-tracker
+   cd pj12-closettracker/closet-tracker
    ```
 
 2. **Install dependencies**
