@@ -271,7 +271,7 @@ export default function WardrobeScreen() {
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={handleLaundrySelected}>
-          <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
+          <IconSymbol name={"washer.fill"} color={"#fff"} />        
         </TouchableOpacity>
 
         <Modal
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#9e9785',
     borderRadius: 50,
     position: 'absolute',
-    bottom: 100,
+    bottom: Platform.OS === 'ios' ? 100 : 50,
     right: 20,
     // shadow
     shadowColor: '#000',

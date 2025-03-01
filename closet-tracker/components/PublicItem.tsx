@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { getDoc, updateDoc, arrayUnion, arrayRemove, increment, doc } from 'firebase/firestore';
 import { db } from '@/FirebaseConfig';
 import { useUser } from '@/context/UserContext';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function PublicItem({ item }: { item: any }) {
   const [userImg, setUserImg] = useState<string>(' ');
@@ -81,11 +82,7 @@ export default function PublicItem({ item }: { item: any }) {
       <Text style={styles.itemName}>{itemName}</Text>
       <View style={styles.likeContainer}>
         <TouchableOpacity style={styles.likeButton} onPress={handlePress} disabled={likeLoading}>
-          {likeLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.likeButtonText}>{liked ? "Unlike" : "Like"}</Text>
-          )}
+          <IconSymbol name={liked ? "heart" : "heart.fill"} color={liked ? "red" : "black"} size={24} />
         </TouchableOpacity>
         <Text style={styles.likeCount}>{item.likes ? item.likes.length : 0}</Text>
       </View>
@@ -148,10 +145,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   likeButton: {
-    backgroundColor: '#4160fb',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+    paddingVertical: 5,
+    borderColor: '#000',
   },
   likeButtonText: {
     color: '#fff',

@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4160fb',
     borderRadius: 50,
     position: 'absolute',
-    bottom: 100,
+    bottom: Platform.OS === 'ios' ? 100 : 50,
     right: 20,
     // shadow
     shadowColor: '#000',
