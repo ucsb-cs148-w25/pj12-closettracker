@@ -265,7 +265,7 @@ export default function LaundryScreen() {
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={handleMoveToWardrobe}>
-          <IconSymbol name={"tshirt.fill"} color={"#4160fb"} />
+          <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
         </TouchableOpacity>
 
         <Modal
