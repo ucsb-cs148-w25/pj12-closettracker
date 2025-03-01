@@ -12,6 +12,8 @@ export default function HomeScreen() {
   const { currentUser : user } = useUser();
   const [laundryCount, setLaundryCount] = useState(0);
   const [clothingCount, setClothingCount] = useState(0);
+  const [tempLaundryCount, setTempLaundryCount] = useState(0);
+  const [tempClothingCount, setTempClothingCount] = useState(0);
   const [publicItems, setPublicItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -25,27 +27,53 @@ export default function HomeScreen() {
   const fetchCounts = async (uid: string) => {
     try {
       const laundrySnapshot = await getCountFromServer(collection(db, "users", uid, "laundry"));
-      setLaundryCount(laundrySnapshot.data().count);
       const clothingSnapshot = await getCountFromServer(collection(db, "users", uid, "clothing"));
-      setClothingCount(clothingSnapshot.data().count);
+      return {
+        laundryCount: laundrySnapshot.data().count,
+        clothingCount: clothingSnapshot.data().count,
+      };
     } catch (error) {
       console.error("Error fetching counts:", error);
+      return {
+        laundryCount: 0,
+        clothingCount: 0,
+      };
     }
   };
 
-  // Set up listener for public items
+  // Set up listener for public items and counts
   useEffect(() => {
     if (!user) return;
-    fetchCounts(user.uid);
+
+    const updateCounts = async () => {
+      const counts = await fetchCounts(user.uid);
+      if (!loading) {
+        setLaundryCount(counts.laundryCount);
+        setClothingCount(counts.clothingCount);
+      } else {
+        setTempLaundryCount(counts.laundryCount);
+        setTempClothingCount(counts.clothingCount);
+      }
+    };
+
+    updateCounts();
+
     const publicRef = collection(db, "public");
-    // Firestore does not allow ordering by array length; instead, we order by "likesCount"
     const q = query(publicRef, orderBy("likesCount", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribePublic = onSnapshot(q, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPublicItems(items);
     });
-    return unsubscribe;
-  }, [user, db]);
+
+    const unsubscribeLaundry = onSnapshot(collection(db, "users", user.uid, "laundry"), updateCounts);
+    const unsubscribeClothing = onSnapshot(collection(db, "users", user.uid, "clothing"), updateCounts);
+
+    return () => {
+      unsubscribePublic();
+      unsubscribeLaundry();
+      unsubscribeClothing();
+    };
+  }, [user, db, loading]);
 
   // Start a rotation loop when loading
   const startRotation = () => {
@@ -81,20 +109,29 @@ export default function HomeScreen() {
         await deleteDoc(doc(db, "users", user.uid, "laundry", docSnap.id));
       });
       await Promise.all(promises);
-      // Refresh counts
-      fetchCounts(user.uid);
+
+      // Fetch updated counts but do not update state yet
+      const counts = await fetchCounts(user.uid);
+
+      // Wait for loading to finish before updating state
+      stopRotation();
+      setLoading(false);
+
+      // Update state with new counts
+      setLaundryCount(counts.laundryCount);
+      setClothingCount(counts.clothingCount);
+
+      // Animate completion text opacity: fade in then fade out.
+      completeOpacity.setValue(0);
+      Animated.sequence([
+        Animated.timing(completeOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(completeOpacity, { toValue: 0, duration: 1000, delay: 500, useNativeDriver: true }),
+      ]).start();
     } catch (error) {
       console.error("Error washing items:", error);
+      stopRotation();
+      setLoading(false);
     }
-    stopRotation();
-    setLoading(false);
-
-    // Animate completion text opacity: fade in then fade out.
-    completeOpacity.setValue(0);
-    Animated.sequence([
-      Animated.timing(completeOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(completeOpacity, { toValue: 0, duration: 1000, delay: 500, useNativeDriver: true }),
-    ]).start();
   };
 
   const rotation = rotateAnim.interpolate({
