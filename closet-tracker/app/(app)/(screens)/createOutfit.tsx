@@ -13,7 +13,6 @@ import { useUser } from '@/context/UserContext';
 
 export default function createOutfit() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [selectMode, setSelectMode] = useState(true);
     const router = useRouter();
     const [items, setItems] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(true);
@@ -37,6 +36,12 @@ export default function createOutfit() {
     const [filterModalVisible, setFilterModalVisible] = useState(false);
 
     const db = getFirestore();
+    
+    const handleItemPress = (itemId: string) => {
+        setSelectedIds((prev) =>
+            prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+        );
+    };
 
     // Fetch wardrobe items
     const fetchItems = useCallback(() => {
@@ -115,7 +120,7 @@ export default function createOutfit() {
         return (
             <ClothingItem
                 item={item}
-                onPress={() => {}}
+                onPress={() => handleItemPress(item.id)}
                 onLongPress={() => {}}
                 backgroundColor={backgroundColor}
                 textColor={textColor}
@@ -127,20 +132,16 @@ export default function createOutfit() {
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    {selectMode ? (
-                        <MultiSelectActions
-                            selectedIds={selectedIds}
-                            showCancel={false}
-                            handleCancelSelection={() => {}}
-                            handleAddOutfit={handleAddOutfit}
-                            handleEdit={() => {}}
-                            showEdit={false}
-                            handleDeleteSelected={async () => {}}
-                            showDelete={false}
-                        />
-                    ) : (
-                        <Text style={styles.title}>Wardrobe</Text>
-                    )}
+                    <MultiSelectActions
+                        selectedIds={selectedIds}
+                        showCancel={false}
+                        handleCancelSelection={() => {}}
+                        handleAddOutfit={handleAddOutfit}
+                        handleEdit={() => {}}
+                        showEdit={false}
+                        handleDeleteSelected={async () => {}}
+                        showDelete={false}
+                    />
                 </View>
 
                 <View style={styles.nonSelectHeader}>
