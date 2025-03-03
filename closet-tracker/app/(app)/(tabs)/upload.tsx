@@ -69,10 +69,12 @@ export default function UploadScreen() {
       const docRef = await addDoc(collection(db, "users", currentUser.uid, "clothing"), {
         itemName: itemName,
         image: imageUrl,
+        dateUploaded: new Date(),
       });
   
       alert("Item uploaded successfully!");
       setImage(null);
+      setRmbgImage(null);
       setItemName("");
       
       console.log(docRef.id)
@@ -112,8 +114,11 @@ export default function UploadScreen() {
 
         {/* Subtitle Section */}
         <ThemedView style={[styles.subtitleContainer, { backgroundColor: 'transparent' }]}>
-          <ThemedText type="subtitle" style={{ backgroundColor: 'transparent', color: '#000' }}>
-            Use your camera to upload an item, or select a photo from your camera roll. Please ensure the photo is taken on a solid background.
+          <ThemedText style={{ backgroundColor: 'transparent', color: '#000' }}>
+            Use your camera to upload an item, or select a photo from your camera roll.
+          </ThemedText>
+          <ThemedText style={{ backgroundColor: 'transparent', color: '#000' }}>
+            Please ensure the photo is taken on a solid background.
           </ThemedText>
         </ThemedView>
 
@@ -182,6 +187,7 @@ export default function UploadScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 16,
   },
   contentContainer: {
     paddingHorizontal: 16,
@@ -192,7 +198,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   subtitleContainer: {
-    alignItems: 'center',
     marginBottom: 30,
   },
   uploadBox: {

@@ -103,7 +103,7 @@ export default function EditItem () {
       });
       
       //go back to wardrobe
-      router.back();
+      router.dismissAll();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
@@ -141,7 +141,7 @@ export default function EditItem () {
       });
       
       //go back to wardrobe
-      router.back();
+      router.dismissAll();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
@@ -171,7 +171,7 @@ export default function EditItem () {
       });
       
       //go back to outfit
-      router.back();
+      router.dismissAll();
     } catch (error) {
       console.error('Error interacting with Firestore: ', error);
     }
