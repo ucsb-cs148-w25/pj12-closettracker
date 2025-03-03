@@ -55,7 +55,7 @@ export default function LaundryScreen() {
 
       return unsubscribe;
     } else {
-      console.log("No user found. Clearing wardrobe items.");
+      console.log("No user found. Clearing laundry items.");
       setLaundryItems([]); // Clear items if logged out
       setRefreshing(false);
     }
@@ -237,7 +237,7 @@ export default function LaundryScreen() {
             <Text style={styles.emptyMessage}>
               {searchQuery || filters.size || filters.color || filters.clothingType || filters.brand || filters.notes
                 ? "No items found."
-                : "Your wardrobe is empty."}
+                : "All clothings are clean!"}
             </Text>
           </View>
         ) : (

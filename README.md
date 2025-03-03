@@ -36,7 +36,7 @@ The frontend of the app will rely on React Native with Expo Go to ensure compati
 2. Start the app
 
    ```bash
-    npx expo start
+    npx expo start --tunnel
    ```
 
 In the output, you'll find options to open the app in a
