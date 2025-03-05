@@ -134,7 +134,6 @@ export default function UploadScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter item name"
-                value={itemName}
                 onChangeText={setItemName}
               />
 

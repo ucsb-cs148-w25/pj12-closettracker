@@ -50,8 +50,8 @@ export default function OutfitDataDropdowns ({
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder={placeholders.itemName || "Set name"}
-          value={newName}
+          placeholder={"Set name"}
+          defaultValue={placeholders.itemName}
           onChangeText={setNewName}
         />
       ),
@@ -63,8 +63,8 @@ export default function OutfitDataDropdowns ({
         <TextInput
           style={styles.input}
           placeholderTextColor="#000"
-          placeholder={placeholders.note || "Add note"}
-          value={note}
+          placeholder={"Add note"}
+          defaultValue={placeholders.note}
           onChangeText={setNote}
           multiline={true}
         />

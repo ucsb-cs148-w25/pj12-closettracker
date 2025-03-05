@@ -135,7 +135,7 @@ export default function CanvasScreen() {
         <TextInput
           style={styles.input}
           placeholder="Enter outfit name..."
-          value={outfitName}
+          defaultValue={outfitName}
           onChangeText={setOutfitName}
           placeholderTextColor="#aaa"
         />

@@ -197,7 +197,7 @@ export default function UserProfile() {
             {isEditing ? (
               <TextInput
                 style={styles.descriptionInput}
-                value={description}
+                defaultValue={description}
                 onChangeText={setDescription}
                 multiline
                 autoCapitalize="none"
