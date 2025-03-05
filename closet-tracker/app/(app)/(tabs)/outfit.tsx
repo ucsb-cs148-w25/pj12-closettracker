@@ -92,7 +92,8 @@ export default function OutfitScreen() {
 
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
-    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=outfit`);
+    // router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=outfit`);
+    router.push(`../(screens)/canvas?outfitId=${selectedIds[0]}`)
   };
 
   const handleSearch = (query: string) => {
