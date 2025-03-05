@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "react";
-import { SafeAreaView, View, StyleSheet, Text, Image, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaView, View, StyleSheet, Text, Image, TextInput, TouchableOpacity, Switch } from "react-native";
 import DraggableResizableImage from "@/components/DraggableResizableImage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
-import { collection, query, where, getDocs, getFirestore, addDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, getFirestore, addDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist";
 import ViewShot, { captureRef } from "react-native-view-shot";
@@ -16,6 +16,8 @@ export default function CanvasScreen() {
   const itemIds = JSON.parse(Array.isArray(param.item) ? param.item[0] : param.item);
   const [itemUri, setItemUri] = useState<{ id: string; uri: string; itemName: string }[]>([]);
   const [outfitName, setOutfitName] = useState(""); // Outfit name input state
+  const [profilePictureUri, setProfilePictureUri] = useState<string | null>(null); // Profile picture state
+  const [showProfilePicture, setShowProfilePicture] = useState(false); // Toggle state for profile picture
   const { currentUser } = useUser();
 
   const router = useRouter();
@@ -111,6 +113,13 @@ export default function CanvasScreen() {
         }));
 
         setItemUri(fetchedImages);
+
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setProfilePictureUri(userData?.profilePicture || null);
+        }
       } catch (error) {
         console.error("Error fetching items:", error);
       }
@@ -144,9 +153,24 @@ export default function CanvasScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Canvas with clothing items */}
+      {profilePictureUri && (
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleText}>Show Profile Picture</Text>
+          <Switch
+            value={showProfilePicture}
+            onValueChange={(value) => setShowProfilePicture(value)}
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={showProfilePicture ? "#007BFF" : "#f4f3f4"}
+          />
+        </View>
+      )}
+
+      {/* Canvas with clothing items and profile picture */}
       <ViewShot style={styles.canvas} ref={viewRef} options={{ format: 'png', quality: 0.9 }}>
         <View>
+          {showProfilePicture && profilePictureUri && (
+            <DraggableResizableImage key="profile" uri={profilePictureUri} />
+          )}
           {itemUri.map(({ id, uri }) => (
             <DraggableResizableImage key={id} uri={uri} />
           ))}
@@ -203,6 +227,20 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+  toggleText: {
+    marginRight: 10,
+    fontSize: 16,
+    color: "#333",
   },
   canvas: {
     flex: 1,
