@@ -287,6 +287,7 @@ export default function WardrobeScreen() {
           style={styles.laundryButton}
           onPress={handleLaundrySelected}>
           <IconSymbol name={"washer.fill"} color={"#fff"} />
+          <Text style={{color:"#fff"}}> Laundry </Text>
         </TouchableOpacity>
 
         <Modal
