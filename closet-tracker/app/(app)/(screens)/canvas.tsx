@@ -23,6 +23,28 @@ export default function CanvasScreen() {
   const router = useRouter();
   const viewRef = useRef<ViewShot>(null);
 
+  const [combinedItems, setCombinedItems] = useState<{ id: string; uri: string; itemName: string }[]>([]);
+
+  useEffect(() => {
+    if (showProfilePicture && profilePictureUri) {
+      // add pfp to list if it's toggled on and not already in list
+      if (!combinedItems.some((item) => item.id === "profile")) {
+        const pfpItem = { id: "profile", uri: profilePictureUri, itemName: "Profile Picture" };
+        setCombinedItems([pfpItem, ...combinedItems]);
+      }
+    } else {
+      // remove pfp from  list if toggled off
+      setCombinedItems(combinedItems.filter((item) => item.id !== "profile"));
+    }
+  }, [showProfilePicture, profilePictureUri]);
+
+  const handleDragEnd = ({ data }: { data: { id: string; uri: string; itemName: string }[] }) => {
+    setCombinedItems(data);
+
+    const newItemUri = data.filter((item) => item.id !== "profile");
+    setItemUri(newItemUri);
+  };
+
   const takeScreenshot = async () => {
     try {
       const uri = await captureRef(viewRef, {
@@ -113,6 +135,7 @@ export default function CanvasScreen() {
         }));
 
         setItemUri(fetchedImages);
+        setCombinedItems(fetchedImages);
 
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
@@ -168,10 +191,7 @@ export default function CanvasScreen() {
       {/* Canvas with clothing items and profile picture */}
       <ViewShot style={styles.canvas} ref={viewRef} options={{ format: 'png', quality: 0.9 }}>
         <View>
-          {showProfilePicture && profilePictureUri && (
-            <DraggableResizableImage key="profile" uri={profilePictureUri} />
-          )}
-          {itemUri.map(({ id, uri }) => (
+          {combinedItems.map(({ id, uri }) => (
             <DraggableResizableImage key={id} uri={uri} />
           ))}
         </View>
@@ -182,9 +202,9 @@ export default function CanvasScreen() {
         <Text style={styles.layerTitle}>Adjust Layer Order</Text>
         <DraggableFlatList
           horizontal
-          data={itemUri}
+          data={combinedItems}
           keyExtractor={(item) => item.id}
-          onDragEnd={({ data }) => setItemUri(data)}
+          onDragEnd={handleDragEnd}
           renderItem={renderItem}
           contentContainerStyle={{ paddingHorizontal: 10 }}
         />
