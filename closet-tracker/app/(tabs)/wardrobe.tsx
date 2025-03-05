@@ -44,7 +44,7 @@ export default function WardrobeScreen() {
     if (user) {
       const itemsRef = collection(db, "users", user.uid, "clothing");
       const q = query(itemsRef, orderBy("dateUploaded", "desc"));
-      
+
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const fetchedItems = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -92,19 +92,19 @@ export default function WardrobeScreen() {
 
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSize = filters.size 
+    const matchesSize = filters.size
       ? (item.size ? item.size.toLowerCase() === filters.size.toLowerCase() : false)
       : true;
-    const matchesColor = filters.color 
+    const matchesColor = filters.color
       ? (item.color ? item.color.toLowerCase() === filters.color.toLowerCase() : false)
       : true;
-    const matchesClothingType = filters.clothingType 
+    const matchesClothingType = filters.clothingType
       ? (item.clothingType ? item.clothingType.toLowerCase() === filters.clothingType.toLowerCase() : false)
       : true;
-    const matchesBrand = filters.brand 
+    const matchesBrand = filters.brand
       ? (item.brand ? item.brand.toLowerCase().includes(filters.brand.toLowerCase()) : false)
       : true;
-    const matchesNotes = filters.notes 
+    const matchesNotes = filters.notes
       ? (item.notes ? item.notes.toLowerCase().includes(filters.notes.toLowerCase()) : false)
       : true;
     return matchesSearch && matchesSize && matchesColor && matchesClothingType && matchesBrand && matchesNotes;
@@ -161,15 +161,15 @@ export default function WardrobeScreen() {
       router.push("../(screens)/laundry"); // Exit if no user or no items selected
       return;
     }
-  
+
     try {
       handleCancelSelection(); // Exit selection mode
-  
+
       // Move items from "wardrobe" to "laundry"
       const promises = selectedIds.map(async (id) => {
         const wardrobeRef = doc(db, "users", user.uid, "clothing", id); // Reference to wardrobe item
         const laundryRef = doc(db, "users", user.uid, "laundry", id);  // Reference to laundry item
-  
+
         // Fetch wardrobe item data
         const itemSnapshot = await getDoc(wardrobeRef);
         if (itemSnapshot.exists()) {
@@ -177,14 +177,14 @@ export default function WardrobeScreen() {
           await setDoc(laundryRef, itemSnapshot.data());
           // Remove the item from the wardrobe collection
           await deleteDoc(wardrobeRef);
-        } else{
+        } else {
           console.log(`Item with ID ${id} does not exist in wardrobe.`);
         }
       });
-  
+
       // Wait for all items to be moved
       await Promise.all(promises);
-  
+
       // Navigate to the laundry screen after moving items
       router.push("../(screens)/laundry");
     } catch (error) {
@@ -199,7 +199,21 @@ export default function WardrobeScreen() {
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
-    const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
+    const getBackgroundColor = (wearCount: number, isSelected: boolean) => {
+      if (isSelected) return '#4160fb'; // Blue when selected
+
+      // Normalize wearCount to a range (e.g., 0 to 10 or 20)
+      const maxWearCount = 10;
+      const normalizedCount = Math.min(wearCount, maxWearCount) / maxWearCount;
+
+      // Interpolate lightness from 75% (light beige) to 30% (dark brown)
+      const lightness = 75 - normalizedCount * 45;
+
+      return `hsl(30, 50%, ${lightness}%)`; // HSL with a brownish hue
+    };
+
+    // Usage
+    const backgroundColor = getBackgroundColor(item.wearCount, isSelected);
     const textColor = isSelected ? 'white' : 'black';
 
     return (
@@ -221,7 +235,7 @@ export default function WardrobeScreen() {
             <MultiSelectActions
               selectedIds={selectedIds}
               handleCancelSelection={handleCancelSelection}
-              handleAddOutfit={() => {}}
+              handleAddOutfit={() => { }}
               showAddOutfit={false}
               handleEdit={handleEdit}
               handleDeleteSelected={handleDeleteSelected}
@@ -229,7 +243,7 @@ export default function WardrobeScreen() {
           ) : (
             <View style={styles.nonSelectHeader}>
               <Text style={styles.title}>Wardrobe</Text>
-              <Pressable 
+              <Pressable
                 onPress={() => {
                   setOriginalFilters(filters); // store current filters in case of cancel
                   setFilterModalVisible(true);
@@ -260,7 +274,7 @@ export default function WardrobeScreen() {
           <FlatList
             contentContainerStyle={styles.clothesContainer}
             style={{ marginBottom: Platform.OS === 'ios' ? 50 : 0, height: '100%' }}
-            data={filteredItems.length % 2 === 1 ? [...filteredItems, {id: "\"STUB\""}] : filteredItems}
+            data={filteredItems.length % 2 === 1 ? [...filteredItems, { id: "\"STUB\"" }] : filteredItems}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             extraData={selectedIds}
@@ -281,7 +295,7 @@ export default function WardrobeScreen() {
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={handleLaundrySelected}>
-          <IconSymbol name={"archivebox.fill"} color={"#fff"} />        
+          <IconSymbol name={"archivebox.fill"} color={"#fff"} />
         </TouchableOpacity>
 
         <Modal
