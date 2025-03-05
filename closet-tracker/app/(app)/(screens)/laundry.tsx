@@ -263,9 +263,14 @@ export default function LaundryScreen() {
           />
         )}
         <TouchableOpacity
-          style={styles.laundryButton}
-          onPress={handleMoveToWardrobe}>
+          style={[
+            styles.laundryButton,
+            selectedIds.length > 0 ? styles.laundryButtonSelected : {},
+          ]}
+          onPress={handleMoveToWardrobe}
+        >
           <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
+          {selectedIds.length > 0 && <Text style={styles.laundryButtonText}>Clean</Text>}
         </TouchableOpacity>
 
         <Modal
@@ -343,5 +348,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  laundryButtonSelected: {
+    backgroundColor: '#4160fb', // Change color to indicate selection
+    transform: [{ scale: 1.1 }], // Slightly enlarge the button
+  },
+  
+  laundryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    alignItems: 'center',
   }
 });
