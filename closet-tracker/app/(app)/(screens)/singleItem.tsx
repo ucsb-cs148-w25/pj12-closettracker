@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import TimesWornComponent from '@/components/SingleItemComponents'
 import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/context/UserContext';
 
 export default function singleItem() {
@@ -126,11 +126,11 @@ export default function singleItem() {
   };
 
   if (!itemData) {
-    return <SafeAreaProvider><Text>Loading...</Text></SafeAreaProvider>;
+    return <SafeAreaView><Text>Loading...</Text></SafeAreaView>;
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.container}>
           {itemData.image && (
@@ -140,31 +140,47 @@ export default function singleItem() {
 
           <TimesWornComponent itemId={itemId} wearCountFromDB={wearCount} collectionId={collectionId} />
           
-          {collectionId === 'clothing' && (
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoHeader}>Item Details</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>📏 Size:</Text>
-              <Text style={styles.infoText}>{itemData.size || 'Uh Oh, it\'s empty'}</Text>
+            {collectionId === 'clothing' && (
+            <View style={styles.infoContainer}>
+              {(itemData.size || itemData.color || itemData.clothingType || itemData.brand || itemData.note) ? (
+                <>
+                  <Text style={styles.infoHeader}>Item Details</Text>
+                  {itemData.size && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>📏 Size:</Text>
+                      <Text style={styles.infoText}>{itemData.size}</Text>
+                    </View>
+                  )}
+                  {itemData.color && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>🎨 Color:</Text>
+                      <Text style={styles.infoText}>{itemData.color}</Text>
+                    </View>
+                  )}
+                  {itemData.clothingType && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>👕 Type:</Text>
+                      <Text style={styles.infoText}>{itemData.clothingType}</Text>
+                    </View>
+                  )}
+                  {itemData.brand && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>🏷️ Brand:</Text>
+                      <Text style={styles.infoText}>{itemData.brand}</Text>
+                    </View>
+                  )}
+                  {itemData.note && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>📝 Notes:</Text>
+                      <Text style={styles.infoText}>{itemData.note}</Text>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <Text style={styles.infoText}>No additional details available.</Text>
+              )}
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>🎨 Color:</Text>
-              <Text style={styles.infoText}>{itemData.color || 'Uh Oh, it\'s empty'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>👕 Type:</Text>
-              <Text style={styles.infoText}>{itemData.clothingType || 'Uh Oh, it\'s empty'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>🏷️ Brand:</Text>
-              <Text style={styles.infoText}>{itemData.brand || 'Uh Oh, it\'s empty'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>📝 Notes:</Text>
-              <Text style={styles.infoText}>{itemData.note || 'Uh Oh, it\'s empty!'}</Text>
-            </View>
-          </View>
-          )}
+            )}
 
           {collectionId === 'outfit' && (
             isPublic ? (
@@ -197,7 +213,7 @@ export default function singleItem() {
 
         </View>
       </ScrollView>
-    </SafeAreaProvider>
+    </SafeAreaView>
   );
 }
 
@@ -315,5 +331,3 @@ const styles = StyleSheet.create({
     flex: 1,
   }
 });
-
-// 
