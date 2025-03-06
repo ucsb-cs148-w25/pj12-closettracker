@@ -67,7 +67,26 @@ export default function TimesWornComponent({
   // Function to determine square color based on wear count
   const getSquareColor = (index: number) => {
     if (index < wearCount) {
-      return '#B8FF12';  // Dirtier clothes (change to any color you want, like brown or gray)
+      // Calculate normalized wear factor (from 0 to 1)
+      const t = (index + 1) / maxWearCount;
+      
+      if (t <= 0.7) {
+        // Phase 1: Interpolate from white to red
+        // Normalize t within [0, 0.7]
+        const t2 = t / 0.7;
+        const r = 255; 
+        const g = Math.round(255 * (1 - t2)); 
+        const b = Math.round(255 * (1 - t2));
+        return `rgb(${r}, ${g}, ${b})`;
+      } else {
+        // Phase 2: Interpolate from red to dark red ("black red")
+        // Normalize t within [0.7, 1]
+        const t2 = (t - 0.7) / 0.3;
+        const r = Math.round(255 - (255 - 139) * t2); // from 255 to 139
+        const g = 0;
+        const b = 0;
+        return `rgb(${r}, ${g}, ${b})`;
+      }
     } else {
       return '#FFFFFF';  // Clean clothes (white)
     }
