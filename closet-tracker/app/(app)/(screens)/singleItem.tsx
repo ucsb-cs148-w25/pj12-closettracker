@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Button, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-// import TimesWornComponent from '@/components/SingleItemComponents'
+import TimesWornComponent from '@/components/SingleItemComponents'
 import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -61,21 +61,25 @@ export default function singleItem() {
     checkPublicStatus();
   }, [collectionId, itemId, currentUser]);
 
-  const updateWearCount = async (newCount: number) => {
-    if (!itemId || newCount < 0) return;
+  // const updateWearCount = async (newCount: number) => {
+  //   if (!itemId || newCount < 0) return;
 
-    if (!currentUser) return;
+  //   if (!currentUser) return;
 
-    const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
+  //   const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
 
-    try {
-      await updateDoc(itemRef, { wearCount: newCount });
-      setWearCount(newCount);
-    } catch (error) {
-      console.error("Error updating wear count:", error);
-    }
+  //   try {
+  //     await updateDoc(itemRef, { wearCount: newCount });
+  //     setWearCount(newCount);
+  //   } catch (error) {
+  //     console.error("Error updating wear count:", error);
+  //   }
+  // };
+  const handleEdit = () => {
+    if (!currentUser || collectionId !== "clothing") return;
+    router.push(`../(screens)/editItem?item_id=${itemId}&collections=${collectionId}`);
   };
-
+  
   const handleMakePublic = async () => {
     if (collectionId !== 'outfit' || !currentUser) return;
     if (isPublic) {
@@ -127,43 +131,72 @@ export default function singleItem() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
-        {itemData.image && (
-          <Image source={{ uri: itemData.image }} style={styles.image} />
-        )}
-        <Text style={styles.title}>{itemData.itemName}</Text>
-        <Text style={styles.wearCountText}>Times Worn: {wearCount}</Text>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.container}>
+          {itemData.image && (
+            <Image source={{ uri: itemData.image }} style={styles.image} />
+          )}
+          <Text style={styles.title}>{itemData.itemName}</Text>
 
-        <View style={styles.buttonContainer}>
-          <Pressable onPress={() => updateWearCount(wearCount - 1)} style={styles.button}>
-            <Text style={styles.buttonText}>-</Text>
-          </Pressable>
-          <Pressable onPress={() => updateWearCount(wearCount + 1)} style={styles.button}>
-            <Text style={styles.buttonText}>+</Text>
-          </Pressable>
+          <TimesWornComponent itemId={itemId} wearCountFromDB={wearCount} collectionId={collectionId} />
+          
+          {collectionId === 'clothing' && (
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoHeader}>Item Details</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>📏 Size:</Text>
+              <Text style={styles.infoText}>{itemData.size || 'Uh Oh, it\'s empty'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>🎨 Color:</Text>
+              <Text style={styles.infoText}>{itemData.color || 'Uh Oh, it\'s empty'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>👕 Type:</Text>
+              <Text style={styles.infoText}>{itemData.clothingType || 'Uh Oh, it\'s empty'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>🏷️ Brand:</Text>
+              <Text style={styles.infoText}>{itemData.brand || 'Uh Oh, it\'s empty'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>📝 Notes:</Text>
+              <Text style={styles.infoText}>{itemData.note || 'Uh Oh, it\'s empty!'}</Text>
+            </View>
+          </View>
+          )}
+
+          {collectionId === 'outfit' && (
+            isPublic ? (
+              <TouchableOpacity 
+                onPress={handleMakePrivate} 
+                style={[styles.publicButton, loading && styles.disabledButton]} 
+                disabled={loading}
+              >
+                <Text style={styles.publicButtonText}>Make Private</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                onPress={handleMakePublic} 
+                style={[styles.publicButton, loading && styles.disabledButton]} 
+                disabled={loading}
+              >
+                <Text style={styles.publicButtonText}>Make Public</Text>
+              </TouchableOpacity>
+            )
+          )}
+          
+          <View style={styles.buttonContainer}>
+            <Pressable onPress={() => router.back()} style={styles.button}>
+                <Text style={styles.buttonText}>Back</Text>
+            </Pressable> 
+            <Pressable onPress={() => handleEdit()} style={styles.button}>
+                <Text style={styles.buttonText}>Edit</Text>
+            </Pressable> 
+          </View>
+
         </View>
-
-        {collectionId === 'outfit' && (
-          isPublic ? (
-            <TouchableOpacity 
-              onPress={handleMakePrivate} 
-              style={[styles.publicButton, loading && styles.disabledButton]} 
-              disabled={loading}
-            >
-              <Text style={styles.publicButtonText}>Make Private</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity 
-              onPress={handleMakePublic} 
-              style={[styles.publicButton, loading && styles.disabledButton]} 
-              disabled={loading}
-            >
-              <Text style={styles.publicButtonText}>Make Public</Text>
-            </TouchableOpacity>
-          )
-        )}
-        <Button title="Back" onPress={() => router.back()} />
-      </View>
+      </ScrollView>
     </SafeAreaProvider>
   );
 }
@@ -198,7 +231,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    backgroundColor: '#4160fb',
+    backgroundColor: '#ADD8E6',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -240,4 +273,47 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  infoText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  infoContainer: {
+    width: '90%',
+    backgroundColor: '#f8f9fa', // Light gray background
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3, // Subtle shadow effect
+  },
+  infoHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd', // Light border for separation
+  },
+  infoLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#555',
+  },
+  scrollView: {
+    flex: 1,
+  }
 });
+
+// 

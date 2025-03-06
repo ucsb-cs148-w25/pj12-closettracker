@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import EvilIcons from '@expo/vector-icons/FontAwesome';
+import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
+import { db } from "@/FirebaseConfig";
+import { useUser } from '@/context/UserContext';
 
 interface WearCountButtonProps {
     // title: string;   // 'title' should be a string
@@ -18,11 +21,45 @@ const DecreaseWearButton: React.FC<WearCountButtonProps> = ({ onPress }) => {
   );  
 };
 
-export const TimesWornComponent = () => {
-  const [wearCount, setWearCount] = useState(0);
 
-  const handleIncrement = () => setWearCount(wearCount + 1);
-  const handleDecrement = () => setWearCount(wearCount - 1);
+
+export default function TimesWornComponent({
+    itemId,
+    wearCountFromDB,
+    collectionId,
+  }: {
+    itemId: string;
+    wearCountFromDB: number;
+    collectionId: string;
+
+  }) {
+
+  const { currentUser } = useUser();
+
+  const updateWearCount = async (newCount: number) => {
+    if (!itemId || newCount < 0) return;
+
+    if (!currentUser) return;
+
+    const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
+
+    try {
+      await updateDoc(itemRef, { wearCount: newCount });
+    } catch (error) {
+      console.error("Error updating wear count:", error);
+    }
+  };
+
+  const [wearCount, setWearCount] = useState(wearCountFromDB);
+  const handleIncrement = () => {
+    setWearCount(wearCount + 1)
+    updateWearCount(wearCount + 1);
+  };
+
+  const handleDecrement = () => {
+    setWearCount(wearCount - 1);
+    updateWearCount(wearCount - 1);
+  }
 
   // Max wear count (adjust this to fit your needs)
   const maxWearCount = 8;
@@ -76,7 +113,7 @@ export const TimesWornComponent = () => {
 const styles = StyleSheet.create({
   button: {
     margin : 10,
-    backgroundColor: 'pink',  // Tomato color (or any color you prefer)
+    backgroundColor: '#ADD8E6',
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 8,  // Rounded corners
@@ -128,5 +165,3 @@ const styles = StyleSheet.create({
     shadowRadius: 2.5,
   },
 });
-
-export default TimesWornComponent;
