@@ -1,0 +1,20 @@
+# Retrospective 3, 03/07/25
+
+* Led by: Gretchen Lam
+* Present: Anvitha Kosuri, Sophia Tran, Victor Nardi, Daisy Zhong, Gen Tamada
+* Absent: N/A
+
+## action item
+* a goal: Have the issues more clearly discussed and have PRs described better so the team is on the same page.
+* a change: To have brainstorm sessions and a structure for PRs.
+* a measurement: Less members questioning what they are working on and what the other members PR mean.
+
+## retro assessment
+* Used slack for team members to send start, stop, and continues so team members' opinions aren't affected by each other. Then regrouped to discuss the main practices we want to implement and continue.
+* Retro went well, team agreed to have sessions to better plan out issues and to have more descriptive PRs.
+* For the next retro leader, you can refer to the past retros to help structure the retro mark down file.
+
+## Experiment/Change
+* What constitutes this change/experiment is a messy kanban board and some confusion about what members are working on.
+* We organized the issues and planned better what members are working on so there is less confusion in the messenger group chat.
+* Were going to keep the change of having brainstorm sessions and more detailed PR.
