@@ -65,13 +65,13 @@ export default function Login() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: beigeColors.beige,
         paddingHorizontal: 20,
     },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: beigeColors.beige,
     },
     title: {
         fontSize: 26,
