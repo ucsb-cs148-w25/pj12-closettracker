@@ -30,6 +30,8 @@ const MAPPING = {
   "line.horizontal.3.decrease.circle" : "filter-list",
   "heart" : "favorite",
   "heart.fill" : "favorite-border",
+  "camera": "camera-alt",
+  "folder": "folder-copy",
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

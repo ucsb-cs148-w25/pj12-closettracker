@@ -101,6 +101,7 @@ export default function CanvasScreen() {
       const docRef = await addDoc(collection(db, "users", currentUser.uid, "outfit"), {
         itemName: outfitName.trim(),
         image: imageUrl,
+        dateUploaded: new Date(),
         clothingIds: itemUri.map((item) => item.id),
       });
 
