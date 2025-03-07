@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Redirect } from 'expo-router';
 import { useUser } from '@/context/UserContext';
@@ -14,6 +14,7 @@ export default function Auth() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Image source={require('@/assets/images/logo.png')} style={{ width: 100, height: 100, margin: 30 }} />
       <Text style={styles.title}>Closet Tracker</Text>
       <Text style={styles.subtitle}>Organize and Style your Wardrobe Effortlessly!</Text>
 
