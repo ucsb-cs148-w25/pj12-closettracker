@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Button } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '@/FirebaseConfig';
-import { doc, getDoc, updateDoc, collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, onSnapshot, orderBy, query, getCountFromServer } from 'firebase/firestore';
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
 import { useUser } from '@/context/UserContext';
+import beigeColors from '@/aesthetic/beigeColors';
 
 interface Stat {
   label: string;
@@ -26,54 +27,118 @@ export default function UserProfile() {
   const [stats, setStats] = useState<Stat[]>([
     { label: 'Number of Clothes', value: 0, type: 'text' },
     { label: 'Most Worn Item', value: null, type: 'image' },
+    { label: 'Number of Outfits', value: 0, type: 'text' },
   ]);
   const [wardrobeData, setWardrobeData] = useState<any[]>([]);
 
   useEffect(() => {
-    const unsubscribe = async () => {
-      setLoading(false);
+    const fetchUserData = async () => {
       if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          setUserName(userData?.name || '');
-          setDescription(userData?.description || '');
-          setImage(userData?.profilePicture || null);
-        }
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setUserName(userData?.name || '');
+            setDescription(userData?.description || '');
+            setImage(userData?.profilePicture || null);
+          }
 
-        const wardrobeRef = collection(db, 'users', user.uid, 'clothing');
-        const q = query(wardrobeRef, orderBy('wearCount', 'desc'));
-        const unsubscribeWardrobe = onSnapshot(q, (snapshot) => {
-          const wardrobeItems = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setWardrobeData(wardrobeItems);
-
+          // Initialize stats array with basic structure
           setStats([
-            { label: 'Number of Clothes', value: wardrobeItems.length, type: 'text' },
-            {
-              label: 'Most Worn Item',
-              value:
-                wardrobeItems.length > 0
-                  ? (wardrobeItems[0] as any).image // TODO: need wearCount metadata or update this stat accordingly
-                  : null,
-              type: 'image',
-            },
+            { label: 'Number of Clothes', value: 0, type: 'text' },
+            { label: 'Most Worn Item', value: null, type: 'image' },
+            { label: 'Number of Outfits', value: 0, type: 'text' },
           ]);
-        });
+
+          // Get outfit count using getCountFromServer
+          const outfitsRef = collection(db, 'users', user.uid, 'outfit');
+          const outfitCountSnapshot = await getCountFromServer(outfitsRef);
+          const outfitCount = outfitCountSnapshot.data().count;
+          
+          // Update outfit count in stats
+          setStats(prevStats => {
+            const newStats = [...prevStats];
+            const outfitCountIndex = newStats.findIndex(stat => stat.label === 'Number of Outfits');
+            if (outfitCountIndex !== -1) {
+              newStats[outfitCountIndex].value = outfitCount;
+            }
+            return newStats;
+          });
+
+          // Set up clothing collection listener for dynamic updates
+          const wardrobeRef = collection(db, 'users', user.uid, 'clothing');
+          const wardrobeQuery = query(wardrobeRef, orderBy('wearCount', 'desc'));
+          const unsubscribeWardrobe = onSnapshot(wardrobeQuery, (snapshot) => {
+            const wardrobeItems = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setWardrobeData(wardrobeItems);
+
+            // Update clothing-related stats
+            setStats(prevStats => {
+              const newStats = [...prevStats];
+              // Update clothing count
+              const clothingCountIndex = newStats.findIndex(stat => stat.label === 'Number of Clothes');
+              if (clothingCountIndex !== -1) {
+                newStats[clothingCountIndex].value = wardrobeItems.length;
+              }
+              
+              // Update most worn item
+              const mostWornIndex = newStats.findIndex(stat => stat.label === 'Most Worn Item');
+              if (mostWornIndex !== -1) {
+                newStats[mostWornIndex].value = wardrobeItems.length > 0 ? 
+                  (wardrobeItems[0] as any).image : null;
+              }
+              
+              return newStats;
+            });
+          });
+          
+          // Set up a listener for outfit changes to keep count updated
+          const unsubscribeOutfits = onSnapshot(outfitsRef, async () => {
+            try {
+              // Re-fetch the outfit count when there are changes
+              const updatedCountSnapshot = await getCountFromServer(outfitsRef);
+              const updatedCount = updatedCountSnapshot.data().count;
+              
+              setStats(prevStats => {
+                const newStats = [...prevStats];
+                const outfitCountIndex = newStats.findIndex(stat => stat.label === 'Number of Outfits');
+                if (outfitCountIndex !== -1) {
+                  newStats[outfitCountIndex].value = updatedCount;
+                }
+                return newStats;
+              });
+            } catch (error) {
+              console.error("Error updating outfit count:", error);
+            }
+          });
+          
+          // Return cleanup function
+          return () => {
+            unsubscribeWardrobe();
+            unsubscribeOutfits();
+          };
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
       }
     };
-    unsubscribe();
+    
+    fetchUserData();
   }, [user]);
 
   const handleSignOut = async () => {
     try {
       await auth.signOut();
-      console.log('User signed out successfully');
     } catch (error) {
-      console.log('Error signing out: ', error);
+      alert('Error signing out: ' + error);
     }
   };
 
@@ -81,25 +146,29 @@ export default function UserProfile() {
     base64Image: string,
     userId: string
   ): Promise<string> => {
-    const arrayBuffer = decode(base64Image);
-    const fileName = `profile_${Date.now()}.jpg`;
-    const filePath = `user_${userId}/${fileName}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('profilePictures')
-      .upload(filePath, arrayBuffer, {
-        contentType: 'image/jpeg',
-      });
-    
-    if (uploadError) {
-      console.error('Supabase profile image upload error:', uploadError);
-      throw uploadError;
+    try {
+      const arrayBuffer = decode(base64Image);
+      const fileName = `profile_${Date.now()}.jpg`;
+      const filePath = `user_${userId}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('profilePictures')
+        .upload(filePath, arrayBuffer, {
+          contentType: 'image/jpeg',
+        });
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from('profilePictures')
+        .getPublicUrl(filePath);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Supabase upload error:', error);
+      throw error;
     }
-    
-    const { data: urlData } = supabase.storage
-      .from('profilePictures')
-      .getPublicUrl(filePath);
-    return urlData.publicUrl;
   };
 
   const pickImage = async () => {
@@ -107,101 +176,107 @@ export default function UserProfile() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.7,
       base64: true, 
     });
 
     if (!result.canceled && user) {
       const asset = result.assets[0];
       if (!asset.base64) {
-        alert('Failed to retrieve base64 image data.');
+        alert('Failed to retrieve image data.');
         return;
       }
       try {
         const downloadURL = await uploadProfileImageToSupabase(asset.base64, user.uid);
         setEditedImage(downloadURL);
       } catch (error) {
-        console.error('Error uploading profile image: ', error);
         alert('Failed to upload profile image.');
       }
     }
   };
 
-  const saveProfilePicture = async (downloadURL: string) => {
-    if (user) {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { profilePicture: downloadURL });
-    }
-  };
-
   const handleSaveProfile = async () => {
-    if (user) {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const updates: Record<string, any> = { description };
+      
       if (editedImage) {
-        await saveProfilePicture(editedImage);
+        updates.profilePicture = editedImage;
         setImage(editedImage);
       }
-      await updateDoc(doc(db, 'users', user.uid), { description });
+      
+      await updateDoc(userRef, updates);
       setEditedImage(null);
       setIsEditing(false);
+    } catch (error) {
+      alert('Failed to update profile: ' + error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // if press cancel, revert back to original description and pfp
   const handleCancelEdit = () => {
     setDescription(originalDescription);
     setEditedImage(null);
     setIsEditing(false);
   };
 
+  const renderProfilePicture = () => {
+    const displayImage = editedImage || image;
+    
+    return (
+      <TouchableOpacity 
+        onPress={isEditing ? pickImage : undefined}
+        style={styles.imageContainer}
+      >
+        {displayImage ? (
+          <Image source={{ uri: displayImage }} style={styles.profileImage} />
+        ) : (
+          <View style={styles.profileImagePlaceholder}>
+            <Text style={styles.placeholderText}>No Photo</Text>
+          </View>
+        )}
+        
+        {isEditing && (
+          <View style={styles.overlay}>
+            <Text style={styles.overlayText}>Change Photo</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={beigeColors.mutedGold} />
       </SafeAreaView>
     );
   }
 
-  const renderProfilePicture = () => {
-    const displayImage = editedImage || image;
-    const imageComponent = displayImage ? (
-      <Image source={{ uri: displayImage }} style={styles.profileImage} />
-    ) : (
-      <View style={styles.profileImagePlaceholder} />
-    );
-
-    if (isEditing) {
-      return (
-        <TouchableOpacity onPress={pickImage}>
-          <View style={styles.editableProfileImageContainer}>
-            {imageComponent}
-            <View style={styles.overlay}>
-              <Text style={styles.overlayText}>Change Photo</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      );
-    } else {
-      return imageComponent;
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileHeader}>
-          <Text style={styles.title}>
-            Welcome, {userName || user?.email}!
-          </Text>
-          {renderProfilePicture()}
-          <View style={styles.descriptionContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.title}>
+          Welcome, {userName || user?.email}
+        </Text>
+        
+        {renderProfilePicture()}
+        
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>About Me</Text>
+          <View style={styles.statsContainer}>
             {isEditing ? (
               <TextInput
-                style={styles.descriptionInput}
                 defaultValue={description}
+                style={styles.input}
                 onChangeText={setDescription}
                 multiline
-                autoCapitalize="none"
                 placeholder="Write something about yourself..."
+                placeholderTextColor={beigeColors.taupe}
               />
             ) : (
               <Text style={styles.descriptionText}>
@@ -211,46 +286,53 @@ export default function UserProfile() {
           </View>
         </View>
 
-        <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <View key={index} style={styles.statItem}>
-              {stat.type === 'text' ? (
-                <Text style={styles.statValue}>{stat.value}</Text>
-              ) : stat.value ? (
-                <Image
-                  source={{ uri: stat.value as string }}
-                  style={styles.statImage}
-                />
-              ) : (
-                <Text style={styles.statValue}>N/A</Text>
-              )}
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Statistics</Text>
+          <View style={styles.statsContainer}>
+            {stats.map((stat, index) => (
+              <View key={index} style={styles.statItem}>
+                {stat.type === 'text' ? (
+                  <Text style={styles.statValue}>{stat.value}</Text>
+                ) : stat.value ? (
+                  <Image
+                    source={{ uri: stat.value as string }}
+                    style={styles.statImage}
+                  />
+                ) : (
+                  <Text style={styles.statValue}>N/A</Text>
+                )}
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        <View style={styles.editContainer}>
-          {isEditing ? (
-            <>
-              <Button title="Save" onPress={handleSaveProfile} />
-              <Button title="Cancel" onPress={handleCancelEdit} />
-            </>
-          ) : (
-            <Button
-              title="Edit Profile"
-              // saving current pfp and description in case user cancels
+        {isEditing ? (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.button, styles.buttonHalf]} onPress={handleSaveProfile}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, styles.buttonHalf]} onPress={handleCancelEdit}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.button}
               onPress={() => {
-                setEditedImage(image);
                 setOriginalDescription(description);
                 setIsEditing(true);
               }}
-            />
-          )}
-        </View>
+            >
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        <View style={styles.logOutContainer}>
-          <Button title="Log Out" onPress={handleSignOut} />
-        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSignOut}>
+          <Text style={styles.buttonText}>Log Out</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -259,28 +341,46 @@ export default function UserProfile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: beigeColors.beige,
   },
-  scrollContent: {
+  scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: beigeColors.darkBeige,
   },
-  profileHeader: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
+  imageContainer: {
+    marginBottom: 20,
+    position: 'relative',
   },
   profileImage: {
     width: 150,
     height: 150,
     borderRadius: 75,
+    borderWidth: 2,
+    borderColor: beigeColors.taupe,
   },
-  editableProfileImageContainer: {
-    position: 'relative',
+  profileImagePlaceholder: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: beigeColors.softBrown,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: beigeColors.taupe,
+  },
+  placeholderText: {
+    color: beigeColors.taupe,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   overlay: {
     position: 'absolute',
@@ -292,78 +392,83 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overlayText: {
-    color: '#fff',
-    fontSize: 16,
+    color: 'white',
+    fontSize: 14,
     fontWeight: 'bold',
   },
-  profileImagePlaceholder: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: '#e1e1e1',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileImagePlaceholderText: {
-    color: '#888',
-  },
-  descriptionContainer: {
-    marginTop: 20,
+  sectionContainer: {
     width: '100%',
+    marginBottom: 20,
   },
-  descriptionInput: {
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10,
+    color: beigeColors.darkBeige,
+  },
+  input: {
+    width: '100%',
+    padding: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
-    minHeight: 100,
+    borderColor: beigeColors.taupe,
+    borderRadius: 8,
     textAlignVertical: 'top',
+    backgroundColor: 'white',
+    color: beigeColors.darkBeige,
   },
   descriptionText: {
-    minHeight: 100,
-    padding: 10,
+    color: beigeColors.brown,
+    fontSize: 15,
+    width: '100%',
+    padding: 5,
   },
   statsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    gap: 10,
     justifyContent: 'space-around',
-    padding: 20,
-    backgroundColor: 'white',
-    marginTop: 20,
+    backgroundColor: beigeColors.softBrown,
+    borderRadius: 8,
+    padding: 15,
   },
   statItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '45%',
-    marginBottom: 20,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: beigeColors.darkBeige,
   },
   statImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
-    marginBottom: 10,
+    width: 60,
+    height: 60,
+    marginBottom: 8,
   },
   statLabel: {
     fontSize: 14,
-    color: '#888',
+    color: beigeColors.brown,
     textAlign: 'center',
+    marginTop: 5,
   },
-  editContainer: {
-    padding: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    marginTop: 20,
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 15,
   },
-  logOutContainer: {
-    padding: 10,
-    backgroundColor: 'white',
+  button: {
+    backgroundColor: beigeColors.taupe,
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30,
+    width: '100%',
+    marginTop: 10,
+  },
+  buttonHalf: {
+    width: '48%',
+  },
+  buttonText: {
+    color: beigeColors.darkBeige,
+    fontSize: 16,
   },
 });

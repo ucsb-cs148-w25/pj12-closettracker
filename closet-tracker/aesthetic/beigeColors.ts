@@ -1,13 +1,13 @@
-
-
 export default {
-  lightBeige: '#F5F5DC',
-  beige: '#D2B48C',
-  darkBeige: '#C19A6B',
-  cream: '#FFFDD0',
-  ivory: '#FFFFF0',
+  // lightBeige: '#F5F5DC',
+  beige: '#EDEDE9',
+  brown: "#c2967d",
+  darkBeige: '#463f3a',
+  // cream: '#FFFDD0',
+  // ivory: '#FFFFF0',
   sand: '#C2B280',
-  taupe: '#483C32',
-  softBrown: '#A0522D',
+  taupe: '#D5BDAF',
+  softBrown: '#F5EBE0',
   mutedGold: '#DAA520',
+
 };

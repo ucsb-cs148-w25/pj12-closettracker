@@ -79,19 +79,29 @@ export default function ClothingDataDropdowns ({
     { label: 'Black', value: 'Black' },
     { label: 'Gray', value: 'Gray' },
     { label: 'White', value: 'White' },
+    { label: 'Brown', value: 'Brown' },
+    { label: 'Beige', value: 'Beige' },
+    { label: 'Multicolor', value: 'Multicolor' },
   ]);
 
   const [openType, setOpenType] = useState(false);
   const [clothingTypes] = useState([
+    { label: 'Hat', value: 'Hat' },
+    { label: 'Blazer', value: 'Blazer' },
+    { label: 'Jacket', value: 'Jacket' },
+    { label: 'Sweater', value: 'Sweater' },
     { label: 'T-Shirt', value: 'T-Shirt' },
     { label: 'Top', value: 'Top' },
+    { label: 'Dress', value: 'Dress' },
+    { label: 'Skirt', value: 'Skirt' },
     { label: 'Jeans', value: 'Jeans' },
     { label: 'Trousers', value: 'Trousers' },
     { label: 'Shorts', value: 'Shorts' },
-    { label: 'Jacket', value: 'Jacket' },
     { label: 'Socks', value: 'Socks' },
     { label: 'Shoes', value: 'Shoes' },
-    { label: 'Hat', value: 'Hat' },
+    { label: 'Swimsuit', value: 'Swimsuit' },
+    { label: 'Accessory', value: 'Accessory' },
+    { label: 'Other', value: 'Other' },
   ]);
 
   const [brand, setBrand] = useState(placeholders.brand);
