@@ -47,14 +47,12 @@ export default function Signup() {
                     style={styles.input}
                     placeholder="Name"
                     placeholderTextColor={beigeColors.taupe}
-                    value={name}
                     onChangeText={setName}
                 />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
                     placeholderTextColor={beigeColors.taupe}
-                    value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -63,7 +61,6 @@ export default function Signup() {
                     style={styles.input}
                     placeholder="Password"
                     placeholderTextColor={beigeColors.taupe}
-                    value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
@@ -72,7 +69,6 @@ export default function Signup() {
                     style={styles.input}
                     placeholder="Confirm Password"
                     placeholderTextColor={beigeColors.taupe}
-                    value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     secureTextEntry
                 />

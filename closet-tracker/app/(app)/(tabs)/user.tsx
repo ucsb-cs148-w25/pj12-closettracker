@@ -271,8 +271,8 @@ export default function UserProfile() {
           <View style={styles.statsContainer}>
             {isEditing ? (
               <TextInput
+                defaultValue={description}
                 style={styles.input}
-                value={description}
                 onChangeText={setDescription}
                 multiline
                 placeholder="Write something about yourself..."

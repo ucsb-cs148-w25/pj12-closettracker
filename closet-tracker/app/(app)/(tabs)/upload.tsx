@@ -148,7 +148,6 @@ export default function UploadScreen() {
                 style={styles.input}
                 placeholder="Enter item name"
                 placeholderTextColor={beigeColors.taupe}
-                value={itemName}
                 onChangeText={setItemName}
               />
             </View>
