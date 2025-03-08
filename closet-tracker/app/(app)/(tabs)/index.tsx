@@ -69,9 +69,11 @@ export default function HomeScreen() {
     if (!user) return;
 
     const updateCounts = async () => {
-      const counts = await fetchCounts(user.uid);
-      setLaundryCount(counts.laundryCount);
-      setClothingCount(counts.clothingCount);
+      const counts = await fetchCounts(user.uid); 
+      if (!loading) {
+        setLaundryCount(counts.laundryCount);
+        setClothingCount(counts.clothingCount);
+      }
     };
 
     updateCounts();
@@ -102,7 +104,7 @@ export default function HomeScreen() {
       unsubscribeLaundry();
       unsubscribeClothing();
     };
-  }, [user, db]);
+  }, [user, db, loading]);
 
   
   const startRotation = () => {
@@ -133,7 +135,6 @@ export default function HomeScreen() {
       const laundryRef = collection(db, 'users', user.uid, 'laundry');
       const laundrySnapshot = await getDocs(laundryRef);
 
-      
       const promises = laundrySnapshot.docs.map(async (docSnap) => {
         const data = docSnap.data();
         const clothingDocRef = doc(db, 'users', user.uid, 'clothing', docSnap.id);
@@ -145,18 +146,14 @@ export default function HomeScreen() {
 
       await Promise.all(promises);
 
-      
       const counts = await fetchCounts(user.uid);
 
-      
       stopRotation();
       setLoading(false);
 
-     
       setLaundryCount(counts.laundryCount);
       setClothingCount(counts.clothingCount);
 
-      
       completeOpacity.setValue(0);
       Animated.sequence([
         Animated.timing(completeOpacity, {
@@ -186,7 +183,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {}
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
           <Text style={styles.statNumber}>{laundryCount}</Text>
@@ -212,12 +208,10 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {}
       <Animated.View style={[styles.completeContainer, { opacity: completeOpacity }]}>
         <Text style={styles.completeText}>Washing Complete!</Text>
       </Animated.View>
 
-      {}
       <Text style={styles.sectionTitle}>Public Items</Text>
       {publicItems.length === 0 ? (
         <View style={styles.emptyPublicContainer}>
@@ -253,8 +247,16 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
     justifyContent: 'space-around',
+    backgroundColor: '#fff',
     padding: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   statBox: {
     alignItems: 'center',
@@ -279,17 +281,28 @@ const styles = StyleSheet.create({
   completeContainer: {
     position: 'absolute',
     top: 90,
-    alignSelf: 'center',
+    alignSelf: 'center',    
+    shadowColor: '#000',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(100, 255, 100, 0.7)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 5,
   },
   completeText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'green',
+    color: '#fff',
   },
   sectionTitle: {
     fontSize: 20,
     marginBottom: 10,
     fontWeight: 'bold',
+  },
+  publicList: {
+    paddingVertical: 10,
   },
   emptyPublicContainer: {
     justifyContent: 'center',
@@ -300,9 +313,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
     textAlign: 'center',
-  },
-  
-  publicList: {
-    paddingVertical: 10,
   },
 });
