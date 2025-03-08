@@ -269,8 +269,14 @@ export default function LaundryScreen() {
           ]}
           onPress={handleMoveToWardrobe}
         >
-          <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
-          {selectedIds.length > 0 && <Text style={styles.laundryButtonText}>Clean</Text>}
+          {selectedIds.length > 0 ? 
+            <>
+              <Text style={styles.laundryButtonText}>Clean</Text>
+              <IconSymbol name={"sparkles"} color={"#fff"} />
+            </>
+            :
+            <IconSymbol name={"arrow.uturn.backward"} color={"#4160fb"} />
+          }
         </TouchableOpacity>
 
         <Modal
