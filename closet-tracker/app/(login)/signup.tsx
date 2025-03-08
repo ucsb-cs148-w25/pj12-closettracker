@@ -1,4 +1,4 @@
-import { Text, TextInput, ActivityIndicator, TouchableHighlight, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, TextInput, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -46,15 +46,13 @@ export default function Signup() {
                 <TextInput
                     style={styles.input}
                     placeholder="Name"
-                    placeholderTextColor="#FFFFFF"
-                    value={name}
+                    placeholderTextColor={beigeColors.taupe}
                     onChangeText={setName}
                 />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
-                    placeholderTextColor="#FFFFFF"
-                    value={email}
+                    placeholderTextColor={beigeColors.taupe}
                     onChangeText={setEmail}
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -62,8 +60,7 @@ export default function Signup() {
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
-                    placeholderTextColor="#FFFFFF"
-                    value={password}
+                    placeholderTextColor={beigeColors.taupe}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
@@ -71,7 +68,7 @@ export default function Signup() {
                 <TextInput
                     style={styles.input}
                     placeholder="Confirm Password"
-                    value={confirmPassword}
+                    placeholderTextColor={beigeColors.taupe}
                     onChangeText={setConfirmPassword}
                     secureTextEntry
                 />
@@ -79,9 +76,9 @@ export default function Signup() {
                 {loading ? (
                     <ActivityIndicator size="large" color={beigeColors.mutedGold} />
                 ) : (
-                    <TouchableHighlight style={styles.button} onPress={signUp}>
+                    <TouchableOpacity style={styles.button} onPress={signUp}>
                         <Text style={styles.buttonText}>Create Account</Text>
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                 )}
             </ScrollView>
         </SafeAreaView>
@@ -91,20 +88,20 @@ export default function Signup() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: beigeColors.beige,
         paddingHorizontal: 20,
     },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: beigeColors.beige,
     },
     title: {
         fontSize: 26,
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
-        color: '#FFFFFF',
+        color: beigeColors.darkBeige,
     },
     input: {
         width: '100%',
@@ -116,7 +113,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         backgroundColor: beigeColors.softBrown,
-        color: '#FFFFFF',
+        color: beigeColors.darkBeige,
     },
     button: {
         backgroundColor: beigeColors.taupe,
@@ -127,8 +124,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     buttonText: {
-        color: '#FFFFFF',
+        color: beigeColors.darkBeige,
         fontSize: 16,
-        fontWeight: 'bold',
     },
 });

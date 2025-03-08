@@ -82,7 +82,7 @@ export default function PublicItem({ item }: { item: any }) {
       <Text style={styles.itemName}>{itemName}</Text>
       <View style={styles.likeContainer}>
         <TouchableOpacity style={styles.likeButton} onPress={handlePress} disabled={likeLoading}>
-          <IconSymbol name={liked ? "heart" : "heart.fill"} color={liked ? "red" : "black"} size={24} />
+          <IconSymbol name={liked ? "heart.fill" : "heart"} color={liked ? "red" : "black"} size={24} />
         </TouchableOpacity>
         <Text style={styles.likeCount}>{item.likes ? item.likes.length : 0}</Text>
       </View>

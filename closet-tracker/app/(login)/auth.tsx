@@ -1,7 +1,8 @@
-import { Button, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Redirect } from 'expo-router';
 import { useUser } from '@/context/UserContext';
+import beigeColors from '@/aesthetic/beigeColors';
 
 export default function Auth() {
   const router = useRouter();
@@ -13,12 +14,22 @@ export default function Auth() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Image source={require('@/assets/images/logo.png')} style={{ width: 100, height: 100, margin: 30 }} />
       <Text style={styles.title}>Closet Tracker</Text>
-      <Text style={styles.subtitle}>The app's tagline or description goes here.</Text>
+      <Text style={styles.subtitle}>Organize and Style your Wardrobe Effortlessly!</Text>
 
-      {/* Navigation Buttons */}
-      <Button title="Login" onPress={() => router.push('./login')} />
-      <Button title="Sign Up" onPress={() => router.push('./signup')} />
+      <TouchableOpacity 
+        onPress={() => router.push('./login')} 
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push('./signup')}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -29,17 +40,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: beigeColors.beige,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: beigeColors.darkBeige,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    color: '#666',
+    color: beigeColors.brown,
+  },
+  button: {
+    backgroundColor: beigeColors.taupe,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: beigeColors.darkBeige,
+    fontSize: 16,
   },
 });

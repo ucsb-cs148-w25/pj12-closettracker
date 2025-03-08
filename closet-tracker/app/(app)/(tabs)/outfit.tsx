@@ -1,11 +1,10 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, Image, RefreshControl, Pressable, useColorScheme } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, FlatList, Text, TouchableOpacity, Platform, View, RefreshControl } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, orderBy, query } from "firebase/firestore";
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-//import { TextInput } from 'react-native-gesture-handler';
 import { ClothingItem } from '@/components/ClothingItem';
 import { MultiSelectActions } from '@/components/MultiSelectActions';
 import SearchBar from '@/components/searchBar';
@@ -92,7 +91,7 @@ export default function OutfitScreen() {
 
   const handleEdit = () => {
     if (!user || selectedIds.length !== 1) return;
-    router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=outfit`);
+    router.push(`../(screens)/canvas?outfitId=${selectedIds[0]}`)
   };
 
   const handleSearch = (query: string) => {
@@ -175,7 +174,7 @@ export default function OutfitScreen() {
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => router.push("../(screens)/createOutfit")}>
-          <IconSymbol name={"plus"} color={"#fff"} />        
+          <IconSymbol name={"plus"} color={"#fff"} />
         </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
