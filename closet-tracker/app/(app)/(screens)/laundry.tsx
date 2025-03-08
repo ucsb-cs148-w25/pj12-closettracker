@@ -159,7 +159,13 @@ export default function LaundryScreen() {
         const itemSnapshot = await getDoc(laundryRef);
         
         if (itemSnapshot.exists()) {
-          await setDoc(wardrobeRef, itemSnapshot.data());
+          const oldData = itemSnapshot.data();
+          const newData = {
+            ...oldData,
+            wearCount: 0,
+          };
+
+          await setDoc(wardrobeRef, newData);
           await deleteDoc(laundryRef);
         } else{
           console.log(`Item with ID ${id} does not exist in laundry.`);
@@ -337,8 +343,6 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   laundryButton: {
-    borderWidth: 1,
-    borderColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
     width: 80,
