@@ -424,18 +424,20 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    gap: 10,
+    flexWrap: 'wrap',
     justifyContent: 'space-around',
     backgroundColor: beigeColors.softBrown,
     borderRadius: 8,
     padding: 15,
+    width: '100%',
   },
   statItem: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: '30%',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: beigeColors.darkBeige,
   },
