@@ -28,23 +28,26 @@ export const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({
 }) => {
   return (
     <View style={styles.iconContainer}>
-      {showCancel ? (<Pressable onPress={handleCancelSelection}>
+      {showCancel ? (<Pressable onPress={handleCancelSelection} style={styles.iconName}>
         <IconSymbol name="xmark.app" color="gray" size={28} />
+        <Text style={{color: "ccc"}}> Cancel </Text>
       </Pressable>): <View/>}
 
-      {showAddOutfit && (<Pressable onPress={handleAddOutfit}>
+      {showAddOutfit && (<Pressable onPress={handleAddOutfit} style={styles.iconName}>
         <IconSymbol name="pencil.and.list.clipboard" color="green" size={28} />
+        <Text style={{color: "green"}}> Create </Text>
       </Pressable>)}
 
       {showEdit && selectedIds.length === 1 && (
-        <Pressable onPress={handleEdit}>
+        <Pressable onPress={handleEdit} style={styles.iconName}>
           <IconSymbol name="pencil" color="gray" size={28} />
+          <Text style={{color: "ccc"}}> Edit </Text>
         </Pressable>
       )}
 
       {showDelete && handleDeleteSelected && (
         <View style={styles.deleteIconWrapper}>
-          <Pressable onPress={handleDeleteSelected}>
+          <Pressable onPress={handleDeleteSelected} style={styles.iconName}>
             <IconSymbol name="trash" color="red" size={28} />
             {selectedIds.length > 0 && (
               <View style={styles.badge}>
@@ -52,6 +55,7 @@ export const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({
               </View>
             )}
           </Pressable>
+          <Text style={{color: "red"}}> Delete </Text>
         </View>
       )}
     </View>
@@ -86,4 +90,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
   },
+  iconName: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

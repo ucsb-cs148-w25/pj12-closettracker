@@ -19,7 +19,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchQuery, handleSearch, clearS
         style={styles.searchBox}
         autoCapitalize='none'
         autoCorrect={false}
-        value={searchQuery}
         onChangeText={handleSearch}
       />
       {searchQuery.length > 0 && (

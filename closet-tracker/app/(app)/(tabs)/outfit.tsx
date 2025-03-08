@@ -174,7 +174,7 @@ export default function OutfitScreen() {
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => router.push("../(screens)/createOutfit")}>
-          <IconSymbol name={"plus"} color={"#fff"} />        
+          <IconSymbol name={"plus"} color={"#fff"} />
         </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>

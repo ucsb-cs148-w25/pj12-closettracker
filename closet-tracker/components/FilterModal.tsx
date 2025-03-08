@@ -127,7 +127,6 @@ export default function FilterModal({
           placeholder="Enter brand"
           placeholderTextColor="#ccc"
           style={styles.filterTextInput}
-          value={filters.brand}
           onChangeText={(text) => setFilters({ ...filters, brand: text })}
         />
 
@@ -136,7 +135,6 @@ export default function FilterModal({
           placeholder="Enter notes"
           placeholderTextColor="#ccc"
           style={styles.filterTextInput}
-          value={filters.notes}
           onChangeText={(text) => setFilters({ ...filters, notes: text })}
         />
 

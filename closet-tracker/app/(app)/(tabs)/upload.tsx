@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity, Platform, TextInput } from 'react-native';
+import { Image, StyleSheet, ScrollView, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator } from 'react-native';
 import { useSelectImage, useCameraImage } from "@/hooks/useImagePicker";
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import supabase from '@/supabase';
@@ -10,7 +8,8 @@ import { decode } from 'base64-arraybuffer';
 import { useRouter } from 'expo-router';
 import { removeBackground } from "@/removebg";
 import { useUser } from "@/context/UserContext";
-
+import beigeColors from '@/aesthetic/beigeColors';
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function UploadScreen() {
   const selectImage = useSelectImage();
@@ -34,19 +33,17 @@ export default function UploadScreen() {
       // extract base64 data from image URI
       const base64 = rmbgImage;
       const arrayBuffer = decode(base64); // converting base64 to ArrayBuffer
-      // console.log("Base64 data:", base64);
 
       const fileName = `image_${Date.now()}.jpg`;
       const filePath = `user_${currentUser?.uid}/${fileName}`;
   
       // uploading to supabase
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('closetImages')
         .upload(filePath, arrayBuffer, {
         contentType: 'image/jpeg',
       });  
       if (uploadError) {
-        console.error("Supabase upload error:", uploadError);
         throw uploadError;
       }
   
@@ -56,7 +53,6 @@ export default function UploadScreen() {
         .getPublicUrl(filePath);
   
       const imageUrl = urlData.publicUrl;
-      console.log("Public URL:", imageUrl);
   
       // store in firestore
       const db = getFirestore();
@@ -70,6 +66,7 @@ export default function UploadScreen() {
         itemName: itemName,
         image: imageUrl,
         dateUploaded: new Date(),
+        wearCount: 0,
       });
   
       alert("Item uploaded successfully!");
@@ -77,7 +74,6 @@ export default function UploadScreen() {
       setRmbgImage(null);
       setItemName("");
       
-      console.log(docRef.id)
       router.push(`../(screens)/editItem?item_id=${docRef.id}&collections=clothing`);
 
     } catch (error) {
@@ -89,95 +85,122 @@ export default function UploadScreen() {
   };
 
   const handleRemoveBackground = async () => {
+    if (!image) return;
+    
+    setLoading(true);
     try {
-      const result = await removeBackground(image!);
+      const result = await removeBackground(image);
       setRmbgImage(result);
     } catch (error) {
       console.error("Error removing background:", error);
+      alert("Failed to remove background. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
   const handleClear = () => {
     setImage(null);
     setRmbgImage(null);
+    setItemName("");
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Title Section */}
-        <ThemedView style={[styles.titleContainer, { backgroundColor: 'transparent' }]}>
-          <ThemedText type="title" style={{ backgroundColor: 'transparent', color: '#000' }}>
-            Upload your clothes!
-          </ThemedText>
-        </ThemedView>
+        <Text style={styles.title}>Add to Your Closet</Text>
 
-        {/* Subtitle Section */}
-        <ThemedView style={[styles.subtitleContainer, { backgroundColor: 'transparent' }]}>
-          <ThemedText style={{ backgroundColor: 'transparent', color: '#000' }}>
-            Use your camera to upload an item, or select a photo from your camera roll.
-          </ThemedText>
-          <ThemedText style={{ backgroundColor: 'transparent', color: '#000' }}>
-            Please ensure the photo is taken on a solid background.
-          </ThemedText>
-        </ThemedView>
+        {/* Instructions */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Instructions</Text>
+          <View style={styles.contentBox}>
+            <Text style={styles.descriptionText}>
+              Use your camera to upload an item, or select a photo from your gallery.
+            </Text>
+            <Text style={styles.descriptionText}>
+              For best results, place your item on a plain background.
+            </Text>
+          </View>
+        </View>
 
-        {image ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={beigeColors.mutedGold} />
+            <Text style={styles.loadingText}>
+              {rmbgImage ? "Uploading..." : "Processing image..."}
+            </Text>
+          </View>
+        ) : image ? (
           // Display selected image and options
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: `data:image/jpeg;base64,${rmbgImage ? rmbgImage: image}` }} style={styles.image} />
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.optionButton} onPress={() => handleClear()}>
-                <Text style={[styles.optionButtonText, { color: '#fff' }]}>Clear</Text>
-              </TouchableOpacity>
-
+          <View style={styles.imageSection}>
+            <Text style={styles.sectionTitle}>Your Item</Text>
+            <View style={styles.contentBox}>
+              <View style={styles.imageContainer}>
+                <Image 
+                  source={{ uri: `data:image/jpeg;base64,${rmbgImage ? rmbgImage : image}` }} 
+                  style={styles.image} 
+                  resizeMode="contain"
+                />
+              </View>
+              
               <TextInput
                 style={styles.input}
                 placeholder="Enter item name"
-                value={itemName}
+                placeholderTextColor={beigeColors.taupe}
                 onChangeText={setItemName}
               />
+            </View>
 
+            <View style={styles.buttonRow}>
+              {rmbgImage ? (
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.button} onPress={handleRemoveBackground}>
+                  <Text style={styles.buttonText}>Remove Background</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={handleClear}>
+                <Text style={styles.buttonText}>Start Over</Text>
+              </TouchableOpacity>
             </View>
           </View>
         ) : (
           <>
-            <TouchableOpacity style={styles.uploadBox} onPress={async () => setImage(await selectImage())}>
-              <Text style={[styles.uploadBoxText, { color: '#fff' }]}>Select from Camera Roll</Text>
-            </TouchableOpacity>
-
-            {/* OR Divider */}
-            <View style={styles.orContainer}>
-              <View style={styles.line} />
-              <Text style={[styles.orText, { color: '#000' }]}>or</Text>
-              <View style={styles.line} />
+            {/* Image Selection Options */}
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Upload Method</Text>
+              <View style={styles.contentBox}>
+                <TouchableOpacity 
+                  style={[styles.uploadOption, styles.modeButton]} 
+                  onPress={async () => setImage(await selectImage())}
+                >
+                  <View style={styles.buttonContent}>
+                    <IconSymbol name="folder" size={30} color={beigeColors.darkBeige} />
+                    <Text style={styles.buttonText}>Gallery</Text>
+                  </View>
+                </TouchableOpacity>
+                
+                <View style={styles.optionDivider}>
+                  <View style={styles.line} />
+                  <Text style={styles.orText}>or</Text>
+                  <View style={styles.line} />
+                </View>
+                
+                <TouchableOpacity 
+                  style={[styles.uploadOption, styles.modeButton]} 
+                  onPress={async () => setImage(await captureImage())}
+                >
+                  <View style={styles.buttonContent}>
+                    <IconSymbol name="camera" size={30} color={beigeColors.darkBeige} />
+                    <Text style={styles.buttonText}>Camera</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            {/* Camera Button */}
-            <TouchableOpacity style={styles.cameraButton} onPress={async () => setImage(await captureImage())}>
-              <Text style={[styles.cameraButtonText, { color: '#fff' }]}>Open Camera & Take Photo</Text>
-            </TouchableOpacity>
           </>
-        )}
-
-        {/* Dividing Line */}
-        <View style={styles.lineDivider} />
-
-        {/* Submit Button */}
-        {image && (
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={rmbgImage ? handleSubmit : handleRemoveBackground}
-            disabled={loading}
-          >
-            <Text style={[styles.submitButtonText, { color: '#fff' }]}>
-              {loading
-                ? "Uploading..."
-                : rmbgImage
-                ? "Submit"
-                : "Remove Background"}
-            </Text>
-          </TouchableOpacity>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -187,114 +210,124 @@ export default function UploadScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 16,
+    backgroundColor: beigeColors.beige,
   },
-  contentContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 0,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingBottom: Platform.OS === 'ios' ? 50 : 20,
   },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 15,
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: beigeColors.darkBeige,
   },
-  subtitleContainer: {
-    marginBottom: 30,
+  sectionContainer: {
+    width: '100%',
+    marginBottom: 20,
   },
-  uploadBox: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 10,
-    paddingVertical: 100,
-    alignItems: 'center',
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  uploadBoxText: {
-    fontSize: 16,
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '600',
+    marginBottom: 10,
+    color: beigeColors.darkBeige,
   },
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
+  contentBox: {
+    backgroundColor: beigeColors.softBrown,
+    borderRadius: 8,
+    padding: 15,
   },
-  line: {
-    height: 1,
-    flex: 1,
-    backgroundColor: '#444',
-    marginHorizontal: 8,
+  descriptionText: {
+    color: beigeColors.brown,
+    fontSize: 15,
+    marginBottom: 8,
   },
-  orText: {
-    fontSize: 14,
-  },
-  cameraButton: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 10,
-    paddingVertical: 15,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-    marginBottom: 30,
-  },
-  cameraButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  imageSection: {
+    width: '100%',
+    marginBottom: 20,
   },
   imageContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
+    marginBottom: 15,
+    height: 250,
   },
   image: {
-    width: 250,
-    height: 250,
-    borderRadius: 10,
-    resizeMode: 'contain',
-  },
-  buttonContainer: {
-    marginTop: 15,
     width: '100%',
-    alignItems: 'center',
+    height: '100%',
+    borderRadius: 8,
   },
-  optionButton: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginBottom: 10,
-    width: '90%',
-    alignItems: 'center',
-  },
-  optionButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  submitButton: {
-    backgroundColor: '#007BFF',
-    borderRadius: 10,
+  uploadOption: {
     paddingVertical: 15,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
+    justifyContent: 'center',
   },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  modeButton: {
+    backgroundColor: beigeColors.taupe,
+    borderRadius: 8,
+    marginVertical: 10,
   },
-  lineDivider: {
+  optionDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  line: {
+    flex: 1,
     height: 1,
-    backgroundColor: '#444',
-    marginBottom: 30,
-    width: '100%',
+    backgroundColor: beigeColors.taupe,
+  },
+  orText: {
+    fontSize: 14,
+    marginHorizontal: 10,
+    color: beigeColors.brown,
   },
   input: {
-    height: 40,
-    width: '90%',
-    borderColor: 'gray',
+    padding: 12,
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 20,
+    borderColor: beigeColors.taupe,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    color: beigeColors.darkBeige,
   },
-
+  buttonRow: {
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: beigeColors.taupe,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 5,
+  },
+  secondaryButton: {
+    backgroundColor: beigeColors.softBrown,
+    borderWidth: 1,
+    borderColor: beigeColors.taupe,
+  },
+  buttonText: {
+    color: beigeColors.darkBeige,
+    fontSize: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    height: 200,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: beigeColors.darkBeige,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
 });

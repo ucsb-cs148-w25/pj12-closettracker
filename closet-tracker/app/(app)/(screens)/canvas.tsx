@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { SafeAreaView, View, StyleSheet, Text, Image, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaView, View, StyleSheet, Text, Image, TextInput, TouchableOpacity, Switch } from "react-native";
 import DraggableResizableImage from "@/components/DraggableResizableImage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { getAuth } from "firebase/auth";
 import { collection, query, where, getDocs, getDoc, getFirestore, addDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist";
@@ -19,11 +18,34 @@ export default function CanvasScreen() {
   const [outfitName, setOutfitName] = useState(""); 
   const [transforms, setTransforms] = useState<{ [id: string]: { translationX: number; translationY: number; scale: number } }>({});
   const [loading, setLoading] = useState(false);
-
+  const [profilePictureUri, setProfilePictureUri] = useState<string | null>(null); // Profile picture state
+  const [showProfilePicture, setShowProfilePicture] = useState(false); // Toggle state for profile picture
   const { currentUser } = useUser();
 
   const router = useRouter();
   const viewRef = useRef<ViewShot>(null);
+
+  const [combinedItems, setCombinedItems] = useState<{ id: string; uri: string; itemName: string }[]>([]);
+
+  useEffect(() => {
+    if (showProfilePicture && profilePictureUri) {
+      // add pfp to list if it's toggled on and not already in list
+      if (!combinedItems.some((item) => item.id === "profile")) {
+        const pfpItem = { id: "profile", uri: profilePictureUri, itemName: "Profile Picture" };
+        setCombinedItems([pfpItem, ...combinedItems]);
+      }
+    } else {
+      // remove pfp from  list if toggled off
+      setCombinedItems(combinedItems.filter((item) => item.id !== "profile"));
+    }
+  }, [showProfilePicture, profilePictureUri]);
+
+  const handleDragEnd = ({ data }: { data: { id: string; uri: string; itemName: string }[] }) => {
+    setCombinedItems(data);
+
+    const newItemUri = data.filter((item) => item.id !== "profile");
+    setItemUri(newItemUri);
+  };
 
   const takeScreenshot = async () => {
     try {
@@ -72,7 +94,7 @@ export default function CanvasScreen() {
         alert("Please sign in before uploading your outfits.");
         return;
       }
-
+      
       const clothingItems = itemUri.map(item => ({
         itemRef: doc(db, "users", currentUser.uid, "clothing", item.id),
         translationX: transforms[item.id]?.translationX ?? 0,
@@ -85,6 +107,7 @@ export default function CanvasScreen() {
         await updateDoc(doc(db, "users", currentUser.uid, "outfit", String(outfitId)), {
           itemName: outfitName.trim(),
           image: imageUrl,
+          dateUploaded: new Date(),
           clothingItems,
         });
         alert("Outfit updated successfully!");
@@ -93,6 +116,7 @@ export default function CanvasScreen() {
         const docRef = await addDoc(collection(db, "users", currentUser.uid, "outfit"), {
           itemName: outfitName.trim(),
           image: imageUrl,
+          dateUploaded: new Date(),
           clothingItems,
         });
         alert("Outfit uploaded successfully!");
@@ -169,6 +193,14 @@ export default function CanvasScreen() {
           itemName: doc.data().itemName,
         }));
         setItemUri(fetchedImages);
+        setCombinedItems(fetchedImages);
+
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setProfilePictureUri(userData?.profilePicture || null);
+        }
       } catch (error) {
         console.error("Error fetching items:", error);
       }
@@ -209,10 +241,22 @@ export default function CanvasScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Canvas with clothing items */}
+      {profilePictureUri && (
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleText}>Show Profile Picture</Text>
+          <Switch
+            value={showProfilePicture}
+            onValueChange={(value) => setShowProfilePicture(value)}
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={showProfilePicture ? "#007BFF" : "#f4f3f4"}
+          />
+        </View>
+      )}
+
+      {/* Canvas with clothing items and profile picture */}
       <ViewShot style={styles.canvas} ref={viewRef} options={{ format: 'png', quality: 0.9 }}>
         <View>
-          {itemUri.map(({ id, uri }) => (
+          {combinedItems.map(({ id, uri }) => (
             <DraggableResizableImage 
               key={id} 
               uri={uri}
@@ -228,9 +272,9 @@ export default function CanvasScreen() {
         <Text style={styles.layerTitle}>Adjust Layer Order</Text>
         <DraggableFlatList
           horizontal
-          data={itemUri}
+          data={combinedItems}
           keyExtractor={(item) => item.id}
-          onDragEnd={({ data }) => setItemUri(data)}
+          onDragEnd={handleDragEnd}
           renderItem={renderItem}
           contentContainerStyle={{ paddingHorizontal: 10 }}
         />
@@ -273,6 +317,20 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+  toggleText: {
+    marginRight: 10,
+    fontSize: 16,
+    color: "#333",
   },
   canvas: {
     flex: 1,

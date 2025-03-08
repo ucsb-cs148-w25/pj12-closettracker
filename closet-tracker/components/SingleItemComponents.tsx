@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import EvilIcons from '@expo/vector-icons/FontAwesome';
+import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
+import { db } from "@/FirebaseConfig";
+import { useUser } from '@/context/UserContext';
 
 interface WearCountButtonProps {
     // title: string;   // 'title' should be a string
@@ -18,11 +21,45 @@ const DecreaseWearButton: React.FC<WearCountButtonProps> = ({ onPress }) => {
   );  
 };
 
-export const TimesWornComponent = () => {
-  const [wearCount, setWearCount] = useState(0);
 
-  const handleIncrement = () => setWearCount(wearCount + 1);
-  const handleDecrement = () => setWearCount(wearCount - 1);
+
+export default function TimesWornComponent({
+    itemId,
+    wearCountFromDB,
+    collectionId,
+  }: {
+    itemId: string;
+    wearCountFromDB: number;
+    collectionId: string;
+
+  }) {
+
+  const { currentUser } = useUser();
+
+  const updateWearCount = async (newCount: number) => {
+    if (!itemId || newCount < 0) return;
+
+    if (!currentUser) return;
+
+    const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
+
+    try {
+      await updateDoc(itemRef, { wearCount: newCount });
+    } catch (error) {
+      console.error("Error updating wear count:", error);
+    }
+  };
+
+  const [wearCount, setWearCount] = useState(wearCountFromDB);
+  const handleIncrement = () => {
+    setWearCount(wearCount + 1)
+    updateWearCount(wearCount + 1);
+  };
+
+  const handleDecrement = () => {
+    setWearCount(wearCount - 1);
+    updateWearCount(wearCount - 1);
+  }
 
   // Max wear count (adjust this to fit your needs)
   const maxWearCount = 8;
@@ -30,7 +67,26 @@ export const TimesWornComponent = () => {
   // Function to determine square color based on wear count
   const getSquareColor = (index: number) => {
     if (index < wearCount) {
-      return '#B8FF12';  // Dirtier clothes (change to any color you want, like brown or gray)
+      // Calculate normalized wear factor (from 0 to 1)
+      const t = (index + 1) / maxWearCount;
+      
+      if (t <= 0.7) {
+        // Phase 1: Interpolate from white to red
+        // Normalize t within [0, 0.7]
+        const t2 = t / 0.7;
+        const r = 255; 
+        const g = Math.round(255 * (1 - t2)); 
+        const b = Math.round(255 * (1 - t2));
+        return `rgb(${r}, ${g}, ${b})`;
+      } else {
+        // Phase 2: Interpolate from red to dark red ("black red")
+        // Normalize t within [0.7, 1]
+        const t2 = (t - 0.7) / 0.3;
+        const r = Math.round(255 - (255 - 139) * t2); // from 255 to 139
+        const g = 0;
+        const b = 0;
+        return `rgb(${r}, ${g}, ${b})`;
+      }
     } else {
       return '#FFFFFF';  // Clean clothes (white)
     }
@@ -76,7 +132,7 @@ export const TimesWornComponent = () => {
 const styles = StyleSheet.create({
   button: {
     margin : 10,
-    backgroundColor: 'pink',  // Tomato color (or any color you prefer)
+    backgroundColor: '#ADD8E6',
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 8,  // Rounded corners
@@ -128,5 +184,3 @@ const styles = StyleSheet.create({
     shadowRadius: 2.5,
   },
 });
-
-export default TimesWornComponent;
