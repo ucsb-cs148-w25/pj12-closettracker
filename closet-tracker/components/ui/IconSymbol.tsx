@@ -32,6 +32,7 @@ const MAPPING = {
   "heart.fill" : "favorite-border",
   "camera": "camera-alt",
   "folder": "folder-copy",
+  "sparkles": "done",
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
