@@ -38,7 +38,7 @@ export default function WardrobeScreen() {
 
   const db = getFirestore();
 
-
+  
   const fetchItems = useCallback(() => {
     if (user) {
       const itemsRef = collection(db, "users", user.uid, "clothing");
@@ -57,22 +57,22 @@ export default function WardrobeScreen() {
       return unsubscribe;
     } else {
       console.log("No user found. Clearing wardrobe items.");
-      setItems([]);
+      setItems([]); 
       setRefreshing(false);
     }
   }, [user, db]);
 
-
+  
   useFocusEffect(
     useCallback(() => {
       fetchItems();
     }, [fetchItems])
   );
 
-
+  
   const sizeOrder: { [key: string]: number } = { xs: 0, s: 1, m: 2, l: 3, xl: 4 };
 
-
+  
   const availableSizes = Array.from(new Set(items.map(item => item.size).filter(Boolean)));
   const sortedAvailableSizes = availableSizes.sort(
     (a, b) => (sizeOrder[a.toLowerCase()] ?? Infinity) - (sizeOrder[b.toLowerCase()] ?? Infinity)
@@ -145,7 +145,7 @@ export default function WardrobeScreen() {
     router.push(`../(screens)/editItem?item_id=${selectedIds[0]}&collections=clothing`);
   };
 
-
+  
   const handleLaundrySelected = async () => {
     if (!user) return;
     if (selectedIds.length === 0) {
@@ -162,6 +162,7 @@ export default function WardrobeScreen() {
 
         const itemSnapshot = await getDoc(wardrobeRef);
         if (itemSnapshot.exists()) {
+         
           const oldData = itemSnapshot.data();
           const newData = {
             ...oldData,
@@ -187,17 +188,17 @@ export default function WardrobeScreen() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-
+    
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
 
-
+   
     const getBackgroundColor = (wearCount: number, isItemSelected: boolean) => {
       if (isItemSelected) return '#4160fb';
       const maxWearCount = 10;
       const normalizedCount = Math.min(wearCount, maxWearCount) / maxWearCount;
-      const lightness = 75 - normalizedCount * 45;
-      return `hsl(30, 50%, ${lightness}%)`;
+      const lightness = 75 - normalizedCount * 45; 
+      return `hsl(30, 50%, ${lightness}%)`; 
     };
 
     const backgroundColor = getBackgroundColor(item.wearCount || 0, isSelected);
@@ -280,7 +281,7 @@ export default function WardrobeScreen() {
           />
         )}
 
-        { }
+        {}
         <TouchableOpacity
           style={styles.laundryButton}
           onPress={handleLaundrySelected}
@@ -356,7 +357,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 100 : 50,
     right: 20,
-
+    
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
