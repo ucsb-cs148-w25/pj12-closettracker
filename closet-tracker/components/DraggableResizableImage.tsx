@@ -21,18 +21,17 @@ function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
 }
 
-// Add initialTransform to props interface
 export default function DraggableResizableImage({ 
-	uri, 
-	onTransformChange, 
-	initialTransform 
+  uri, 
+  onTransformChange, 
+  initialTransform 
 }: { 
-	uri: string; 
-	onTransformChange?: (transform: { translationX: number; translationY: number; scale: number }) => void; 
-	initialTransform?: { translationX: number; translationY: number; scale: number } 
+  uri: string; 
+  onTransformChange?: (transform: { translationX: number; translationY: number; scale: number }) => void; 
+  initialTransform?: { translationX: number; translationY: number; scale: number }  
 }) {
-  const [imageSize, setImageSize] = useState({ width: 100, height: 100 }); // Default size to avoid undefined
-  const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
+  const [imageSize, setImageSize] = useState({ width: 100, height: 100 }); // Default size
+  const { width: ScreenWidth } = useWindowDimensions();
 
   useEffect(() => {
     if (uri) {
@@ -40,15 +39,24 @@ export default function DraggableResizableImage({
         setImageSize({ width, height });
       });
     }
-  }, [uri]); // ✅ Only runs when `uri` changes
+  }, [uri]);
 
-  // Initialize shared values with initialTransform if provided
+  // Initialize with provided transform values or defaults
   const translationX = useSharedValue(initialTransform?.translationX ?? 0);
   const translationY = useSharedValue(initialTransform?.translationY ?? 0);
   const prevTranslationX = useSharedValue(translationX.value);
   const prevTranslationY = useSharedValue(translationY.value);
   const scale = useSharedValue(initialTransform?.scale ?? INITIAL_SIZE);
   const startScale = useSharedValue(0);
+
+  // Also update shared values when initialTransform changes
+  useEffect(() => {
+    if (initialTransform) {
+      translationX.value = initialTransform.translationX;
+      translationY.value = initialTransform.translationY;
+      scale.value = initialTransform.scale;
+    }
+  }, [initialTransform]);
 
   // Function to update transform via callback
   const updateTransform = () => {

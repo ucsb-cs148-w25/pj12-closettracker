@@ -9,48 +9,61 @@ import ViewShot, { captureRef } from "react-native-view-shot";
 import supabase from '@/supabase';
 import { decode } from 'base64-arraybuffer';
 import { useUser } from "@/context/UserContext";
+import { removeBackground } from "@/removebg";
 
 export default function CanvasScreen() {
   const param = useLocalSearchParams();
   const { outfitId } = param;
   const itemIds = outfitId ? [] : JSON.parse(Array.isArray(param.item) ? param.item[0] : param.item);
-  const [itemUri, setItemUri] = useState<{ id: string; uri: string; itemName: string }[]>([]);
+  const [itemUri, setItemUri] = useState<{ id: string; uri: string; itemName: string; isProfilePics: boolean }[]>([]);
   const [outfitName, setOutfitName] = useState(""); 
   const [transforms, setTransforms] = useState<{ [id: string]: { translationX: number; translationY: number; scale: number } }>({});
   const [loading, setLoading] = useState(false);
-  const [profilePictureUri, setProfilePictureUri] = useState<string | null>(null); // Profile picture state
-  const [showProfilePicture, setShowProfilePicture] = useState(false); // Toggle state for profile picture
+  
+  // Profile picture specific states
+  const [profilePictureUri, setProfilePictureUri] = useState<string | null>(null);
+  const [showProfilePicture, setShowProfilePicture] = useState(false);
+  const [profilePicTransform, setProfilePicTransform] = useState<{ translationX: number; translationY: number; scale: number } | null>(null);
+  
+  // Combined items for display
+  const [combinedItems, setCombinedItems] = useState<{ id: string; uri: string; itemName: string; isProfilePics: boolean }[]>([]);
+  
   const { currentUser } = useUser();
-
   const router = useRouter();
   const viewRef = useRef<ViewShot>(null);
 
-  const [combinedItems, setCombinedItems] = useState<{ id: string; uri: string; itemName: string }[]>([]);
-
   useEffect(() => {
+    // Start with clothing items
+    const newCombinedItems = [...itemUri];
+    
+    // Add profile picture if it should be shown
     if (showProfilePicture && profilePictureUri) {
-      // add pfp to list if it's toggled on and not already in list
-      if (!combinedItems.some((item) => item.id === "profile")) {
-        const pfpItem = { id: "profile", uri: profilePictureUri, itemName: "Profile Picture" };
-        setCombinedItems([pfpItem, ...combinedItems]);
-      }
-    } else {
-      // remove pfp from  list if toggled off
-      setCombinedItems(combinedItems.filter((item) => item.id !== "profile"));
+      // Insert profile picture at the beginning of the array
+      newCombinedItems.unshift({ 
+        id: "profile", 
+        uri: profilePictureUri, 
+        itemName: "Profile Picture",
+        isProfilePics: true
+      });
     }
-  }, [showProfilePicture, profilePictureUri]);
+    
+    setCombinedItems(newCombinedItems);
+  }, [showProfilePicture, profilePictureUri, itemUri]);
 
-  const handleDragEnd = ({ data }: { data: { id: string; uri: string; itemName: string }[] }) => {
+  // Handle drag end for the layer order
+  const handleDragEnd = ({ data }: { data: { id: string; uri: string; itemName: string; isProfilePics: boolean }[] }) => {
     setCombinedItems(data);
-
-    const newItemUri = data.filter((item) => item.id !== "profile");
+    
+    // Filter out profile picture from clothing items
+    const newItemUri = data.filter(item => !item.isProfilePics);
     setItemUri(newItemUri);
   };
 
+  // Capture screenshot for saving the outfit
   const takeScreenshot = async () => {
     try {
       setLoading(true);
-      const uri = await captureRef(viewRef, { format: 'png', quality: 0.8, result: 'base64' });
+      const uri = await captureRef(viewRef, { format: 'jpg', quality: 1, result: 'base64' });
       await handleSubmit(uri);
     } catch (error) {
       setLoading(false);
@@ -58,10 +71,16 @@ export default function CanvasScreen() {
     }
   };
 
+  // Handle transform updates for any draggable image
   const handleTransformChange = (id: string, transform: { translationX: number; translationY: number; scale: number }) => {
-    setTransforms(prev => ({ ...prev, [id]: transform }));
+    if (id === "profile") {
+      setProfilePicTransform(transform);
+    } else {
+      setTransforms(prev => ({ ...prev, [id]: transform }));
+    }
   };
 
+  // Save outfit to the database
   const handleSubmit = async (outfitImageUri: string) => {
     if (!outfitImageUri) {
       alert("Error: no screenshot taken.");
@@ -75,19 +94,20 @@ export default function CanvasScreen() {
     }
 
     try {
-      const base64 = outfitImageUri;
+      const result = await removeBackground(outfitImageUri);
+      const base64 = result;
       const arrayBuffer = decode(base64);
       const fileName = `image_${Date.now()}.jpg`;
       const filePath = `user_${currentUser?.uid}/${fileName}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // Upload outfit image to Supabase
+      const { error: uploadError } = await supabase.storage
         .from('outfitImages')
         .upload(filePath, arrayBuffer, { contentType: 'image/jpeg' });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('outfitImages').getPublicUrl(filePath);
       const imageUrl = urlData.publicUrl;
-      console.log("Public URL:", imageUrl);
 
       const db = getFirestore();
       if (!currentUser) {
@@ -95,6 +115,7 @@ export default function CanvasScreen() {
         return;
       }
       
+      // Create clothing items array with their transforms
       const clothingItems = itemUri.map(item => ({
         itemRef: doc(db, "users", currentUser.uid, "clothing", item.id),
         translationX: transforms[item.id]?.translationX ?? 0,
@@ -102,60 +123,79 @@ export default function CanvasScreen() {
         scale: transforms[item.id]?.scale ?? 0.5,
       }));
 
-      // If editing an existing outfit, update its document; otherwise create new
+      // Prepare outfit data with separate profilePic field
+      const outfitData = {
+        itemName: outfitName.trim(),
+        image: imageUrl,
+        dateUploaded: new Date(),
+        clothingItems,
+        // Only include profilePic if it's shown
+        ...(showProfilePicture && profilePicTransform ? {
+          profilePic: {
+            translationX: profilePicTransform.translationX,
+            translationY: profilePicTransform.translationY,
+            scale: profilePicTransform.scale,
+          }
+        } : { profilePic: null }),
+      };
+
+      // Update existing outfit or create a new one
       if (outfitId) {
-        await updateDoc(doc(db, "users", currentUser.uid, "outfit", String(outfitId)), {
-          itemName: outfitName.trim(),
-          image: imageUrl,
-          dateUploaded: new Date(),
-          clothingItems,
-        });
+        await updateDoc(doc(db, "users", currentUser.uid, "outfit", String(outfitId)), outfitData);
         alert("Outfit updated successfully!");
-        router.push(`../(screens)/editItem?item_id=${outfitId}&collections=outfit`);
+        router.replace(`../(screens)/editItem?item_id=${outfitId}&collections=outfit`);
       } else {
-        const docRef = await addDoc(collection(db, "users", currentUser.uid, "outfit"), {
-          itemName: outfitName.trim(),
-          image: imageUrl,
-          dateUploaded: new Date(),
-          clothingItems,
-        });
+        const docRef = await addDoc(collection(db, "users", currentUser.uid, "outfit"), outfitData);
         alert("Outfit uploaded successfully!");
-        router.push(`../(screens)/editItem?item_id=${docRef.id}&collections=outfit`);
+        router.replace(`../(screens)/editItem?item_id=${docRef.id}&collections=outfit`);
       }
     } catch (error) {
       console.error("Error uploading outfit: ", error);
       alert("Failed to upload outfit.");
     } finally {
-      setLoading(false); // NEW: reset loading state
+      setLoading(false);
     }
   };
 
+  // Fetch existing outfit data when editing
   useEffect(() => {
     if (outfitId) {
-      console.log("Outfit");
-      // Editing an existing outfit: fetch outfit document and clothing items from Firestore
       (async () => {
         if (!currentUser) return;
         try {
+          // Get outfit document
           const outfitDocRef = doc(getFirestore(), "users", currentUser.uid, "outfit", String(outfitId));
           const outfitDoc = await getDoc(outfitDocRef);
           if (!outfitDoc.exists()) {
             console.error("Outfit not found");
             return;
           }
+          
           const outfitData = outfitDoc.data();
           setOutfitName(outfitData.itemName || "");
+          
+          // Handle profile picture if exists in outfit data
+          if (outfitData.profilePic) {
+            setShowProfilePicture(true);
+            setProfilePicTransform({
+              translationX: outfitData.profilePic.translationX,
+              translationY: outfitData.profilePic.translationY,
+              scale: outfitData.profilePic.scale
+            });
+          } else {
+            setShowProfilePicture(false);
+          }
+          
+          // Handle clothing items
           const clothingItems = outfitData.clothingItems || [];
-          // For each clothing item, fetch the clothing document for its image and name
           const fetchedItems = await Promise.all(clothingItems.map(async (item: any) => {
             const clothingDoc = await getDoc(item.itemRef);
-            if (!clothingDoc.exists()) {
-              console.error("Clothing item not found");
-              return null;
-            }
+            if (!clothingDoc.exists()) return null;
+            
             const data = clothingDoc.data() as { image: string; itemName: string };
             if (!data) return null;
-            // Set transform state for this item
+            
+            // Set transform for this clothing item
             setTransforms(prev => ({
               ...prev,
               [clothingDoc.id]: {
@@ -164,12 +204,14 @@ export default function CanvasScreen() {
                 scale: item.scale ?? 0.5
               }
             }));
+            
             return {
               id: clothingDoc.id,
               uri: data.image,
               itemName: data.itemName,
             };
           }));
+          
           setItemUri(fetchedItems.filter((item: any) => item !== null));
         } catch (error) {
           console.error("Error fetching outfit data:", error);
@@ -178,38 +220,40 @@ export default function CanvasScreen() {
     }
   }, [outfitId, currentUser]);
   
+  // Fetch initial items and profile picture
   useEffect(() => {
     const fetchItems = async () => {
       if (!currentUser) return;
-      if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) return;
       
       try {
-        const ClothingRef = collection(db, "users", currentUser.uid, "clothing");
-        const q = query(ClothingRef, where("__name__", "in", itemIds));
-        const querySnapshot = await getDocs(q);
-        const fetchedImages = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          uri: doc.data().image,
-          itemName: doc.data().itemName,
-        }));
-        setItemUri(fetchedImages);
-        setCombinedItems(fetchedImages);
-
+        // Fetch user profile picture
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
           setProfilePictureUri(userData?.profilePicture || null);
         }
+        
+        // If not editing and we have item IDs, fetch those items
+        if (!outfitId && itemIds && Array.isArray(itemIds) && itemIds.length > 0) {
+          const ClothingRef = collection(db, "users", currentUser.uid, "clothing");
+          const q = query(ClothingRef, where("__name__", "in", itemIds));
+          const querySnapshot = await getDocs(q);
+          const fetchedImages = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            uri: doc.data().image,
+            itemName: doc.data().itemName,
+            isProfilePics: false,
+          }));
+          
+          setItemUri(fetchedImages);
+        }
       } catch (error) {
         console.error("Error fetching items:", error);
       }
     };
 
-    if (!outfitId) {
-      console.log("Fetching items");
-      fetchItems();
-    }
+    fetchItems();
   }, [outfitId, currentUser?.uid, JSON.stringify(itemIds)]);
 
   const renderItem = (params: RenderItemParams<{ id: string; uri: string; itemName: string }>) => (
@@ -253,15 +297,15 @@ export default function CanvasScreen() {
         </View>
       )}
 
-      {/* Canvas with clothing items and profile picture */}
+      {/* Canvas with items */}
       <ViewShot style={styles.canvas} ref={viewRef} options={{ format: 'png', quality: 0.9 }}>
         <View>
-          {combinedItems.map(({ id, uri }) => (
+          {combinedItems.map(({ id, uri, isProfilePics }) => (
             <DraggableResizableImage 
               key={id} 
               uri={uri}
               onTransformChange={(transform) => handleTransformChange(id, transform)}
-              initialTransform={transforms[id]}
+              initialTransform={isProfilePics ? profilePicTransform || undefined : transforms[id]}
             />
           ))}
         </View>
