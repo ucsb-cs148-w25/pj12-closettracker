@@ -3,6 +3,7 @@ import { Image, StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  runOnJS,
 } from "react-native-reanimated";
 import {
   Gesture,
@@ -20,9 +21,17 @@ function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
 }
 
-export default function DraggableResizableImage({ uri }: { uri: string }) {
-  const [imageSize, setImageSize] = useState({ width: 100, height: 100 }); // Default size to avoid undefined
-  const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
+export default function DraggableResizableImage({ 
+  uri, 
+  onTransformChange, 
+  initialTransform 
+}: { 
+  uri: string; 
+  onTransformChange?: (transform: { translationX: number; translationY: number; scale: number }) => void; 
+  initialTransform?: { translationX: number; translationY: number; scale: number }  
+}) {
+  const [imageSize, setImageSize] = useState({ width: 100, height: 100 }); // Default size
+  const { width: ScreenWidth } = useWindowDimensions();
 
   useEffect(() => {
     if (uri) {
@@ -30,16 +39,35 @@ export default function DraggableResizableImage({ uri }: { uri: string }) {
         setImageSize({ width, height });
       });
     }
-  }, [uri]); // ✅ Only runs when `uri` changes
+  }, [uri]);
 
-  const translationX = useSharedValue(0);
-  const translationY = useSharedValue(0);
-  const prevTranslationX = useSharedValue(0);
-  const prevTranslationY = useSharedValue(0);
-
-  // Scale values for pinch resizing
-  const scale = useSharedValue(INITIAL_SIZE);
+  // Initialize with provided transform values or defaults
+  const translationX = useSharedValue(initialTransform?.translationX ?? 0);
+  const translationY = useSharedValue(initialTransform?.translationY ?? 0);
+  const prevTranslationX = useSharedValue(translationX.value);
+  const prevTranslationY = useSharedValue(translationY.value);
+  const scale = useSharedValue(initialTransform?.scale ?? INITIAL_SIZE);
   const startScale = useSharedValue(0);
+
+  // Also update shared values when initialTransform changes
+  useEffect(() => {
+    if (initialTransform) {
+      translationX.value = initialTransform.translationX;
+      translationY.value = initialTransform.translationY;
+      scale.value = initialTransform.scale;
+    }
+  }, [initialTransform]);
+
+  // Function to update transform via callback
+  const updateTransform = () => {
+    if (onTransformChange) {
+      runOnJS(onTransformChange)({
+        translationX: translationX.value,
+        translationY: translationY.value,
+        scale: scale.value,
+      });
+    }
+  };
 
   // Drag Gesture
   const dragGesture = Gesture.Pan()
@@ -52,6 +80,9 @@ export default function DraggableResizableImage({ uri }: { uri: string }) {
       translationX.value = prevTranslationX.value + event.translationX;
       translationY.value = prevTranslationY.value + event.translationY;
     })
+    .onEnd(() => {
+      updateTransform();
+    })
     .runOnJS(true);
 
   // Pinch Gesture for resizing (maintaining aspect ratio)
@@ -61,6 +92,9 @@ export default function DraggableResizableImage({ uri }: { uri: string }) {
     })
     .onUpdate((event) => {
       scale.value = clamp(startScale.value * event.scale, MIN_SIZE, MAX_SIZE);
+    })
+    .onEnd(() => {
+      updateTransform();
     })
     .runOnJS(true);
 
