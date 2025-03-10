@@ -297,6 +297,7 @@ export default function UserProfile() {
                   <Image
                     source={{ uri: stat.value as string }}
                     style={styles.statImage}
+                    resizeMode='contain'
                   />
                 ) : (
                   <Text style={styles.statValue}>N/A</Text>
