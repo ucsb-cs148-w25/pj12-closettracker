@@ -19,9 +19,11 @@ The graph accurately displays my commits throughout the weeks. However, it notes
 ### Anvitha Kosuri
 
 ### Andrew Chen
+
 I implemented user authentication using Firebase and connected the wardrobe frontend to the Firebase database to store and retrieve user-specific clothing items. I also set up Supabase for image storage, ensuring that uploaded images were displayed on the wardrobe page. Additionally, I contributed to improving the app's modularity by creating a reusable component for displaying clothing items, allowing it to be easily used across multiple pages.
 
 **Commentary on graph**
+
 The graph pretty accurately displays my contributions throughout the quarter. I would say that the amount of lines edited may be an oversetimate due to the massive files of packages I may have pushed.
 
 **Link to my PRs**
