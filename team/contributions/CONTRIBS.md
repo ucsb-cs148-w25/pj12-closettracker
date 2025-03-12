@@ -21,7 +21,7 @@ The graph accurately displays my commits throughout the weeks. However, it notes
 
 ### Sophia Tran
 
-I contributed fairly to the project through this quarter. At the beginning, I created empty screens and screen prototypes for the wardrobe page and laundry page, which my teammates later added to. I added onto their work by editing the UI for some buttons to make the icons and purposes more clear. I also fixed a few bugs, such as the dropdown menu being unscrollable, the keyboard covering the text input, and the edit button resetting the item's data. Lastly, as the QA Coordinator, I added acceptance criteria to Kanban board items as well as monitored issues, linked them to PR's, and closed them when needed
+I contributed fairly to the project through this quarter. At the beginning, I created empty screens and screen prototypes for the wardrobe page and laundry page, which my teammates later added to. I added onto their work by editing the UI for some buttons to make the icons and purposes more clear. I also fixed a few bugs, such as the dropdown menu being unscrollable, the keyboard covering the text input, and the edit button resetting the item's data. Lastly, as the QA Coordinator, I added acceptance criteria to Kanban board items as well as monitored issues, linked them to PR's, and closed them when needed.
 
 **Commentary on graph**
 
