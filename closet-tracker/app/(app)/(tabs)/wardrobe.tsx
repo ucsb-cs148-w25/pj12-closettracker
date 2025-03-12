@@ -189,7 +189,6 @@ export default function WardrobeScreen() {
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
-    // const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
     const getBackgroundColor = (wearCount: number, isSelected: boolean) => {
       if (isSelected) return '#4160fb'; // Blue when selected
 
@@ -197,8 +196,8 @@ export default function WardrobeScreen() {
       const maxWearCount = 10;
       const normalizedCount = Math.min(wearCount, maxWearCount) / maxWearCount;
 
-      // Interpolate lightness from 75% (light beige) to 30% (dark brown)
-      const lightness = 75 - normalizedCount * 45;
+      // Interpolate lightness from 90% (light beige) to 30% (dark brown)
+      const lightness = 90 - normalizedCount * 45;
 
       return `hsl(30, 50%, ${lightness}%)`; // HSL with a brownish hue
     };
