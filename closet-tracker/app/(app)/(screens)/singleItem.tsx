@@ -61,20 +61,6 @@ export default function singleItem() {
     checkPublicStatus();
   }, [collectionId, itemId, currentUser]);
 
-  // const updateWearCount = async (newCount: number) => {
-  //   if (!itemId || newCount < 0) return;
-
-  //   if (!currentUser) return;
-
-  //   const itemRef = doc(db, "users", currentUser.uid, collectionId, itemId);
-
-  //   try {
-  //     await updateDoc(itemRef, { wearCount: newCount });
-  //     setWearCount(newCount);
-  //   } catch (error) {
-  //     console.error("Error updating wear count:", error);
-  //   }
-  // };
   const handleEdit = () => {
     if (!currentUser || collectionId !== "clothing") return;
     router.push(`../(screens)/editItem?item_id=${itemId}&collections=${collectionId}`);
@@ -206,9 +192,11 @@ export default function singleItem() {
             <Pressable onPress={() => router.back()} style={styles.button}>
                 <Text style={styles.buttonText}>Back</Text>
             </Pressable> 
-            <Pressable onPress={() => handleEdit()} style={styles.button}>
+            {(collectionId == "clothing") ? 
+              <Pressable onPress={() => handleEdit()} style={styles.button}>
                 <Text style={styles.buttonText}>Edit</Text>
-            </Pressable> 
+              </Pressable> : <></>}
+            
           </View>
 
         </View>

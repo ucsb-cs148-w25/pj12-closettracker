@@ -77,7 +77,8 @@ export default function EditItem () {
     color: string | null,
     clothingType: string | null,
     brand: string,
-    note: string
+    note: string,
+    wearCount: number | null
   ) => {
     if (!user) {
       alert("Please sign in before uploading your clothes.");
@@ -98,7 +99,7 @@ export default function EditItem () {
         clothingType: clothingType,
         brand: brand,
         note: note,
-        wearCount: 0,
+        wearCount: wearCount,
         dateUploaded: serverTimestamp()
       });
       
