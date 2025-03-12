@@ -12,7 +12,9 @@ export default function ClothingDataDropdowns ({
         size: string | null,
         color: string | null, 
         clothingType: string | null, 
-        brand: string, note: string
+        brand: string, 
+        note: string,
+        wearCount: number | null
     ) => Promise<void>; //for asynch?
     docSnapshot: DocumentSnapshot | null;
 
@@ -110,6 +112,7 @@ export default function ClothingDataDropdowns ({
   const [size, setSize] = useState(placeholders.size);
   const [clothingType, setClothingType] = useState(placeholders.clothingType);
   const [color, setColor] = useState(placeholders.color);
+  const [wearCount, setWearCount] = useState(placeholders.wearCount);
 
   useEffect(() => {
     setBrand(placeholders.brand);
@@ -118,6 +121,7 @@ export default function ClothingDataDropdowns ({
     setSize(placeholders.size);
     setClothingType(placeholders.clothingType);
     setColor(placeholders.color);
+    setWearCount(placeholders.wearCount);
   }, [placeholders]);
 
   // FlatList data
@@ -222,7 +226,7 @@ export default function ClothingDataDropdowns ({
     {
       key: 'submit',
       dropdown: (
-        <Button title="Submit" onPress={() => handleClothingSubmit(newName, size, color, clothingType, brand, note)} />
+        <Button title="Submit" onPress={() => handleClothingSubmit(newName, size, color, clothingType, brand, note, wearCount)} />
       ),
     },
   ];
