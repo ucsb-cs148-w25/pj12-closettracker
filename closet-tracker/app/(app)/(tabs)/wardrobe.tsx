@@ -196,7 +196,7 @@ export default function WardrobeScreen() {
       const maxWearCount = 10;
       const normalizedCount = Math.min(wearCount, maxWearCount) / maxWearCount;
 
-      // Interpolate lightness from 75% (light beige) to 30% (dark brown)
+      // Interpolate lightness from 90% (light beige) to 30% (dark brown)
       const lightness = 90 - normalizedCount * 45;
 
       return `hsl(30, 50%, ${lightness}%)`; // HSL with a brownish hue
