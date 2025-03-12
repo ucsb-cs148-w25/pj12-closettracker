@@ -189,7 +189,19 @@ export default function LaundryScreen() {
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
-    const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
+    const getBackgroundColor = (wearCount: number, isSelected: boolean) => {
+      if (isSelected) return '#4160fb'; // Blue when selected
+
+      // Normalize wearCount to a range (e.g., 0 to 10 or 20)
+      const maxWearCount = 10;
+      const normalizedCount = Math.min(wearCount, maxWearCount) / maxWearCount;
+
+      // Interpolate lightness from 75% (light beige) to 30% (dark brown)
+      const lightness = 90 - normalizedCount * 45;
+
+      return `hsl(30, 50%, ${lightness}%)`; // HSL with a brownish hue
+    };
+    const backgroundColor = getBackgroundColor(item.wearCount, isSelected);
     const textColor = isSelected ? 'white' : 'black';
 
     return (
