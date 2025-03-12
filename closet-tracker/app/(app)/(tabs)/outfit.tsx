@@ -105,7 +105,9 @@ export default function OutfitScreen() {
   const renderItem = ({ item }: { item: any }) => {
     if (item.id === "\"STUB\"") return <View style={{ flex: 1, aspectRatio: 1, margin: 8 }} />;
     const isSelected = selectedIds.includes(item.id);
-    const backgroundColor = isSelected ? '#4160fb' : '#a5b4fd';
+
+    // Usage
+    const backgroundColor = isSelected ? '#4160fb' : `hsl(30, 50%, 90%)`;
     const textColor = isSelected ? 'white' : 'black';
 
     return (
