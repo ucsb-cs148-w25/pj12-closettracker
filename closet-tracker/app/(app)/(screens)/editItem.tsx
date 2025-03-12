@@ -166,7 +166,6 @@ export default function EditItem () {
       await updateDoc(docRef, {
         itemName: itemName,
         note: note,
-        wearCount: 0,
         dateUploaded: serverTimestamp()
       });
       

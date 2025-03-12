@@ -137,8 +137,9 @@ export default function singleItem() {
             <Image source={{ uri: itemData.image }} style={styles.image} />
           )}
           <Text style={styles.title}>{itemData.itemName}</Text>
-
-          <TimesWornComponent itemId={itemId} wearCountFromDB={wearCount} collectionId={collectionId} />
+          {collectionId !== 'outfit' && (
+            <TimesWornComponent itemId={itemId} wearCountFromDB={wearCount} collectionId={collectionId} />
+          )}
           
             {collectionId === 'clothing' && (
             <View style={styles.infoContainer}>
