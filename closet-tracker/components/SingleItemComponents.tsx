@@ -57,8 +57,10 @@ export default function TimesWornComponent({
   };
 
   const handleDecrement = () => {
-    setWearCount(wearCount - 1);
-    updateWearCount(wearCount - 1);
+    if (wearCount - 1 >= 0) {
+      setWearCount(wearCount - 1);
+      updateWearCount(wearCount - 1);
+    }
   }
 
   // Max wear count (adjust this to fit your needs)
