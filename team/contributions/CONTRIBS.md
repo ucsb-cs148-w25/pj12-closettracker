@@ -1,5 +1,7 @@
 ### Gen Tamada
 
+---
+
 ### Gretchen Lam
 
 Throughout this course so far, I contributed to various features, most notably including the UI for the upload page, integrating Supabase with Firebase for image retrieval + display, and additions to the user profile page (profile pictures + descriptions). I have also added on to work done by my peers, such as adding a filter feature to the wardrobe page and allowing users to add their profile pictures to their outfits. 
@@ -11,8 +13,11 @@ The graph accurately displays my commits throughout the weeks. However, it notes
 **Link to my PRs**
 
 - https://github.com/ucsb-cs148-w25/pj12-closettracker/issues?q=state%3Aclosed%20is%3Apr%20author%3Agretchenlam
+---
 
 ### Daisy Zhong
+
+---
 
 ### Sophia Tran
 
@@ -24,8 +29,11 @@ My contributions on the graph are fairly accurate. The ranking by commit level i
 
 **Link to my PRs**
 - https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Asophiattran+
+---
 
 ### Anvitha Kosuri
+
+---
 
 ### Andrew Chen
 
@@ -37,6 +45,7 @@ The graph pretty accurately displays my contributions throughout the quarter. I 
 
 **Link to my PRs**
 - https://github.com/ucsb-cs148-w25/pj12-closettracker/issues?q=state%3Aclosed%20is%3Apr%20author%3Aandrewc512
+---
 
 ### Victor Nardi
 
