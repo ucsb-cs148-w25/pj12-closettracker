@@ -62,8 +62,12 @@ export default function singleItem() {
   }, [collectionId, itemId, currentUser]);
 
   const handleEdit = () => {
-    if (!currentUser || collectionId !== "clothing") return;
-    router.push(`../(screens)/editItem?item_id=${itemId}&collections=${collectionId}`);
+    if (!currentUser) return;
+    if (collectionId === "outfit") {
+      router.push(`../(screens)/canvas?outfitId=${itemId}`);
+    } else { // wardrobe, laundry pages
+      router.push(`../(screens)/editItem?item_id=${itemId}&collections=${collectionId}`);
+    }
   };
   
   const handleMakePublic = async () => {
@@ -192,10 +196,9 @@ export default function singleItem() {
             <Pressable onPress={() => router.back()} style={styles.button}>
                 <Text style={styles.buttonText}>Back</Text>
             </Pressable> 
-            {(collectionId == "clothing") ? 
-              <Pressable onPress={() => handleEdit()} style={styles.button}>
-                <Text style={styles.buttonText}>Edit</Text>
-              </Pressable> : <></>}
+            <Pressable onPress={() => handleEdit()} style={styles.button}>
+              <Text style={styles.buttonText}>Edit</Text>
+            </Pressable>
             
           </View>
 
