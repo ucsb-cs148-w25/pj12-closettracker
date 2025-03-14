@@ -53,10 +53,13 @@ export default function TimesWornComponent({
   const [wearCount, setWearCount] = useState(wearCountFromDB);
   const handleIncrement = () => {
     setWearCount(wearCount + 1)
-    if (wearCount === 5) {
+    if (wearCount === 4) {
       Alert.alert("High five!", "Five’s up—time to wash up!");
     }
     updateWearCount(wearCount + 1);
+    if (wearCount === 9) {
+      Alert.alert("High five!", "Five’s up—time to wash up!");
+    }
   };
 
   const handleDecrement = () => {
