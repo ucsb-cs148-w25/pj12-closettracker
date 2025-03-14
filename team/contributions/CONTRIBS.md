@@ -27,6 +27,15 @@ The graph accurately displays my commits throughout the weeks. However, it notes
 
 ### Daisy Zhong
 
+I contributed to multiple features in the app. In the beginning, I help created the upload page with uploading picture features. Then I created the button to move items from the laundry page and back to the wardrobe page as well as navigate to and from the wardrobe to the laundry page. AFter other teams using our app and providing feedback, I updated some of the ui to make it less confusing for users. I changed the button that moves items from laundry and back to appear differently when items are selected so users don't get confused whether the button will move items or just switch pages.
+
+**Commentary on graph**
+
+My contributions on the graph look pretty accurate with the slight inaccuracy that might come from extra files and code that generates from everything
+
+**Link to my PRs**
+https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Adaisyzhongg+
+
 ---
 
 ### Sophia Tran
