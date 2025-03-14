@@ -12,17 +12,13 @@ If you’re new to Closet Tracker, you’ll need to **sign up** with your email 
 
 ## Home Page
 
-The Home Page is where you can **browse outfits shared by other users**. If you see something you like, tap the **heart icon** to save it for inspiration. 
+The Home Page is where you can **browse outfits shared by other users**. If you see something you like, tap the **heart icon** to let them know you like their style. 
 
 If your laundry is piling up, you can tap the **"Wash All" button** to move all your laundry items back to wardrobe. This shortcut helps when you have just washed all clothing items, and they are ready to use.
 
 ## User Page
 
-Your User Page is where you manage your profile. 
-
-- You can **change your profile picture** to personalize your account.
-- Update your **bio or description** to share a little about your style.
-- If you ever need to log out, simply tap **Sign Out** to securely exit the app.
+Your User Page is where you manage your profile. You can **upload and change your profile picture** to personalize your account. Update your **bio or description** to share a little about your style. If you ever need to log out, simply tap **Sign Out** to securely exit the app.
 
 ## Upload Page
 
@@ -38,18 +34,18 @@ Adding clothes to your digital wardrobe is easy!
 The Wardrobe Page is where you can view and organize all of your clothes. 
 
 - If your wardrobe is empty, you’ll see a message encouraging you to add some clothing.
-- When you have items in your wardrobe, you can **browse through them and tap on any item** to see more details.
+- When you have items in your wardrobe, you can **browse through them and tap on any item** to see the details you've inputted beforehand, as well as an option to edit those details.
 - You can **use the multi-select feature** to:
   - Move multiple items to the laundry when they need washing.
   - Edit multiple items at once.
   - Delete clothing you no longer need.
+ - If you have a lot of clothing, use the **search and filter options** to quickly find what you need.
 
 ### Tracking Wear & Maintenance
 
 - Every time you wear an item, you can **increase its wear count** to track how often you’ve worn it.
 - As items get worn out, they will **gradually change color to brown** as a visual reminder that they need washing.
 - When an item reaches **five wears**, you’ll get a **reminder message** to wash it.
-- If you have a lot of clothing, use the **search and filter options** to quickly find what you need.
 
 ## Laundry Page
 
