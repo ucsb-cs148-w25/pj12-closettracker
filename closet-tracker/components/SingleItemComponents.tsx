@@ -1,38 +1,38 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import EvilIcons from '@expo/vector-icons/FontAwesome';
 import { doc, getDoc, updateDoc, addDoc, deleteDoc, collection, setDoc, DocumentData } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import { useUser } from '@/context/UserContext';
 
 interface WearCountButtonProps {
-    // title: string;   // 'title' should be a string
-    onPress: () => void; // 'onPress' should be a function that returns void (i.e., no return value)
-  }
+  // title: string;   // 'title' should be a string
+  onPress: () => void; // 'onPress' should be a function that returns void (i.e., no return value)
+}
 
 const IncreaseWearButton: React.FC<WearCountButtonProps> = ({ onPress }) => {
-    return (
-        <EvilIcons name="plus" size={20} style={styles.button} onPress={onPress} />
-    );  
+  return (
+    <EvilIcons name="plus" size={20} style={styles.button} onPress={onPress} />
+  );
 };
 const DecreaseWearButton: React.FC<WearCountButtonProps> = ({ onPress }) => {
   return (
-      <EvilIcons name="minus" size={20} style={styles.button} onPress={onPress} />
-  );  
+    <EvilIcons name="minus" size={20} style={styles.button} onPress={onPress} />
+  );
 };
 
 
 
 export default function TimesWornComponent({
-    itemId,
-    wearCountFromDB,
-    collectionId,
-  }: {
-    itemId: string;
-    wearCountFromDB: number;
-    collectionId: string;
+  itemId,
+  wearCountFromDB,
+  collectionId,
+}: {
+  itemId: string;
+  wearCountFromDB: number;
+  collectionId: string;
 
-  }) {
+}) {
 
   const { currentUser } = useUser();
 
@@ -53,6 +53,9 @@ export default function TimesWornComponent({
   const [wearCount, setWearCount] = useState(wearCountFromDB);
   const handleIncrement = () => {
     setWearCount(wearCount + 1)
+    if (wearCount === 4) {
+      Alert.alert("High five!", "Five’s up—time to wash up!");
+    }
     updateWearCount(wearCount + 1);
   };
 
@@ -69,13 +72,13 @@ export default function TimesWornComponent({
     if (index < wearCount) {
       // Calculate normalized wear factor (from 0 to 1)
       const t = (index + 1) / maxWearCount;
-      
+
       if (t <= 0.7) {
         // Phase 1: Interpolate from white to red
         // Normalize t within [0, 0.7]
         const t2 = t / 0.7;
-        const r = 255; 
-        const g = Math.round(255 * (1 - t2)); 
+        const r = 255;
+        const g = Math.round(255 * (1 - t2));
         const b = Math.round(255 * (1 - t2));
         return `rgb(${r}, ${g}, ${b})`;
       } else {
@@ -118,7 +121,7 @@ export default function TimesWornComponent({
         </View>
         <IncreaseWearButton onPress={handleIncrement} />
       </View>
-      
+
 
 
       <Text style={styles.counterText}>Times Worn: {wearCount}</Text>
@@ -131,7 +134,7 @@ export default function TimesWornComponent({
 
 const styles = StyleSheet.create({
   button: {
-    margin : 10,
+    margin: 10,
     backgroundColor: '#ADD8E6',
     paddingVertical: 10,
     paddingHorizontal: 10,
@@ -165,22 +168,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     margin: 8,
     justifyContent: 'center',
-    shadowColor: '#000', 
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: .4,  
+    shadowOpacity: .4,
     shadowRadius: 2.5,
   },
   row: {
     backgroundColor: 'white',
-    maxWidth: '90%', 
+    maxWidth: '90%',
     padding: 5,
     margin: 5,
     flexDirection: 'row',  // Arrange items in a row (horizontally)
     alignItems: 'center',  // Center the icons vertically
     borderRadius: 20,
-    shadowColor: '#000', 
+    shadowColor: '#000',
     shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: .2,  
+    shadowOpacity: .2,
     shadowRadius: 2.5,
   },
 });
