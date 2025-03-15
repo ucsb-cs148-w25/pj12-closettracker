@@ -4,7 +4,6 @@ Log clothing use for tracking your clothes cleaning cycle.
 
 #### Members
 
-- name: git_hub_ID
 - Gen Tamada: Ononymous
 - Sophia Tran: sophiattran
 - Daisy Zhong: daisyzhongg
@@ -24,31 +23,42 @@ The frontend of the app will rely on React Native with Expo Go to ensure compati
 ### Deployment
 
 #### Prerequisites
+Before setting up Closet Tracker locally, ensure you have the following:
 
-- [Node.js](https://nodejs.org/en/download/): JavaScript runtime (> v20.0.0)
+- **Node.js** (version > 20.0.0)
+- **npm** installed
+- API keys and configuration files (Contact the development team to obtain these))
 
-#### Installation
+#### Installation & Setup
 
-1. Install dependencies
-
-   ```bash
-   npm install
+1. **Clone the repository**
+   ```sh
+   git clone git@github.com:ucsb-cs148-w25/pj12-closettracker.git
+   cd pj12-closettracker/closet-tracker
    ```
 
-2. Start the app
+2. **Install dependencies**
+   ```npm install```
 
-   ```bash
-    npx expo start --tunnel
-   ```
+3. **Set up configuration files**
 
-In the output, you'll find options to open the app in a
+Obtain the required API keys and config files from the development team.
+Place them in the appropriate locations as specified in the team’s setup guide.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+4. **Start the application**
+   ```npx expo start```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+You will see options to:
+
+- Run on an Android emulator
+- Run on an iOS simulator
+- Open using Expo Go
+
+#### Deployment Notes
+
+- The app currently runs locally and is not deployed to a cloud platform.
+Ensure you keep your API keys and config files private.
+- Reach out to our team for configuration files and API keys.
 
 #### Dependencies
 
@@ -62,25 +72,30 @@ You can start developing by editing the files inside the **app** directory. This
 ### Functionality
 
 - Authentication
-    - sign in
-    - sign up 
-    - sign out
+    - Sign up
+    - Sign in
+    - Sign out
 - Upload clothing images
-    - upload from camera roll
+    - Upload from camera roll
     - Take a picture from camera
-    - Naming and categorizing clothing, adding tags
+    - Remove background, name and categorize clothing, add tags
 - Wardrobe
-    - select wardrobe item
-    - select multiple wardrobe items
-    - delete (multiple) wardrobe items
-
-### Known Problems
-
-- Not enough color choices when uploading new clothing
-    - remove background of images when uploading
-- Outfit page not implemented
-    - outfit suggester
-    - virtual avatar to visualize outfits
-- Clothings are not sorted by time in wardrobe
-    - track laundry + laundry page
-    - No way to track clothing usage
+    - Select singular or multiple wardrobe items
+    - View and edit the details of singular wardrobe items
+    - Increment the wear count of wardrobe items, watch the background color turn more brown with more wears
+    - Move (multiple) wardrobe items to laundry or delete them
+ - Laundry
+    - View all items in the laundry
+    - Items in laundry cannot be used to create outfits
+    - Move items back to wardrobe, and find that their wear counts have reset to 0
+ - Outfits
+    - Create new outfit by multi-selecting clothing items
+    - Arrange clothing items, resize them, adjust layers, and add your profile picture
+    - View all outfits previously made and saved
+    - Make outfits public to all users or private for yourself
+ - Home page
+    - See other users' outfits and like them
+    - Wash all clothes currently in your laundry
+ - User page
+    - Upload profile picture, add bio/description
+    - Sign out
