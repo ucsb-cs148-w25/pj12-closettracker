@@ -21,11 +21,13 @@ Closet Tracker allows users to track clothing items, plan outfits, and gain a be
 
 The frontend of the app will rely on React Native with Expo Go to ensure compatibality with mobile devices. We also plan on using Firebase for user authentication and database management.
 
-## Prerequisites
+### Deployment
+
+#### Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/): JavaScript runtime (> v20.0.0)
 
-## Installation
+#### Installation
 
 1. Install dependencies
 
@@ -48,7 +50,7 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Dependencies
+#### Dependencies
 
 - react-native: for native app development
 - expo: mobile app development package with more features
@@ -57,7 +59,7 @@ You can start developing by editing the files inside the **app** directory. This
 - base64-arraybuffer: for converting images to base64 and back
 - expo-image-picker: for uploading images and taking pictures
 
-## Functionality
+### Functionality
 
 - Authentication
     - sign in
@@ -72,7 +74,7 @@ You can start developing by editing the files inside the **app** directory. This
     - select multiple wardrobe items
     - delete (multiple) wardrobe items
 
-## Known Problems
+### Known Problems
 
 - Not enough color choices when uploading new clothing
     - remove background of images when uploading
