@@ -56,7 +56,7 @@ export default function TimesWornComponent({
     if (wearCount === 4) {
       Alert.alert("High five!", "Five’s up—time to wash up!");
     }
-    if (wearCount === 8) {
+    if (wearCount === 9) {
       Alert.alert("Double digits, that's quite a streak. Might be time to clean, don't you think?");
     }
     updateWearCount(wearCount + 1);
