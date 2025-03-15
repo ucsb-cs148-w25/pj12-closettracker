@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { SafeAreaView, View, StyleSheet, Text, Image, TextInput, TouchableOpacity, Switch } from "react-native";
+import { View, StyleSheet, Text, Image, TextInput, TouchableOpacity, Switch } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import DraggableResizableImage from "@/components/DraggableResizableImage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, query, where, getDocs, getDoc, getFirestore, addDoc, doc, updateDoc } from "firebase/firestore";
