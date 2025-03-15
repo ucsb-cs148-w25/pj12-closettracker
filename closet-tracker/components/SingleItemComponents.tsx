@@ -56,10 +56,10 @@ export default function TimesWornComponent({
     if (wearCount === 4) {
       Alert.alert("High five!", "Five’s up—time to wash up!");
     }
-    updateWearCount(wearCount + 1);
     if (wearCount === 8) {
-      Alert.alert("Ten!", "Get that wash!");
+      Alert.alert("Double digits, that's quite a streak. Might be time to clean, don't you think?");
     }
+    updateWearCount(wearCount + 1);
   };
 
   const handleDecrement = () => {
