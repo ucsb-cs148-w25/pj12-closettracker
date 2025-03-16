@@ -8,13 +8,13 @@ Closet Tracker helps you **keep track of your clothing, plan stylish outfits, an
 
 ### Signing Up & Logging In
 
-![alt text](<./assets/auth.gif>)
+<img src="./assets/auth.gif" height="400"/>
 
 If you’re new to Closet Tracker, you’ll need to **sign up** with your email and password. Once your account is created, you can start adding clothes to your digital wardrobe. If you already have an account, simply **log in** to access your saved wardrobe, outfits, and laundry history.
 
 ## Home Page
 
-![alt text](<./assets/home.gif>)
+<img src="./assets/home.gif" height="400"/>
 
 The Home Page is where you can **browse outfits shared by other users**. If you see something you like, tap the **heart icon** to let them know you like their style. 
 
@@ -22,13 +22,13 @@ If your laundry is piling up, you can tap the **"Wash All" button** to move all 
 
 ## User Page
 
-![alt text](<./assets/user.gif>)
+<img src="./assets/user.gif" height="400"/>
 
 Your User Page is where you manage your profile. You can **upload and change your profile picture** to personalize your account. Update your **bio or description** to share a little about your style. If you ever need to log out, simply tap **Sign Out** to securely exit the app.
 
 ## Upload Page
 
-![alt text](<./assets/upload.gif>)
+<img src="./assets/upload.gif" height="400"/>
 
 Adding clothes to your digital wardrobe is easy! 
 
@@ -39,7 +39,7 @@ Adding clothes to your digital wardrobe is easy!
 
 ## Wardrobe Page
 
-![alt text](<./assets/wardrobe.gif>)
+<img src="./assets/wardrobe.gif" height="400"/>
 
 The Wardrobe Page is where you can view and organize all of your clothes. 
 
@@ -67,7 +67,7 @@ When your clothes need washing, they’ll be stored in the Laundry Page.
 
 ## Outfits Page
 
-![alt text](<./assets/outfit.gif>)
+<img src="./assets/outfit.gif" height="400"/>
 
 The Outfits Page is where you can **get creative and put together new outfits**. 
 
