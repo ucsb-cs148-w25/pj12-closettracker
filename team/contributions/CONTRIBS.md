@@ -43,7 +43,7 @@ https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed
 
 ### Anvitha Kosuri
 
-There were a multitude of features I worked on for this project. I initially worked on creating the launch page for the app and then removed the automated page provided by Expo. After that, I focused on enhancing the app’s layout by adding colors to improve the visual design. I also developed and implemented the wear count feature, which tracks how many times an item has been worn. Additionally, I modified the wash feature to reset the wear count after an item is washed. To further enhance user experience, I implemented a notification system that alerts users when an item’s wear count reaches a specified threshold.
+There were a multitude of features I worked on for this project. I initially worked on creating the launch page for the app and then removed the automated page provided by Expo. After that, I focused on enhancing the app’s layout by adding colors to improve the visual design. I also developed and implemented the wear count feature, which tracks how many times an item has been worn. Additionally, I modified the wash feature to reset the wear count after an item is washed. To further enhance user experience, I implemented a notification system that alerts users when an item’s wear count reaches a specified threshold. Additionally, I worked on creating and editing the two videos for the presentation. 
 
 **Commentary on graph**
 
