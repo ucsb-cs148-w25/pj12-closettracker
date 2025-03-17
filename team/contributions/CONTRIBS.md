@@ -38,6 +38,24 @@ https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed
 
 ---
 
+
+---
+
+### Anvitha Kosuri
+
+There were a multitude of features I worked on for this project. I initially worked on creating the launch page for the app and then removed the automated page provided by Expo. After that, I focused on enhancing the app’s layout by adding colors to improve the visual design. I also developed and implemented the wear count feature, which tracks how many times an item has been worn. Additionally, I modified the wash feature to reset the wear count after an item is washed. To further enhance user experience, I implemented a notification system that alerts users when an item’s wear count reaches a specified threshold.
+
+**Commentary on graph**
+
+My contributions on the graph looks decently reflective of my work since I was working on fewer but larger and more foundational parts of the app early on, which added big chunks of code at once. Towards the end, I focused more on individual features, so my commits became more frequent. Any slight inaccuracies probably come from auto generated files or dependencies.
+
+**Link to my PRs**
+https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3AAnvithaKosuri+
+
+---
+
+
+
 ### Sophia Tran
 
 I contributed fairly to the project through this quarter. At the beginning, I created empty screens and screen prototypes for the wardrobe page and laundry page, which my teammates later added to. I added onto their work by editing the UI for some buttons to make the icons and purposes more clear. I also fixed a few bugs, such as the dropdown menu being unscrollable, the keyboard covering the text input, and the edit button resetting the item's data. Lastly, as the QA Coordinator, I added acceptance criteria to Kanban board items as well as monitored issues, linked them to PR's, and closed them when needed.
