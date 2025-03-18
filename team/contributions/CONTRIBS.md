@@ -9,7 +9,6 @@ The graph is accurate in terms of my contributions. I have contributed to the pr
 **Link to my PRs**
 
 - https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3AOnonymous
-
 ---
 
 ### Gretchen Lam
@@ -35,10 +34,6 @@ My contributions on the graph look pretty accurate with the slight inaccuracy th
 
 **Link to my PRs**
 https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Adaisyzhongg+
-
----
-
-
 ---
 
 ### Anvitha Kosuri
@@ -51,10 +46,7 @@ My contributions on the graph looks decently reflective of my work since I was w
 
 **Link to my PRs**
 https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3AAnvithaKosuri+
-
 ---
-
-
 
 ### Sophia Tran
 
@@ -66,10 +58,6 @@ My contributions on the graph are fairly accurate. The ranking by commit level i
 
 **Link to my PRs**
 - https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Asophiattran+
----
-
-### Anvitha Kosuri
-
 ---
 
 ### Andrew Chen
