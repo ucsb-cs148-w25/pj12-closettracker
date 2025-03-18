@@ -33,7 +33,7 @@ I contributed to multiple features in the app. In the beginning, I help created 
 My contributions on the graph look pretty accurate with the slight inaccuracy that might come from extra files and code that generates from everything
 
 **Link to my PRs**
-https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Adaisyzhongg+
+- https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3Adaisyzhongg+
 ---
 
 ### Anvitha Kosuri
@@ -45,7 +45,7 @@ There were a multitude of features I worked on for this project. I initially wor
 My contributions on the graph looks decently reflective of my work since I was working on fewer but larger and more foundational parts of the app early on, which added big chunks of code at once. Towards the end, I focused more on individual features, so my commits became more frequent. Any slight inaccuracies probably come from auto generated files or dependencies.
 
 **Link to my PRs**
-https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3AAnvithaKosuri+
+- https://github.com/ucsb-cs148-w25/pj12-closettracker/pulls?q=is%3Apr+is%3Aclosed+author%3AAnvithaKosuri+
 ---
 
 ### Sophia Tran
